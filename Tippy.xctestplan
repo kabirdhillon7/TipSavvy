@@ -1,0 +1,37 @@
+{
+  "configurations" : [
+    {
+      "id" : "09863581-9DCE-4D66-B8AC-BD326149E121",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "targetForVariableExpansion" : {
+      "containerPath" : "container:Tippy.xcodeproj",
+      "identifier" : "4882DCDF2A11CCD6000E8882",
+      "name" : "Tippy"
+    }
+  },
+  "testTargets" : [
+    {
+      "parallelizable" : true,
+      "target" : {
+        "containerPath" : "container:Tippy.xcodeproj",
+        "identifier" : "4882DCEF2A11CCD8000E8882",
+        "name" : "TippyTests"
+      }
+    },
+    {
+      "parallelizable" : true,
+      "target" : {
+        "containerPath" : "container:Tippy.xcodeproj",
+        "identifier" : "4882DCF92A11CCD8000E8882",
+        "name" : "TippyUITests"
+      }
+    }
+  ],
+  "version" : 1
+}
