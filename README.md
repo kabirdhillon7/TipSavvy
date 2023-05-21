@@ -5,11 +5,9 @@ Tippy is a simple tip calculator iOS app built using [SwiftUI](https://developer
 ## Table of Contents
 
 - [Description](#description)
-- [Requirements](#Requirements)
+- [Requirements](#requirements)
 - [Demo](#demo)
-- [Installation](#installation)
 - [Testing](#testing)
-- [Dependencies](#dependencies)
 - [Contact](#contact)
 
 ## Description
@@ -37,6 +35,17 @@ Some of the main features include:
   
   <img src="https://github.com/kabirdhillon7/Tippy/assets/74223402/c2c7bcd2-3ff0-4309-a595-18089830e359" width=250><br>
 </details>
+
+## Testing
+
+Tippy includes a comprehensive suite of unit tests and UI tests to ensure its functionality and quality. Here are the test classes available:
+
+### Unit Tests
+
+The unit tests validate the behavior of individual units or functions in the app.
+
+### UI Tests
+The UI tests simulate user interactions and validate the app's behavior from a user perspective.
 
 ## Contact
 
