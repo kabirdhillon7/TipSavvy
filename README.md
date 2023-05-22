@@ -23,7 +23,7 @@ Some of the main features include:
 ## Requirements
 
 - iOS 16.1 or later
-- iPhone 8 or iPhone SE (2nd Generation) or newer
+- iPhone 8, iPhone SE (2nd Generation), or newer
 
 ## Demo
 ### Current Progress Walkthrough
