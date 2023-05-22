@@ -22,7 +22,7 @@ Some of the main features include:
 
 ## Requirements
 
-- iOS 16.0 or later
+- iOS 16.1 or later
 - iPhone 8 or iPhone SE (2nd Generation) or newer
 
 ## Demo
