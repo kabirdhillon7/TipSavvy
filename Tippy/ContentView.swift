@@ -27,12 +27,14 @@ struct ContentView: View {
                             .onTapGesture {
                                 hideKeyboard()
                             }
+                            .accessibilityLabel("Bill Amount")
                     }
                     Picker("Number of People", selection: $viewModel.numberOfPeople) {
                         ForEach(2..<100) {
                             Text("\($0) people")
                         }
                     }
+                    .accessibilityLabel("Number of People")
                 } header: {
                     Text("Bill Information")
                 }
@@ -40,6 +42,8 @@ struct ContentView: View {
                 // Selecting the Tip Percentage
                 Section {
                     Slider(value: $viewModel.tipPercentage, in: 0...25, step: 1)
+                        .accessibilityLabel("Tip Percentage")
+                        .accessibilityHint("Adjust the tip percentage using the slider")
                     Text("Tip Percentage: \(viewModel.tipPercentage, specifier: "%.0f")%")
                         .fixedSize(horizontal: true, vertical: false)
                 } header: {
