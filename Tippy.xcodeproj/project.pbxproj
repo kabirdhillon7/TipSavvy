@@ -15,6 +15,7 @@
 		4882DCF52A11CCD8000E8882 /* TippyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4882DCF42A11CCD8000E8882 /* TippyTests.swift */; };
 		4882DCFF2A11CCD8000E8882 /* TippyUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4882DCFE2A11CCD8000E8882 /* TippyUITests.swift */; };
 		4882DD012A11CCD8000E8882 /* TippyUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4882DD002A11CCD8000E8882 /* TippyUITestsLaunchTests.swift */; };
+		48D6251E2A1C673C00825A66 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 48D6251D2A1C673C00825A66 /* LaunchScreen.storyboard */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -47,6 +48,8 @@
 		4882DCFA2A11CCD8000E8882 /* TippyUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TippyUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		4882DCFE2A11CCD8000E8882 /* TippyUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TippyUITests.swift; sourceTree = "<group>"; };
 		4882DD002A11CCD8000E8882 /* TippyUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TippyUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		48D6251D2A1C673C00825A66 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
+		48D6251F2A1C689200825A66 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -98,11 +101,13 @@
 		4882DCE22A11CCD6000E8882 /* Tippy */ = {
 			isa = PBXGroup;
 			children = (
+				48D6251F2A1C689200825A66 /* Info.plist */,
 				4882DCE32A11CCD6000E8882 /* TippyApp.swift */,
 				4882DCE52A11CCD6000E8882 /* ContentView.swift */,
 				4841E29D2A144DF70074CC0B /* ContentViewModel.swift */,
 				4882DCE72A11CCD7000E8882 /* Assets.xcassets */,
 				4882DCE92A11CCD7000E8882 /* Preview Content */,
+				48D6251D2A1C673C00825A66 /* LaunchScreen.storyboard */,
 			);
 			path = Tippy;
 			sourceTree = "<group>";
@@ -236,6 +241,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				48D6251E2A1C673C00825A66 /* LaunchScreen.storyboard in Resources */,
 				4882DCEB2A11CCD7000E8882 /* Preview Assets.xcassets in Resources */,
 				4882DCE82A11CCD7000E8882 /* Assets.xcassets in Resources */,
 			);
@@ -426,11 +432,13 @@
 				DEVELOPMENT_TEAM = SBCRL8SBBK;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Tippy/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Tippy;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen.storyboard;
 				INFOPLIST_KEY_UIStatusBarStyle = "";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -459,11 +467,13 @@
 				DEVELOPMENT_TEAM = SBCRL8SBBK;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Tippy/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Tippy;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen.storyboard;
 				INFOPLIST_KEY_UIStatusBarStyle = "";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
