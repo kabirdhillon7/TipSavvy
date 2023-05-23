@@ -68,7 +68,29 @@ struct ContentView: View {
             }
             .navigationTitle("Tippy")
         }
+        .onAppear {
+            // Load user defaults
+            loadUserDefaults()
+        }
+        .onDisappear {
+            // Save user defaults
+            saveUserDefaults()
+        }
     }
+    
+    func loadUserDefaults() {
+            let defaults = UserDefaults.standard
+            viewModel.billAmount = defaults.double(forKey: "billAmount")
+            viewModel.tipPercentage = defaults.double(forKey: "tipPercentage")
+            viewModel.numberOfPeople = defaults.integer(forKey: "numberOfPeople")
+        }
+        
+        func saveUserDefaults() {
+            let defaults = UserDefaults.standard
+            defaults.set(viewModel.billAmount, forKey: "billAmount")
+            defaults.set(viewModel.tipPercentage, forKey: "tipPercentage")
+            defaults.set(viewModel.numberOfPeople, forKey: "numberOfPeople")
+        }
 }
 
 struct ContentView_Previews: PreviewProvider {
