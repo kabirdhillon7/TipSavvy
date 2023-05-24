@@ -67,20 +67,16 @@ final class TippyUITests: XCTestCase {
         let app = XCUIApplication()
         app.launch()
         
-        let slider = XCUIApplication().collectionViews/*@START_MENU_TOKEN@*/.sliders["0"]/*[[".cells.sliders[\"0\"]",".sliders[\"0\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/
-        slider.tap()
-        slider.swipeRight()
         
-        
-        let tipPercentage0StaticText = XCUIApplication().collectionViews/*@START_MENU_TOKEN@*/.staticTexts["Tip Percentage: 0%"]/*[[".cells.staticTexts[\"Tip Percentage: 0%\"]",".staticTexts[\"Tip Percentage: 0%\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/
-        tipPercentage0StaticText.tap()
-        tipPercentage0StaticText.tap()
+        let tipPercentageSlider = XCUIApplication().collectionViews/*@START_MENU_TOKEN@*/.sliders["Tip Percentage"]/*[[".cells.sliders[\"Tip Percentage\"]",".sliders[\"Tip Percentage\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/
+        tipPercentageSlider.swipeLeft()
+        tipPercentageSlider.tap()
     }
     
     func test_picker_shouldSelectInput() {
         let app = XCUIApplication()
         app.launch()
         
-        XCUIApplication().collectionViews/*@START_MENU_TOKEN@*/.staticTexts["4 people"]/*[[".cells",".buttons[\"Number of People, 4 people\"].staticTexts[\"4 people\"]",".staticTexts[\"4 people\"]"],[[[-1,2],[-1,1],[-1,0,1]],[[-1,2],[-1,1]]],[0]]@END_MENU_TOKEN@*/.tap()
+        XCUIApplication().collectionViews/*@START_MENU_TOKEN@*/.staticTexts["0 people"]/*[[".cells",".buttons[\"Number of People, Number of People\"].staticTexts[\"0 people\"]",".staticTexts[\"0 people\"]"],[[[-1,2],[-1,1],[-1,0,1]],[[-1,2],[-1,1]]],[0]]@END_MENU_TOKEN@*/.tap()
     }
 }
