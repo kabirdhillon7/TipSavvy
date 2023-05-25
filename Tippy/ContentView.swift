@@ -66,7 +66,7 @@ struct ContentView: View {
                     Text("Bill Totals")
                 }
             }
-            .navigationTitle("Tippy")
+            .navigationTitle("TipSavvy")
         }
         .onAppear {
             // Load user defaults
