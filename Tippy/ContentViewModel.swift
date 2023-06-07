@@ -13,6 +13,9 @@ class ContentViewModel: ObservableObject  {
     @Published var tipPercentage = 0.0
     @Published var numberOfPeople = 0
     
+    var tipAmount: Double {
+        return billAmount / 100 * tipPercentage
+    }
     var totalAmountWithTip: Double {
         let tipValue = billAmount / 100 * tipPercentage
         

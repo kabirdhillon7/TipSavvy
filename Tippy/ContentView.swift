@@ -30,7 +30,7 @@ struct ContentView: View {
                             .accessibilityLabel("Bill Amount")
                     }
                     Picker("Number of People", selection: $viewModel.numberOfPeople) {
-                        ForEach(0..<100) {
+                        ForEach(0..<10) {
                             Text("\($0) people")
                         }
                     }
@@ -53,12 +53,22 @@ struct ContentView: View {
                 // Final Totals
                 Section {
                     HStack {
-                        Text("With Tip")
+                        Text("Subtotal")
+                        Spacer()
+                        Text(viewModel.billAmount, format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
+                    }
+                    HStack {
+                        Text("Tip")
+                        Spacer()
+                        Text(viewModel.tipAmount, format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
+                    }
+                    HStack {
+                        Text("Total With Tip")
                         Spacer()
                         Text(viewModel.totalAmountWithTip, format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
                     }
                     HStack {
-                        Text("Per Person")
+                        Text("Total Per Person")
                         Spacer()
                         Text(viewModel.totalPerPerson, format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
                     }
