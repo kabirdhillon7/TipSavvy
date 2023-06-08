@@ -12,10 +12,11 @@ struct ContentView: View {
     
     @FocusState private var amountIsFocused: Bool
     
+    @State private var animate = false
+    
     var body: some View {
         NavigationStack {
             Form {
-                
                 // Bill Information from User
                 Section {
                     HStack {
@@ -75,6 +76,14 @@ struct ContentView: View {
                 } header: {
                     Text("Bill Totals")
                 }
+                
+                Section {
+                    TextField("Enter Name", text: $viewModel.tipInfoName)
+                    Button("Save Calculation", action: saveTipInfo)
+                        .background()
+                } header: {
+                    Text("Save Tip Information")
+                }
             }
             .navigationTitle("TipSavvy")
         }
@@ -89,18 +98,22 @@ struct ContentView: View {
     }
     
     func loadUserDefaults() {
-            let defaults = UserDefaults.standard
-            viewModel.billAmount = defaults.double(forKey: "billAmount")
-            viewModel.tipPercentage = defaults.double(forKey: "tipPercentage")
-            viewModel.numberOfPeople = defaults.integer(forKey: "numberOfPeople")
-        }
+        let defaults = UserDefaults.standard
+        viewModel.billAmount = defaults.double(forKey: "billAmount")
+        viewModel.tipPercentage = defaults.double(forKey: "tipPercentage")
+        viewModel.numberOfPeople = defaults.integer(forKey: "numberOfPeople")
+    }
+    
+    func saveUserDefaults() {
+        let defaults = UserDefaults.standard
+        defaults.set(viewModel.billAmount, forKey: "billAmount")
+        defaults.set(viewModel.tipPercentage, forKey: "tipPercentage")
+        defaults.set(viewModel.numberOfPeople, forKey: "numberOfPeople")
+    }
+    
+    func saveTipInfo() {
         
-        func saveUserDefaults() {
-            let defaults = UserDefaults.standard
-            defaults.set(viewModel.billAmount, forKey: "billAmount")
-            defaults.set(viewModel.tipPercentage, forKey: "tipPercentage")
-            defaults.set(viewModel.numberOfPeople, forKey: "numberOfPeople")
-        }
+    }
 }
 
 struct ContentView_Previews: PreviewProvider {

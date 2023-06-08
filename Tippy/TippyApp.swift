@@ -11,7 +11,17 @@ import SwiftUI
 struct TippyApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            TabView {
+                ContentView()
+                    .tabItem {
+                        Label("Calculate", systemImage: "percent")
+                    }
+                
+                SavedView()
+                    .tabItem {
+                        Label("Saved", systemImage: "bookmark")
+                    }
+            }
         }
     }
 }

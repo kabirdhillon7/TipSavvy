@@ -15,6 +15,8 @@
 		4882DCF52A11CCD8000E8882 /* TippyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4882DCF42A11CCD8000E8882 /* TippyTests.swift */; };
 		4882DCFF2A11CCD8000E8882 /* TippyUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4882DCFE2A11CCD8000E8882 /* TippyUITests.swift */; };
 		4882DD012A11CCD8000E8882 /* TippyUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4882DD002A11CCD8000E8882 /* TippyUITestsLaunchTests.swift */; };
+		48BA30142A3281A500FAFC1C /* SavedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48BA30132A3281A500FAFC1C /* SavedView.swift */; };
+		48BA30162A32889900FAFC1C /* SavedTip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48BA30152A32889900FAFC1C /* SavedTip.swift */; };
 		48D6251E2A1C673C00825A66 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 48D6251D2A1C673C00825A66 /* LaunchScreen.storyboard */; };
 /* End PBXBuildFile section */
 
@@ -62,6 +64,8 @@
 		4882DCFA2A11CCD8000E8882 /* TippyUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TippyUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		4882DCFE2A11CCD8000E8882 /* TippyUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TippyUITests.swift; sourceTree = "<group>"; };
 		4882DD002A11CCD8000E8882 /* TippyUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TippyUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		48BA30132A3281A500FAFC1C /* SavedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedView.swift; sourceTree = "<group>"; };
+		48BA30152A32889900FAFC1C /* SavedTip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedTip.swift; sourceTree = "<group>"; };
 		48CDC7012A1EA93E000EFCB1 /* Screenshots.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Screenshots.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		48CDC7122A1ECBAC000EFCB1 /* TippyScreenshots.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TippyScreenshots.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		48D6251D2A1C673C00825A66 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -137,9 +141,11 @@
 				4882DCE32A11CCD6000E8882 /* TippyApp.swift */,
 				4882DCE52A11CCD6000E8882 /* ContentView.swift */,
 				4841E29D2A144DF70074CC0B /* ContentViewModel.swift */,
+				48BA30132A3281A500FAFC1C /* SavedView.swift */,
 				4882DCE72A11CCD7000E8882 /* Assets.xcassets */,
 				4882DCE92A11CCD7000E8882 /* Preview Content */,
 				48D6251D2A1C673C00825A66 /* LaunchScreen.storyboard */,
+				48BA30152A32889900FAFC1C /* SavedTip.swift */,
 			);
 			path = Tippy;
 			sourceTree = "<group>";
@@ -361,7 +367,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				4882DCE62A11CCD6000E8882 /* ContentView.swift in Sources */,
+				48BA30142A3281A500FAFC1C /* SavedView.swift in Sources */,
 				4882DCE42A11CCD6000E8882 /* TippyApp.swift in Sources */,
+				48BA30162A32889900FAFC1C /* SavedTip.swift in Sources */,
 				4841E29E2A144DF70074CC0B /* ContentViewModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
