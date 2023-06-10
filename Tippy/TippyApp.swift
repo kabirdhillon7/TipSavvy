@@ -9,6 +9,8 @@ import SwiftUI
 
 @main
 struct TippyApp: App {
+    @StateObject var savedTipsEnvironment = SavedTipsEnvironment()
+    
     var body: some Scene {
         WindowGroup {
             TabView {
@@ -16,11 +18,13 @@ struct TippyApp: App {
                     .tabItem {
                         Label("Calculate", systemImage: "percent")
                     }
+                    .environmentObject(savedTipsEnvironment)
                 
                 SavedView()
                     .tabItem {
                         Label("Saved", systemImage: "bookmark")
                     }
+                    .environmentObject(savedTipsEnvironment) 
             }
         }
     }

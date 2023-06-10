@@ -8,12 +8,13 @@
 import SwiftUI
 
 struct ContentView: View {
+    @EnvironmentObject var savedTipsEnvironment: SavedTipsEnvironment
+    
     @StateObject var viewModel = ContentViewModel()
     
     @FocusState private var amountIsFocused: Bool
-    
-    @State private var animate = false
-    
+    @FocusState private var nameIsFocused: Bool
+        
     var body: some View {
         NavigationStack {
             Form {
@@ -78,7 +79,11 @@ struct ContentView: View {
                 }
                 
                 Section {
-                    TextField("Enter Name", text: $viewModel.tipInfoName)
+                    TextField("Enter Name", text: $viewModel.tipItemName)
+                        .focused($nameIsFocused)
+                        .onTapGesture {
+                            hideKeyboard()
+                        }
                     Button("Save Calculation", action: saveTipInfo)
                         .background()
                 } header: {
@@ -112,7 +117,16 @@ struct ContentView: View {
     }
     
     func saveTipInfo() {
+        let tipInfo = SavedTip(date: Date(),
+                               name: viewModel.tipItemName,
+                               billAmount: viewModel.billAmount,
+                               tipPercentage: viewModel.tipAmount,
+                               numberOfPeople: viewModel.numberOfPeople,
+                               tipAmount: viewModel.tipAmount,
+                               totalAmountWithTip: viewModel.totalAmountWithTip,
+                               totalPerPerson: viewModel.totalPerPerson)
         
+        savedTipsEnvironment.addSavedTip(tipInfo)
     }
 }
 

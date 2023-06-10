@@ -8,11 +8,11 @@
 import Foundation
 import Combine
 
-class ContentViewModel: ObservableObject  {
+class ContentViewModel: ObservableObject  {    
     @Published var billAmount = 0.0
     @Published var tipPercentage = 0.0
     @Published var numberOfPeople = 0
-    @Published var tipInfoName = ""
+    @Published var tipItemName = ""
     
     var tipAmount: Double {
         return billAmount / 100 * tipPercentage
