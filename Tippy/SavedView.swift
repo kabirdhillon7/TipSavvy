@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct SavedView: View {
-    @EnvironmentObject var savedTipsEnvironment: SavedTipsEnvironment
+    @EnvironmentObject var dataManager: DataManager
     
     var body: some View {
         /*
@@ -19,10 +19,10 @@ struct SavedView: View {
          Need an object where user
          */
         NavigationStack {
-            List(savedTipsEnvironment.savedTips) { tip in
+            List(dataManager.savedTips) { tip in
                 VStack {
                     HStack {
-                        Text(tip.name)
+                        Text(tip.name ?? "")
                         Spacer()
                         Text(tip.billAmount, format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
                         Spacer()
@@ -35,23 +35,8 @@ struct SavedView: View {
     }
 }
 
-//struct HistoryView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        SavedView()
-//            .environmentObject(SavedTipsEnvironment())
-//    }
-//}
-struct HistoryView_Previews: PreviewProvider {
+struct SavedView_Previews: PreviewProvider {
     static var previews: some View {
-        let savedTipsEnvironment = SavedTipsEnvironment()
-        
-        // Add some sample saved tips
-        savedTipsEnvironment.savedTips = [
-            SavedTip(date: Date(), name: "Tip 1", billAmount: 50.0, tipPercentage: 15.0, numberOfPeople: 2, tipAmount: 7.5, totalAmountWithTip: 57.5, totalPerPerson: 28.75),
-            SavedTip(date: Date(), name: "Tip 2", billAmount: 100.0, tipPercentage: 20.0, numberOfPeople: 4, tipAmount: 20.0, totalAmountWithTip: 120.0, totalPerPerson: 30.0)
-        ]
-        
-        return SavedView()
-            .environmentObject(savedTipsEnvironment)
+        SavedView()
     }
 }

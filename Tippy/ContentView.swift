@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct ContentView: View {
-    @EnvironmentObject var savedTipsEnvironment: SavedTipsEnvironment
+    @EnvironmentObject var dataManager: DataManager
     
     @StateObject var viewModel = ContentViewModel()
     
@@ -92,14 +92,6 @@ struct ContentView: View {
             }
             .navigationTitle("TipSavvy")
         }
-        .onAppear {
-            // Load user defaults
-            loadUserDefaults()
-        }
-        .onDisappear {
-            // Save user defaults
-            saveUserDefaults()
-        }
     }
     
     func loadUserDefaults() {
@@ -109,24 +101,14 @@ struct ContentView: View {
         viewModel.numberOfPeople = defaults.integer(forKey: "numberOfPeople")
     }
     
-    func saveUserDefaults() {
-        let defaults = UserDefaults.standard
-        defaults.set(viewModel.billAmount, forKey: "billAmount")
-        defaults.set(viewModel.tipPercentage, forKey: "tipPercentage")
-        defaults.set(viewModel.numberOfPeople, forKey: "numberOfPeople")
-    }
-    
     func saveTipInfo() {
-        let tipInfo = SavedTip(date: Date(),
-                               name: viewModel.tipItemName,
-                               billAmount: viewModel.billAmount,
-                               tipPercentage: viewModel.tipAmount,
-                               numberOfPeople: viewModel.numberOfPeople,
-                               tipAmount: viewModel.tipAmount,
-                               totalAmountWithTip: viewModel.totalAmountWithTip,
-                               totalPerPerson: viewModel.totalPerPerson)
-        
-        savedTipsEnvironment.addSavedTip(tipInfo)
+        dataManager.saveTip(name: viewModel.tipItemName,
+                            billAmount: viewModel.billAmount,
+                            tipPercentage: viewModel.tipPercentage,
+                            numberOfPeople: viewModel.numberOfPeople,
+                            tipAmount: viewModel.tipAmount,
+                            totalAmountWithTip: viewModel.totalAmountWithTip,
+                            totalPerPerson: viewModel.totalPerPerson)
     }
 }
 
