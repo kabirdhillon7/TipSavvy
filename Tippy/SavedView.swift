@@ -11,26 +11,42 @@ struct SavedView: View {
     @EnvironmentObject var dataManager: DataManager
     
     var body: some View {
-        /*
-         Need a list
-         need to load previous calculations
-         Format: Name given, subtotal, amnt w/ tip
-         
-         Need an object where user
-         */
         NavigationStack {
-            List(dataManager.savedTips) { tip in
-                VStack {
-                    HStack {
-                        Text(tip.name ?? "")
-                        Spacer()
-                        Text(tip.billAmount, format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
-                        Spacer()
-                        Text(tip.totalPerPerson, format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
+            List() {
+                ForEach(dataManager.savedTips) { tip in
+                    VStack {
+                        HStack {
+                            Text(tip.name ?? "")
+                            Spacer()
+                            Text(tip.billAmount, format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
+                            Spacer()
+                            Text(tip.totalPerPerson, format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
+                        }
                     }
+                }.onDelete { indexSet in
+                    deleteTips(at: indexSet)
                 }
             }
             .navigationTitle("Saved Tips")
+        }
+    }
+    
+    func deleteTips(at offsets: IndexSet) {
+        
+        // First, delete the selected tips from Core Data
+        let context = dataManager.container.viewContext
+        for index in offsets {
+            let tip = dataManager.savedTips[index]
+            context.delete(tip)
+        }
+        
+        dataManager.savedTips.remove(atOffsets: offsets)
+        
+        // Save the changes
+        do {
+            try context.save()
+        } catch {
+            fatalError("Failed to delete tips: \(error)")
         }
     }
 }
