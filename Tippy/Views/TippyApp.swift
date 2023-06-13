@@ -9,7 +9,7 @@ import SwiftUI
 
 @main
 struct TippyApp: App {
-//    @StateObject var savedTipsEnvironment = SavedTipsEnvironment()
+    //    @StateObject var savedTipsEnvironment = SavedTipsEnvironment()
     @StateObject private var manager: DataManager = DataManager()
     
     var body: some Scene {
@@ -25,16 +25,8 @@ struct TippyApp: App {
                     .tabItem {
                         Label("Saved", systemImage: "bookmark")
                     }
-                    .environmentObject(manager) 
+                    .environmentObject(manager)
             }
         }
     }
 }
-
-//class SavedTipsEnvironment: ObservableObject {
-//    @Published var savedTips: [SavedTip] = []
-//
-//    func addSavedTip(_ savedTip: SavedTip) {
-//        savedTips.append(savedTip)
-//    }
-//}

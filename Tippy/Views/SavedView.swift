@@ -32,7 +32,6 @@ struct SavedView: View {
     }
     
     func deleteTips(at offsets: IndexSet) {
-        
         // First, delete the selected tips from Core Data
         let context = dataManager.container.viewContext
         for index in offsets {
