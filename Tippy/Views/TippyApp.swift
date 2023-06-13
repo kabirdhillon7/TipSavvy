@@ -11,7 +11,7 @@ import SwiftUI
 struct TippyApp: App {
     //    @StateObject var savedTipsEnvironment = SavedTipsEnvironment()
     @StateObject private var manager: DataManager = DataManager()
-    
+        
     var body: some Scene {
         WindowGroup {
             TabView {

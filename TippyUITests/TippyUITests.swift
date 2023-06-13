@@ -79,4 +79,13 @@ final class TippyUITests: XCTestCase {
         
         XCUIApplication().collectionViews/*@START_MENU_TOKEN@*/.staticTexts["0 people"]/*[[".cells",".buttons[\"Number of People, Number of People\"].staticTexts[\"0 people\"]",".staticTexts[\"0 people\"]"],[[[-1,2],[-1,1],[-1,0,1]],[[-1,2],[-1,1]]],[0]]@END_MENU_TOKEN@*/.tap()
     }
+    
+    func test_tabBar_shouldSelectSavedTab() {
+        let app = XCUIApplication()
+        app.launch()
+        
+        let tabBar = XCUIApplication().tabBars["Tab Bar"]
+        tabBar.buttons["Calculate"].tap()
+        tabBar.buttons["Saved"].tap()
+    }
 }
