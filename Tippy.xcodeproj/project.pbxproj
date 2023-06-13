@@ -21,6 +21,7 @@
 		48DE4E2D2A36E20200BB3E98 /* SavedTip+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48DE4E2B2A36E20200BB3E98 /* SavedTip+CoreDataClass.swift */; };
 		48DE4E2E2A36E20200BB3E98 /* SavedTip+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48DE4E2C2A36E20200BB3E98 /* SavedTip+CoreDataProperties.swift */; };
 		48DE4E322A36E4B400BB3E98 /* DataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48DE4E312A36E4B400BB3E98 /* DataManager.swift */; };
+		48DE4E3D2A38426B00BB3E98 /* SavedDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48DE4E3C2A38426B00BB3E98 /* SavedDetailView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -76,6 +77,7 @@
 		48DE4E2B2A36E20200BB3E98 /* SavedTip+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SavedTip+CoreDataClass.swift"; sourceTree = "<group>"; };
 		48DE4E2C2A36E20200BB3E98 /* SavedTip+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SavedTip+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		48DE4E312A36E4B400BB3E98 /* DataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataManager.swift; sourceTree = "<group>"; };
+		48DE4E3C2A38426B00BB3E98 /* SavedDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedDetailView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -196,6 +198,7 @@
 				4882DCE32A11CCD6000E8882 /* TippyApp.swift */,
 				4882DCE52A11CCD6000E8882 /* ContentView.swift */,
 				48BA30132A3281A500FAFC1C /* SavedView.swift */,
+				48DE4E3C2A38426B00BB3E98 /* SavedDetailView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -407,6 +410,7 @@
 				48DE4E2E2A36E20200BB3E98 /* SavedTip+CoreDataProperties.swift in Sources */,
 				48DE4E2D2A36E20200BB3E98 /* SavedTip+CoreDataClass.swift in Sources */,
 				4841E29E2A144DF70074CC0B /* ContentViewModel.swift in Sources */,
+				48DE4E3D2A38426B00BB3E98 /* SavedDetailView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

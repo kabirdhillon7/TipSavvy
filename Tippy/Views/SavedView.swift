@@ -16,11 +16,13 @@ struct SavedView: View {
                 ForEach(dataManager.savedTips) { tip in
                     VStack {
                         HStack {
-                            Text(tip.name ?? "")
-                            Spacer()
-                            Text(tip.billAmount, format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
-                            Spacer()
-                            Text(tip.totalPerPerson, format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
+                            NavigationLink(destination: SavedDetailView(tip: tip)){
+                                Text(tip.name ?? "")
+                                Spacer()
+                                Text(tip.billAmount, format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
+                                Spacer()
+                                Text(tip.totalPerPerson, format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
+                            }
                         }
                     }
                 }.onDelete { indexSet in
