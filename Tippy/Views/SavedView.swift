@@ -12,24 +12,28 @@ struct SavedView: View {
     
     var body: some View {
         NavigationStack {
-            List() {
-                ForEach(dataManager.savedTips) { tip in
-                    VStack {
-                        HStack {
-                            NavigationLink(destination: SavedDetailView(tip: tip)){
-                                Text(tip.name ?? "")
-                                Spacer()
-                                Text(tip.billAmount, format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
-                                Spacer()
-                                Text(tip.totalPerPerson, format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
+            if dataManager.savedTips.isEmpty {
+                Text("No saved tips")
+            } else {
+                List() {
+                    ForEach(dataManager.savedTips) { tip in
+                        VStack {
+                            HStack {
+                                NavigationLink(destination: SavedDetailView(tip: tip)){
+                                    Text(tip.name ?? "")
+                                    Spacer()
+                                    Text(tip.billAmount, format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
+                                    Spacer()
+                                    Text(tip.totalPerPerson, format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
+                                }
                             }
                         }
+                    }.onDelete { indexSet in
+                        deleteTips(at: indexSet)
                     }
-                }.onDelete { indexSet in
-                    deleteTips(at: indexSet)
                 }
+                .navigationTitle("Saved Tips")
             }
-            .navigationTitle("Saved Tips")
         }
     }
     
