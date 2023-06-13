@@ -146,15 +146,12 @@
 			isa = PBXGroup;
 			children = (
 				48D6251F2A1C689200825A66 /* Info.plist */,
-				4882DCE32A11CCD6000E8882 /* TippyApp.swift */,
-				4882DCE52A11CCD6000E8882 /* ContentView.swift */,
-				4841E29D2A144DF70074CC0B /* ContentViewModel.swift */,
-				48BA30132A3281A500FAFC1C /* SavedView.swift */,
 				4882DCE72A11CCD7000E8882 /* Assets.xcassets */,
-				4882DCE92A11CCD7000E8882 /* Preview Content */,
 				48D6251D2A1C673C00825A66 /* LaunchScreen.storyboard */,
-				48DE4E282A36E17B00BB3E98 /* SavedTip.xcdatamodeld */,
-				48DE4E312A36E4B400BB3E98 /* DataManager.swift */,
+				48DE4E332A38347800BB3E98 /* Models */,
+				48DE4E342A38349800BB3E98 /* Views */,
+				48DE4E352A3834A200BB3E98 /* View Models */,
+				4882DCE92A11CCD7000E8882 /* Preview Content */,
 			);
 			path = Tippy;
 			sourceTree = "<group>";
@@ -182,6 +179,33 @@
 				4882DD002A11CCD8000E8882 /* TippyUITestsLaunchTests.swift */,
 			);
 			path = TippyUITests;
+			sourceTree = "<group>";
+		};
+		48DE4E332A38347800BB3E98 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				48DE4E282A36E17B00BB3E98 /* SavedTip.xcdatamodeld */,
+				48DE4E312A36E4B400BB3E98 /* DataManager.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		48DE4E342A38349800BB3E98 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				4882DCE32A11CCD6000E8882 /* TippyApp.swift */,
+				4882DCE52A11CCD6000E8882 /* ContentView.swift */,
+				48BA30132A3281A500FAFC1C /* SavedView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		48DE4E352A3834A200BB3E98 /* View Models */ = {
+			isa = PBXGroup;
+			children = (
+				4841E29D2A144DF70074CC0B /* ContentViewModel.swift */,
+			);
+			path = "View Models";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
