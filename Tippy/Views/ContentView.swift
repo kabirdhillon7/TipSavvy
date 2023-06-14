@@ -34,7 +34,7 @@ struct ContentView: View {
                             .accessibilityLabel("Bill Amount")
                     }
                     Picker("Number of People", selection: $viewModel.numberOfPeople) {
-                        ForEach(0..<10) {
+                        ForEach(1..<10) {
                             Text("\($0) people")
                         }
                     }
