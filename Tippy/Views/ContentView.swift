@@ -14,6 +14,8 @@ struct ContentView: View {
     
     @FocusState private var amountIsFocused: Bool
     @FocusState private var nameIsFocused: Bool
+    
+    @State private var showingSavedAlert = false
         
     var body: some View {
         NavigationStack {
@@ -86,6 +88,9 @@ struct ContentView: View {
                         }
                     Button("Save Tip Calculation", action: saveTipInfo)
                         .background()
+                        .alert("Tip Calculation Saved", isPresented: $showingSavedAlert) {
+                            Button("OK", role: .none) { }
+                        }
                 } header: {
                     Text("Save Tip Information")
                 }
@@ -109,6 +114,8 @@ struct ContentView: View {
                             tipAmount: viewModel.tipAmount,
                             totalAmountWithTip: viewModel.totalAmountWithTip,
                             totalPerPerson: viewModel.totalPerPerson)
+        
+        showingSavedAlert = true
     }
 }
 
