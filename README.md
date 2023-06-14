@@ -23,6 +23,9 @@ Some of the main features include:
 - Split the bill among a specified number of people and calculate the amount per person.
 - Supports a wide range of bill amounts, tip percentages, and number of people.
 - Currency formatting based on the device's locale for a seamless user experience.
+- Save tip information including the name, bill amount, tip percentage, number of people, tip amount, total amount with tip, and total per person
+- Tab bar navigation and view a list of saved tips with the ability to swipe and delete individual tips.
+- Detailed view for each saved tip, displaying the saved information including the name, date, bill amount, tip percentage, number of people, tip amount, total amount with tip, and total per person.
 
 ## Requirements
 
