@@ -84,7 +84,7 @@ struct ContentView: View {
                         .onTapGesture {
                             hideKeyboard()
                         }
-                    Button("Save Calculation", action: saveTipInfo)
+                    Button("Save Tip Calculation", action: saveTipInfo)
                         .background()
                 } header: {
                     Text("Save Tip Information")
