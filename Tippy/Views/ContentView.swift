@@ -13,8 +13,9 @@ struct ContentView: View {
     @StateObject var viewModel = ContentViewModel()
     
     @FocusState private var amountIsFocused: Bool
+    @FocusState private var numberOfPeopleIsFocused: Bool
     @FocusState private var nameIsFocused: Bool
-    
+        
     @State private var showingSavedAlert = false
         
     var body: some View {
@@ -22,30 +23,30 @@ struct ContentView: View {
             Form {
                 // Bill Information from User
                 Section {
-                    HStack {
-                        Text("Enter Bill Amount:")
-                        Spacer(minLength: 10)
-                        TextField("Amount", value: $viewModel.billAmount, format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
-                            .keyboardType(.decimalPad)
-                            .focused($amountIsFocused)
-                            .onTapGesture {
-                                hideKeyboard()
-                            }
-                            .accessibilityLabel("Bill Amount")
-                    }
-                    Picker("Number of People", selection: $viewModel.numberOfPeople) {
-                        ForEach(0..<10) {
-                            Text("\($0) people")
+                    TextField("Enter Bill Amount",
+                              value: $viewModel.billAmount,
+                              format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
+                        .keyboardType(.decimalPad)
+                        .focused($amountIsFocused)
+                        .onTapGesture {
+                            hideKeyboard()
                         }
-                    }
-                    .accessibilityLabel("Number of People")
+                        .accessibilityLabel("Bill Amount")
+                    
+                    TextField("Number of People", value: $viewModel.numberOfPeople, format: .number)
+                        .keyboardType(.decimalPad)
+                        .focused($numberOfPeopleIsFocused)
+                        .onTapGesture {
+                            hideKeyboard()
+                        }
+                        .accessibilityLabel("Number of People")
                 } header: {
                     Text("Bill Information")
                 }
                 
                 // Selecting the Tip Percentage
                 Section {
-                    Slider(value: $viewModel.tipPercentage, in: 0...25, step: 1)
+                    Slider(value: $viewModel.tipPercentage, in: 0...30, step: 1)
                         .accessibilityLabel("Tip Percentage")
                         .accessibilityHint("Adjust the tip percentage using the slider")
                     Text("Tip Percentage: \(viewModel.tipPercentage, specifier: "%.0f")%")
@@ -59,7 +60,9 @@ struct ContentView: View {
                     HStack {
                         Text("Subtotal")
                         Spacer()
-                        Text(viewModel.billAmount, format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
+                        if let billAmount = viewModel.billAmount {
+                            Text(billAmount, format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
+                        }
                     }
                     HStack {
                         Text("Tip")
@@ -86,13 +89,15 @@ struct ContentView: View {
                         .onTapGesture {
                             hideKeyboard()
                         }
+                } header: {
+                    Text("Save Tip Information")
+                }
+                Section {
                     Button("Save Tip Calculation", action: saveTipInfo)
-                        .background()
+                        .frame(maxWidth: .infinity, alignment: .center)
                         .alert("Tip Calculation Saved", isPresented: $showingSavedAlert) {
                             Button("OK", role: .none) { }
                         }
-                } header: {
-                    Text("Save Tip Information")
                 }
             }
             .navigationTitle("TipSavvy")
@@ -107,10 +112,13 @@ struct ContentView: View {
     }
     
     func saveTipInfo() {
+        guard let billAmount = viewModel.billAmount, let numberOfPeople = viewModel.numberOfPeople  else {
+            return
+        }
         dataManager.saveTip(name: viewModel.tipItemName,
-                            billAmount: viewModel.billAmount,
+                            billAmount: billAmount,
                             tipPercentage: viewModel.tipPercentage,
-                            numberOfPeople: viewModel.numberOfPeople,
+                            numberOfPeople: numberOfPeople,
                             tipAmount: viewModel.tipAmount,
                             totalAmountWithTip: viewModel.totalAmountWithTip,
                             totalPerPerson: viewModel.totalPerPerson)
