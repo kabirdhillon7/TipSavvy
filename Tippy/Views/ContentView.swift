@@ -46,13 +46,15 @@ struct ContentView: View {
                 
                 // Selecting the Tip Percentage
                 Section {
-                    Slider(value: $viewModel.tipPercentage, in: 0...30, step: 1)
-                        .accessibilityLabel("Tip Percentage")
-                        .accessibilityHint("Adjust the tip percentage using the slider")
-                    Text("Tip Percentage: \(viewModel.tipPercentage, specifier: "%.0f")%")
-                        .fixedSize(horizontal: true, vertical: false)
+                    HStack {
+                        Slider(value: $viewModel.tipPercentage, in: 0...30, step: 1)
+                            .accessibilityLabel("Tip Percentage")
+                            .accessibilityHint("Adjust the tip percentage using the slider")
+                        Text("\(viewModel.tipPercentage, specifier: "%.0f")%")
+                            .fixedSize(horizontal: true, vertical: false)
+                    }
                 } header: {
-                    Text("Select a Tip Amount")
+                    Text("Select Tip Amount")
                 }
                 
                 // Final Totals
@@ -62,6 +64,8 @@ struct ContentView: View {
                         Spacer()
                         if let billAmount = viewModel.billAmount {
                             Text(billAmount, format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
+                        } else {
+                            Text(0, format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
                         }
                     }
                     HStack {
