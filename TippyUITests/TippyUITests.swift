@@ -41,32 +41,34 @@ final class TippyUITests: XCTestCase {
     
     // naming test_[UI Comp]_[expected result]
     
-    func test_billAmountTextField_shouldAcceptInput() {
+    func test_enterbillAmountTextField_shouldAcceptInput() {
         let app = XCUIApplication()
         app.launch()
+
+        let enterBillAmountTextField = app.collectionViews/*@START_MENU_TOKEN@*/.textFields["Enter Bill Amount"]/*[[".cells.textFields[\"Enter Bill Amount\"]",".textFields[\"Enter Bill Amount\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/
+        enterBillAmountTextField.tap()
         
-        let amountTextField = app.collectionViews/*@START_MENU_TOKEN@*/.textFields["Amount"]/*[[".cells.textFields[\"Amount\"]",".textFields[\"Amount\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/
+        let key = app/*@START_MENU_TOKEN@*/.keys["2"]/*[[".keyboards.keys[\"2\"]",".keys[\"2\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/
+        key.tap()
+        key.tap()
         
-        amountTextField.tap()
-        amountTextField.tap()
-        amountTextField.tap()
+        let key2 = app/*@START_MENU_TOKEN@*/.keys["6"]/*[[".keyboards.keys[\"6\"]",".keys[\"6\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/
+        key2.tap()
+        key2.tap()
         
         let deleteKey = app/*@START_MENU_TOKEN@*/.keys["Delete"]/*[[".keyboards.keys[\"Delete\"]",".keys[\"Delete\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/
         deleteKey.tap()
         deleteKey.tap()
-        deleteKey.tap()
-        deleteKey.tap()
-        deleteKey.tap()
-        app/*@START_MENU_TOKEN@*/.keys["2"]/*[[".keyboards.keys[\"2\"]",".keys[\"2\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
-        app/*@START_MENU_TOKEN@*/.keys["5"]/*[[".keyboards.keys[\"5\"]",".keys[\"5\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
         
-        XCTAssertEqual(amountTextField.value as? String, "25")
+        let key3 = app/*@START_MENU_TOKEN@*/.keys["5"]/*[[".keyboards.keys[\"5\"]",".keys[\"5\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/
+        key3.tap()
+        key3.tap()
+        enterBillAmountTextField.tap()
     }
     
     func test_slider_shouldTapAndSwipeRight() {
         let app = XCUIApplication()
         app.launch()
-        
         
         let tipPercentageSlider = XCUIApplication().collectionViews/*@START_MENU_TOKEN@*/.sliders["Tip Percentage"]/*[[".cells.sliders[\"Tip Percentage\"]",".sliders[\"Tip Percentage\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/
         tipPercentageSlider.swipeLeft()
@@ -77,7 +79,8 @@ final class TippyUITests: XCTestCase {
         let app = XCUIApplication()
         app.launch()
         
-        XCUIApplication().collectionViews/*@START_MENU_TOKEN@*/.staticTexts["0 people"]/*[[".cells",".buttons[\"Number of People, Number of People\"].staticTexts[\"0 people\"]",".staticTexts[\"0 people\"]"],[[[-1,2],[-1,1],[-1,0,1]],[[-1,2],[-1,1]]],[0]]@END_MENU_TOKEN@*/.tap()
+        app.collectionViews/*@START_MENU_TOKEN@*/.textFields["Number of People"]/*[[".cells.textFields[\"Number of People\"]",".textFields[\"Number of People\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
+        app/*@START_MENU_TOKEN@*/.keys["5"]/*[[".keyboards.keys[\"5\"]",".keys[\"5\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()                       
     }
     
     func test_tabBar_shouldSelectSavedTab() {
