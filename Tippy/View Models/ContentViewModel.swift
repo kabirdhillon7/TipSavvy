@@ -14,32 +14,6 @@ class ContentViewModel: ObservableObject  {
     @Published var numberOfPeople: Int?
     @Published var tipItemName = ""
     
-//    var tipAmount: Double {
-//        return billAmount / 100 * tipPercentage
-//    }
-//    var totalAmountWithTip: Double {
-//        let tipValue = billAmount / 100 * tipPercentage
-//
-//        return billAmount + tipValue
-//    }
-//
-//    var totalPerPerson: Double {
-//        let people = Double(numberOfPeople)
-//        let tipValue = billAmount / 100 * tipPercentage
-//        let totalBillPlusTip = billAmount + tipValue
-//
-//        var total = totalBillPlusTip / people
-//
-//        if people != 0 {
-//            total = totalBillPlusTip / people
-//        }
-//
-//        if total.isNaN || total.isInfinite {
-//            total = 0
-//        }
-//
-//        return total
-//    }
     var tipAmount: Double {
         if let billAmount = billAmount {
             return billAmount / 100 * tipPercentage
@@ -68,5 +42,11 @@ class ContentViewModel: ObservableObject  {
             return total
         }
         return 0
+    }
+    
+    func resetValues() {
+        billAmount = nil
+        tipPercentage = 0
+        numberOfPeople = nil
     }
 }

@@ -13,7 +13,7 @@ struct SavedView: View {
     var body: some View {
         NavigationStack {
             if dataManager.savedTips.isEmpty {
-                Text("No saved tips")
+                Text("No Saved Tips")
             } else {
                 List() {
                     ForEach(dataManager.savedTips) { tip in

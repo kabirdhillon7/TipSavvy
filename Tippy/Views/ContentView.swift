@@ -97,11 +97,22 @@ struct ContentView: View {
                     Text("Save Tip Information")
                 }
                 Section {
-                    Button("Save Tip Calculation", action: saveTipInfo)
-                        .frame(maxWidth: .infinity, alignment: .center)
-                        .alert("Tip Calculation Saved", isPresented: $showingSavedAlert) {
-                            Button("OK", role: .none) { }
+                    Button("Save Tip Calculation"){
+                        saveTipInfo()
+                    }
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .alert("Tip Calculation Saved", isPresented: $showingSavedAlert) {
+                        Button("OK", role: .none) {
+                            DispatchQueue.main.async {
+                                viewModel.resetValues()
+                            }
                         }
+                    }
+                    Button("Reset") {
+                        viewModel.resetValues()
+                    }
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .foregroundColor(.red)
                 }
             }
             .navigationTitle("TipSavvy")
