@@ -11,69 +11,48 @@ struct SavedDetailView: View {
     var tip: SavedTip
     
     var body: some View {
-        ScrollView {
-            VStack {
-                if let name = tip.name {
-                    Text(name)
-                        .font(.largeTitle)
-                        .frame(alignment: .center)
-                        .bold()
-                }
-                Spacer(minLength: 2)
-                
-                if let date = tip.date {
-                    Text(date, format: .dateTime.month().day().year())
-                        .frame(alignment: .center)
-                        .font(.subheadline)
-                }
+        VStack(alignment: .leading) {
+            if let date = tip.date {
+                Text(date, format: .dateTime.month().day().year())
             }
-            
-            Spacer(minLength: 10)
-            
             HStack {
-                VStack {
-                    Text("Bill Amount:")
-                        .bold()
-                        .font(.title3)
-                    Text(tip.billAmount, format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
-                        .font(.body)
-                }
-                
-                VStack {
-                    Text("Tip Percentage:")
-                        .bold()
-                        .font(.title3)
-                    Text("\(Int(tip.tipPercentage))%")
-                        .font(.body)
-                }
+                Text("Bill Amount:")
+                    .bold()
+                Spacer()
+                Text(tip.billAmount, format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
             }
-            
-            VStack {
+            HStack {
+                Text("Tip Percentage:")
+                    .bold()
+                Spacer()
+                Text("\(Int(tip.tipPercentage))%")
+            }
+
+            HStack {
                 Text("Number of People:")
                     .bold()
-                    .font(.title3)
+                Spacer()
                 Text("\(tip.numberOfPeople)")
-                    .font(.body)
-                
+            }
+            HStack {
                 Text("Tip Amount:")
                     .bold()
-                    .font(.title3)
+                Spacer()
                 Text(tip.tipAmount, format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
-                    .font(.body)
-                
+            }
+            HStack {
                 Text("Total Bill With Tip:")
                     .bold()
-                    .font(.title3)
+                Spacer()
                 Text(tip.totalAmountWithTip, format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
-                    .font(.body)
-                
+            }
+            HStack {
                 Text("Total Per Person:")
                     .bold()
-                    .font(.title3)
+                Spacer()
                 Text(tip.totalPerPerson, format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
                     .font(.body)
             }
-            .lineSpacing(5)
         }
     }
 }

@@ -17,16 +17,8 @@ struct SavedView: View {
             } else {
                 List() {
                     ForEach(dataManager.savedTips) { tip in
-                        VStack {
-                            HStack {
-                                NavigationLink(destination: SavedDetailView(tip: tip)){
-                                    Text(tip.name ?? "")
-                                    Spacer()
-                                    Text(tip.billAmount, format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
-                                    Spacer()
-                                    Text(tip.totalPerPerson, format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
-                                }
-                            }
+                        DisclosureGroup(tip.name ?? "") {
+                            SavedDetailView(tip: tip)
                         }
                     }.onDelete { indexSet in
                         deleteTips(at: indexSet)
