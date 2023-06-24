@@ -18,14 +18,6 @@ final class TippyTests: XCTestCase {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
 
-    func testExample() throws {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-        // Any test you write for XCTest can be annotated as throws and async.
-        // Mark your test throws to produce an unexpected failure when your test encounters an uncaught error.
-        // Mark your test async to allow awaiting for asynchronous code to complete. Check the results with assertions afterwards.
-    }
-
     func testPerformanceExample() throws {
         // This is an example of a performance test case.
         self.measure {
@@ -40,29 +32,23 @@ final class TippyTests: XCTestCase {
     func test_totalAmountWithTip_shouldBeTrue() {
         let viewModel = ContentViewModel()
         
-        // given
         viewModel.billAmount = 25.00
         viewModel.tipPercentage = 15
         
-        // when
         let totalWithTip = viewModel.totalAmountWithTip
         
-        // then
         XCTAssertEqual(totalWithTip, 28.75)
     }
     
     func test_billAmount_shouldAcceptLargeValue() {
         let viewModel = ContentViewModel()
         
-        // given
         viewModel.billAmount = 1_000_000_000_000_000
         viewModel.tipPercentage = 20
         
-        // when, presenting a number w/ 2 decimal places
         let total = viewModel.totalAmountWithTip
         let expectedValue = 1_000_000_000_000_000 + (1_000_000_000_000_000 * 0.20)
         
-        // then
         XCTAssertEqual(total, expectedValue)
     }
     
@@ -70,16 +56,13 @@ final class TippyTests: XCTestCase {
     func test_totalPerPerson_shouldBeTrue() {
         let viewModel = ContentViewModel()
         
-        // given
         viewModel.billAmount = 129.99
         viewModel.tipPercentage = 20
         viewModel.numberOfPeople = 5
         
-        // when, presenting a number w/ 2 decimal places
         let totalPerPerson = viewModel.totalPerPerson
         let totalPerPersonRounded = String(format: "%.2f", totalPerPerson)
         
-        // then
         XCTAssertEqual(Double(totalPerPersonRounded), 31.2)
     }
     
@@ -87,14 +70,11 @@ final class TippyTests: XCTestCase {
     func test_tipPercentage_shouldAcceptMinimum() {
         let viewModel = ContentViewModel()
         
-        // given
         viewModel.tipPercentage = 0
         viewModel.billAmount = 100
         
-        // when
         let total = viewModel.totalAmountWithTip
         
-        // then
         XCTAssertEqual(total, 100)
     }
     
@@ -102,14 +82,11 @@ final class TippyTests: XCTestCase {
     func test_tipPercentage_shouldAcceptMaximum() {
         let viewModel = ContentViewModel()
         
-        // given
         viewModel.tipPercentage = 25
         viewModel.billAmount = 100
         
-        // when
         let total = viewModel.totalAmountWithTip
         
-        // then
         XCTAssertEqual(total, 125)
     }
     
@@ -117,14 +94,11 @@ final class TippyTests: XCTestCase {
     func test_totalAmountWithTip_shouldBeZero() {
         let viewModel = ContentViewModel()
         
-        // given
         viewModel.billAmount = 0
         viewModel.tipPercentage = 0
         
-        // when
         let total = viewModel.totalAmountWithTip
         
-        // then
         XCTAssertTrue(total == 0)
     }
     
@@ -132,15 +106,12 @@ final class TippyTests: XCTestCase {
     func test_numberOfPeople_shouldAcceptMin() {
         let viewModel = ContentViewModel()
         
-        // given
         viewModel.numberOfPeople = 2
         viewModel.billAmount = 6
         viewModel.tipPercentage = 0
         
-        // when
         let totalPerPerson = viewModel.totalPerPerson
         
-        // then
         XCTAssertTrue(totalPerPerson == 3)
     }
     
@@ -148,15 +119,12 @@ final class TippyTests: XCTestCase {
     func test_totalPerPerson_shouldBeZero() {
         let viewModel = ContentViewModel()
         
-        // given
         viewModel.billAmount = 0
         viewModel.tipPercentage = 0
         viewModel.numberOfPeople = 99
         
-        // when
         let totalPerPerson = viewModel.totalPerPerson
         
-        // then
         XCTAssertTrue(totalPerPerson == 0)
     }
     
@@ -164,14 +132,41 @@ final class TippyTests: XCTestCase {
     func test_tipAmount_shouldBeEqual() {
         let viewModel = ContentViewModel()
         
-        // given
         viewModel.billAmount = 100
         viewModel.tipPercentage = 15
         
-        // when
         let tip = viewModel.tipAmount
         
-        // then
         XCTAssertEqual(tip, 15)
+    }
+    
+    func test_tipItemName_shouldBeEmptyString() {
+        let viewModel = ContentViewModel()
+                
+        viewModel.tipItemName = ""
+        
+        XCTAssertEqual("", viewModel.tipItemName)
+    }
+    
+    func test_tipItemName_shouldBeEqual() {
+        let viewModel = ContentViewModel()
+        
+        viewModel.tipItemName = "Pizza"
+        
+        XCTAssertEqual("Pizza", viewModel.tipItemName)
+    }
+    
+    func test_resetValues_shouldResetValues() {
+        let viewModel = ContentViewModel()
+        
+        viewModel.billAmount = 15.99
+        viewModel.tipPercentage = 15
+        viewModel.numberOfPeople = 2
+                
+        viewModel.resetValues()
+        
+        XCTAssertNil(viewModel.billAmount)
+        XCTAssertEqual(viewModel.tipAmount, 0.0)
+        XCTAssertNil(viewModel.numberOfPeople)
     }
 }
