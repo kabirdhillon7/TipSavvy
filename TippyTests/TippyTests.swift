@@ -162,11 +162,13 @@ final class TippyTests: XCTestCase {
         viewModel.billAmount = 15.99
         viewModel.tipPercentage = 15
         viewModel.numberOfPeople = 2
+        viewModel.tipItemName = "Sandwiches"
                 
         viewModel.resetValues()
         
         XCTAssertNil(viewModel.billAmount)
         XCTAssertEqual(viewModel.tipAmount, 0.0)
         XCTAssertNil(viewModel.numberOfPeople)
+        XCTAssertEqual(viewModel.tipItemName, "")
     }
 }

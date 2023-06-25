@@ -48,5 +48,6 @@ class ContentViewModel: ObservableObject  {
         billAmount = nil
         tipPercentage = 0
         numberOfPeople = nil
+        tipItemName = ""
     }
 }
