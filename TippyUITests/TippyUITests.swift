@@ -80,7 +80,7 @@ final class TippyUITests: XCTestCase {
         app.launch()
         
         app.collectionViews/*@START_MENU_TOKEN@*/.textFields["Number of People"]/*[[".cells.textFields[\"Number of People\"]",".textFields[\"Number of People\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
-        app/*@START_MENU_TOKEN@*/.keys["5"]/*[[".keyboards.keys[\"5\"]",".keys[\"5\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()                       
+        app/*@START_MENU_TOKEN@*/.keys["5"]/*[[".keyboards.keys[\"5\"]",".keys[\"5\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
     }
     
     func test_tabBar_shouldSelectSavedTab() {

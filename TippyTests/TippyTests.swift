@@ -66,6 +66,32 @@ final class TippyTests: XCTestCase {
         XCTAssertEqual(Double(totalPerPersonRounded), 31.2)
     }
     
+    // Max People Split
+    func test_totalPerPerson_shouldBeZero() {
+        let viewModel = ContentViewModel()
+        
+        viewModel.billAmount = 0
+        viewModel.tipPercentage = 0
+        viewModel.numberOfPeople = 99
+        
+        let totalPerPerson = viewModel.totalPerPerson
+        
+        XCTAssertTrue(totalPerPerson == 0)
+    }
+    
+    // Check for 0 bill total, but multiple people
+    func test_totalPerPerson_shouldReturnTrueForZeroBillAmount() {
+        let viewModel = ContentViewModel()
+        
+        viewModel.billAmount = 0
+        viewModel.numberOfPeople = 10
+        viewModel.tipPercentage = 10
+        
+        let totalPerPerson = viewModel.totalPerPerson
+        
+        XCTAssertTrue(totalPerPerson == 0)
+    }
+
     // Min Tip
     func test_tipPercentage_shouldAcceptMinimum() {
         let viewModel = ContentViewModel()
@@ -115,19 +141,6 @@ final class TippyTests: XCTestCase {
         XCTAssertTrue(totalPerPerson == 3)
     }
     
-    // Max People Split
-    func test_totalPerPerson_shouldBeZero() {
-        let viewModel = ContentViewModel()
-        
-        viewModel.billAmount = 0
-        viewModel.tipPercentage = 0
-        viewModel.numberOfPeople = 99
-        
-        let totalPerPerson = viewModel.totalPerPerson
-        
-        XCTAssertTrue(totalPerPerson == 0)
-    }
-    
     // tip amount
     func test_tipAmount_shouldBeEqual() {
         let viewModel = ContentViewModel()
@@ -167,8 +180,19 @@ final class TippyTests: XCTestCase {
         viewModel.resetValues()
         
         XCTAssertNil(viewModel.billAmount)
-        XCTAssertEqual(viewModel.tipAmount, 0.0)
+        XCTAssertEqual(viewModel.tipPercentage, 0.0)
         XCTAssertNil(viewModel.numberOfPeople)
         XCTAssertEqual(viewModel.tipItemName, "")
+    }
+    
+    func test_resetValues_shouldReturnTrue() {
+        let viewModel = ContentViewModel()
+                
+        viewModel.resetValues()
+        
+        XCTAssertTrue(viewModel.billAmount == nil)
+        XCTAssertTrue(viewModel.tipPercentage == 0)
+        XCTAssertTrue(viewModel.numberOfPeople == nil)
+        XCTAssertTrue(viewModel.tipItemName == "")
     }
 }

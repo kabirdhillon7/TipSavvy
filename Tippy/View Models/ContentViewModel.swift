@@ -28,6 +28,7 @@ class ContentViewModel: ObservableObject  {
         }
         return 0
     }
+    
     var totalPerPerson: Double {
         if let billAmount = billAmount, let people = numberOfPeople, people != 0 {
             let numOfPeople = Double(people)
