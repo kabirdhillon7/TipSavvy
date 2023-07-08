@@ -14,6 +14,7 @@ struct SavedView: View {
         NavigationStack {
             if dataManager.savedTips.isEmpty {
                 Text("No Saved Tips")
+                    .navigationTitle("Saved Tips")
             } else {
                 List() {
                     ForEach(dataManager.savedTips) { tip in
