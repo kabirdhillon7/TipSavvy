@@ -88,26 +88,11 @@ struct ContentView: View {
                 }
                 
                 Section {
-                    TextField("Enter Name", text: $viewModel.tipItemName)
-                        .focused($nameIsFocused)
-                        .onTapGesture {
-                            hideKeyboard()
-                        }
-                } header: {
-                    Text("Save Tip Information")
-                }
-                Section {
-                    Button("Save Tip Calculation"){
-                        saveTipInfo()
+                    Button("Save Tip Calculation") {
+                        showingSavedAlert = true
                     }
                     .frame(maxWidth: .infinity, alignment: .center)
-                    .alert("Tip Calculation Saved", isPresented: $showingSavedAlert) {
-                        Button("OK", role: .none) {
-                            DispatchQueue.main.async {
-                                viewModel.resetValues()
-                            }
-                        }
-                    }
+                    
                     Button("Reset") {
                         viewModel.resetValues()
                     }
@@ -116,6 +101,19 @@ struct ContentView: View {
                 }
             }
             .navigationTitle("TipSavvy")
+            .alert("Save Tip Calc", isPresented: $showingSavedAlert,  actions: {
+                TextField("Enter Name", text: $viewModel.tipItemName)
+                Button("OK", role: nil) {
+                    saveTipInfo()
+                    
+                    DispatchQueue.main.async {
+                        viewModel.resetValues()
+                    }
+                }
+                Button("Cancel", role: .cancel) {
+                    viewModel.tipItemName = ""
+                }
+            })
         }
     }
     
@@ -137,8 +135,6 @@ struct ContentView: View {
                             tipAmount: viewModel.tipAmount,
                             totalAmountWithTip: viewModel.totalAmountWithTip,
                             totalPerPerson: viewModel.totalPerPerson)
-        
-        showingSavedAlert = true
     }
 }
 
