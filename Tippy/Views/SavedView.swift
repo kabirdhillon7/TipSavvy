@@ -24,6 +24,9 @@ struct SavedView: View {
                         deleteTips(at: indexSet)
                     }
                 }
+                .toolbar {
+                    EditButton()
+                }
                 .navigationTitle("Saved Tips")
             }
         }
