@@ -101,7 +101,7 @@ struct ContentView: View {
                 }
             }
             .navigationTitle("TipSavvy")
-            .alert("Save Tip Calc", isPresented: $showingSavedAlert,  actions: {
+            .alert("Save Tip Calculation", isPresented: $showingSavedAlert,  actions: {
                 TextField("Enter Name", text: $viewModel.tipItemName)
                 Button("OK", role: nil) {
                     saveTipInfo()
