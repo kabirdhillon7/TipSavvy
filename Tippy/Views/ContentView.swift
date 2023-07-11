@@ -15,9 +15,9 @@ struct ContentView: View {
     @FocusState private var amountIsFocused: Bool
     @FocusState private var numberOfPeopleIsFocused: Bool
     @FocusState private var nameIsFocused: Bool
-        
+    
     @State private var showingSavedAlert = false
-        
+    
     var body: some View {
         NavigationStack {
             Form {
@@ -26,12 +26,12 @@ struct ContentView: View {
                     TextField("Enter Bill Amount",
                               value: $viewModel.billAmount,
                               format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
-                        .keyboardType(.decimalPad)
-                        .focused($amountIsFocused)
-                        .onTapGesture {
-                            hideKeyboard()
-                        }
-                        .accessibilityLabel("Bill Amount")
+                    .keyboardType(.decimalPad)
+                    .focused($amountIsFocused)
+                    .onTapGesture {
+                        hideKeyboard()
+                    }
+                    .accessibilityLabel("Bill Amount")
                     
                     TextField("Number of People", value: $viewModel.numberOfPeople, format: .number)
                         .keyboardType(.decimalPad)
@@ -92,17 +92,22 @@ struct ContentView: View {
                         showingSavedAlert = true
                     }
                     .frame(maxWidth: .infinity, alignment: .center)
+                    .accessibilityLabel("Save Tip Calculation")
+                    .accessibilityHint("Adjust the tip percentage using the slider")
+                    .accessibilityLabel("Save Tip Calculation")
                     
                     Button("Reset") {
                         viewModel.resetValues()
                     }
                     .frame(maxWidth: .infinity, alignment: .center)
                     .foregroundColor(.red)
+                    .accessibilityLabel("Reset")
                 }
             }
             .navigationTitle("TipSavvy")
             .alert("Save Tip Calculation", isPresented: $showingSavedAlert,  actions: {
                 TextField("Enter Name", text: $viewModel.tipItemName)
+                    .accessibilityLabel("Enter Tip Calculation Name")
                 Button("OK", role: nil) {
                     saveTipInfo()
                     
@@ -110,9 +115,11 @@ struct ContentView: View {
                         viewModel.resetValues()
                     }
                 }
+                .accessibilityLabel("OK")
                 Button("Cancel", role: .cancel) {
                     viewModel.tipItemName = ""
                 }
+                .accessibilityLabel("Cancel")
             })
         }
     }
