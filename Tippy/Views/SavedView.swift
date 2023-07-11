@@ -24,7 +24,7 @@ struct SavedView: View {
                         } label: {
                             Text(tip.name ?? "")
                                 .accessibilityLabel(tip.name ?? "")
-                                .accessibilityHint("Tap to view details")
+                                .accessibilityHint("Select to get details")
                         }
                     }.onDelete { indexSet in
                         deleteTips(at: indexSet)
