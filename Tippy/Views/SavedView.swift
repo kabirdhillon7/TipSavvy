@@ -14,12 +14,17 @@ struct SavedView: View {
         NavigationStack {
             if dataManager.savedTips.isEmpty {
                 Text("No Saved Tips")
+                    .accessibilityLabel("No Saved Tips")
                     .navigationTitle("Saved Tips")
             } else {
                 List() {
                     ForEach(dataManager.savedTips) { tip in
-                        DisclosureGroup(tip.name ?? "") {
+                        DisclosureGroup() {
                             SavedDetailView(tip: tip)
+                        } label: {
+                            Text(tip.name ?? "")
+                                .accessibilityLabel(tip.name ?? "")
+                                .accessibilityHint("Tap to view details")
                         }
                     }.onDelete { indexSet in
                         deleteTips(at: indexSet)
@@ -27,6 +32,7 @@ struct SavedView: View {
                 }
                 .toolbar {
                     EditButton()
+                        .accessibilityLabel("Edit")
                 }
                 .navigationTitle("Saved Tips")
             }
