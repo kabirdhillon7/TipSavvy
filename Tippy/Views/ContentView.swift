@@ -49,7 +49,7 @@ struct ContentView: View {
                     HStack {
                         Slider(value: $viewModel.tipPercentage, in: 0...30, step: 1)
                             .accessibilityLabel("Tip Percentage")
-                            .accessibilityHint("Adjust the tip percentage using the slider")
+                            .accessibilityHint("Slide to select the desired tip percentage")
                         Text("\(viewModel.tipPercentage, specifier: "%.0f")%")
                             .fixedSize(horizontal: true, vertical: false)
                     }
