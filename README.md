@@ -28,13 +28,19 @@ Some of the main features include:
 
 ## Requirements
 
-- iOS 16.1 or later
+- iOS 16 or later
 - iPhone 8, iPhone SE (2nd Generation), or newer
 
 ## Demo
 ### Current Progress Walkthrough
 
-<img src="https://github.com/kabirdhillon7/TipSavvy/assets/74223402/b4061fa5-578b-496e-a7ca-b0d27fe0f4e3" width=250><br>
+
+### Progress 2 Walkthrough
+<details>
+  <summary>Click to view</summary>
+  
+  <img src="https://github.com/kabirdhillon7/TipSavvy/assets/74223402/b4061fa5-578b-496e-a7ca-b0d27fe0f4e3" width=250><br>
+</details>
 
 ### Progress 1 Walkthrough
 <details>
