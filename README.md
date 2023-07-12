@@ -33,7 +33,7 @@ Some of the main features include:
 
 ## Demo
 ### Current Progress Walkthrough
-
+<img src="https://github.com/kabirdhillon7/TipSavvy/assets/74223402/1046ebd0-183c-498a-b455-d2ad05c05901" width=250><br>
 
 ### Progress 2 Walkthrough
 <details>
