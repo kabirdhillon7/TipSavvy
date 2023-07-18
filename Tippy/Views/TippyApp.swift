@@ -18,6 +18,7 @@ struct TippyApp: App {
                     .tabItem {
                         Label("Calculate", systemImage: "percent")
                             .accessibilityLabel("Calculate")
+                            .accessibilityHint("Calculate tip amounts")
                     }
                     .environmentObject(manager)
                 
@@ -25,6 +26,7 @@ struct TippyApp: App {
                     .tabItem {
                         Label("Saved", systemImage: "bookmark")
                             .accessibilityLabel("Saved")
+                            .accessibilityHint("View and manage saved tip calculations")
                     }
                     .environmentObject(manager)
             }
