@@ -41,6 +41,13 @@ final class TippyUITests: XCTestCase {
     
     // naming test_[UI Comp]_[expected result]
     
+    func test_device_shouldRotate() {
+        let app = XCUIApplication()
+        app.launch()
+        
+                
+    }
+    
     func test_enterbillAmountTextField_shouldAcceptInput() {
         let app = XCUIApplication()
         app.launch()
@@ -92,41 +99,13 @@ final class TippyUITests: XCTestCase {
         tabBar.buttons["Saved"].tap()
     }
     
-    
-    
     func test_resetButton_shouldTap() {
         let app = XCUIApplication()
         app.launch()
-        
-        let resetButton = XCUIApplication().collectionViews/*@START_MENU_TOKEN@*/.buttons["Reset"]/*[[".cells.buttons[\"Reset\"]",".buttons[\"Reset\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/
-        resetButton.tap()
-    }
-    
-    func test_saveButton_shouldReset() {
-        let app = XCUIApplication()
-        app.launch()
-        
+
         let collectionViewsQuery = app.collectionViews
-        collectionViewsQuery/*@START_MENU_TOKEN@*/.textFields["Enter Bill Amount"]/*[[".cells.textFields[\"Enter Bill Amount\"]",".textFields[\"Enter Bill Amount\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
-        
-        let key = app/*@START_MENU_TOKEN@*/.keys["1"]/*[[".keyboards.keys[\"1\"]",".keys[\"1\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/
-        key.tap()
-        key.tap()
-        
-        let key2 = app/*@START_MENU_TOKEN@*/.keys["0"]/*[[".keyboards.keys[\"0\"]",".keys[\"0\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/
-        key2.tap()
-        key2.tap()
-        
-        let numberOfPeopleTextField = collectionViewsQuery/*@START_MENU_TOKEN@*/.textFields["Number of People"]/*[[".cells.textFields[\"Number of People\"]",".textFields[\"Number of People\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/
-        numberOfPeopleTextField.tap()
-        
-        let key3 = app/*@START_MENU_TOKEN@*/.keys["2"]/*[[".keyboards.keys[\"2\"]",".keys[\"2\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/
-        key3.tap()
-        key3.tap()
-        collectionViewsQuery/*@START_MENU_TOKEN@*/.sliders["Tip Percentage"]/*[[".cells.sliders[\"Tip Percentage\"]",".sliders[\"Tip Percentage\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.swipeRight()
-        collectionViewsQuery/*@START_MENU_TOKEN@*/.staticTexts["BILL TOTALS"]/*[[".cells.staticTexts[\"BILL TOTALS\"]",".staticTexts[\"BILL TOTALS\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.swipeUp()
-        numberOfPeopleTextField.tap()
-        collectionViewsQuery/*@START_MENU_TOKEN@*/.buttons["Reset"]/*[[".cells.buttons[\"Reset\"]",".buttons[\"Reset\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
+        let resetButton = collectionViewsQuery/*@START_MENU_TOKEN@*/.buttons["Reset"]/*[[".cells.buttons[\"Reset\"]",".buttons[\"Reset\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/
+        resetButton.tap()
     }
     
     func test_saveTipCalculationButton_shouldTap() {
@@ -137,13 +116,20 @@ final class TippyUITests: XCTestCase {
         saveTipCalculationButton.tap()
     }
     
+    func test_saveTipCalculationButton_shouldSave() {
+        let app = XCUIApplication()
+        app.launch()
+        
+        app.collectionViews/*@START_MENU_TOKEN@*/.buttons["Save Tip Calculation"]/*[[".cells.buttons[\"Save Tip Calculation\"]",".buttons[\"Save Tip Calculation\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
+        app.alerts["Save Tip Calculation"].scrollViews.otherElements.buttons["OK"].tap()
+        
+    }
+    
     func test_saveTipCalculationButton_shouldCancel() {
         let app = XCUIApplication()
         app.launch()
         
-        let saveTipCalculationButton = app.collectionViews/*@START_MENU_TOKEN@*/.buttons["Save Tip Calculation"]/*[[".cells.buttons[\"Save Tip Calculation\"]",".buttons[\"Save Tip Calculation\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/
-        saveTipCalculationButton.tap()
-        saveTipCalculationButton.tap()
-        app.alerts["Save Tip Calc"].scrollViews.otherElements.buttons["Cancel"].tap()      
+        app.collectionViews/*@START_MENU_TOKEN@*/.buttons["Save Tip Calculation"]/*[[".cells.buttons[\"Save Tip Calculation\"]",".buttons[\"Save Tip Calculation\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
+        app.alerts["Save Tip Calculation"].scrollViews.otherElements.buttons["Cancel"].tap()
     }
 }

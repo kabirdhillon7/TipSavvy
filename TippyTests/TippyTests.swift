@@ -153,6 +153,21 @@ final class TippyTests: XCTestCase {
         XCTAssertEqual(tip, 15)
     }
     
+    func test_tipAmount_shouldBeEqualForNilBillAmount() {
+        // Arrange
+        let viewModel = ContentViewModel()
+        viewModel.billAmount = nil
+        viewModel.tipPercentage = 15
+        
+        // Act
+        let tipAmount = viewModel.tipAmount
+        
+        // Assert
+        XCTAssertEqual(tipAmount, 0)
+    }
+    
+
+    
     func test_tipItemName_shouldBeEmptyString() {
         let viewModel = ContentViewModel()
                 
