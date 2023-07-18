@@ -94,7 +94,6 @@ struct ContentView: View {
                     .frame(maxWidth: .infinity, alignment: .center)
                     .accessibilityLabel("Save Tip Calculation")
                     .accessibilityHint("Adjust the tip percentage using the slider")
-                    .accessibilityLabel("Save Tip Calculation")
                     
                     Button("Reset") {
                         viewModel.resetValues()
