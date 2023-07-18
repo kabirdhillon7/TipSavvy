@@ -41,11 +41,36 @@ final class TippyUITests: XCTestCase {
     
     // naming test_[UI Comp]_[expected result]
     
-    func test_device_shouldRotate() {
+    func test_contentView_shouldCancelSaving() {
         let app = XCUIApplication()
         app.launch()
+
+        let collectionViewsQuery = app.collectionViews
+        collectionViewsQuery/*@START_MENU_TOKEN@*/.textFields["Enter Bill Amount"]/*[[".cells.textFields[\"Enter Bill Amount\"]",".textFields[\"Enter Bill Amount\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
+        app/*@START_MENU_TOKEN@*/.keys["1"]/*[[".keyboards.keys[\"1\"]",".keys[\"1\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
         
-                
+        let key = app/*@START_MENU_TOKEN@*/.keys["2"]/*[[".keyboards.keys[\"2\"]",".keys[\"2\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/
+        key.tap()
+        key.tap()
+        
+        let numberOfPeopleTextField = collectionViewsQuery/*@START_MENU_TOKEN@*/.textFields["Number of People"]/*[[".cells.textFields[\"Number of People\"]",".textFields[\"Number of People\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/
+        numberOfPeopleTextField.tap()
+        
+        let key2 = app/*@START_MENU_TOKEN@*/.keys["3"]/*[[".keyboards.keys[\"3\"]",".keys[\"3\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/
+        key2.tap()
+        key2.tap()
+        numberOfPeopleTextField.tap()
+        
+        let tipPercentageSlider = collectionViewsQuery/*@START_MENU_TOKEN@*/.sliders["Tip Percentage"]/*[[".cells.sliders[\"Tip Percentage\"]",".sliders[\"Tip Percentage\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/
+        tipPercentageSlider.swipeRight()
+        tipPercentageSlider.swipeRight()
+        tipPercentageSlider.swipeRight()
+        tipPercentageSlider.swipeRight()
+        tipPercentageSlider.swipeRight()
+        tipPercentageSlider.swipeRight()
+        collectionViewsQuery/*@START_MENU_TOKEN@*/.buttons["Save Tip Calculation"]/*[[".cells.buttons[\"Save Tip Calculation\"]",".buttons[\"Save Tip Calculation\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
+        
+        app.alerts["Save Tip Calculation"].scrollViews.otherElements.buttons["Cancel"].tap()
     }
     
     func test_enterbillAmountTextField_shouldAcceptInput() {
