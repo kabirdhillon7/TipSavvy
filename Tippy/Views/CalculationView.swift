@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct ContentView: View {
+struct CalculationView: View {
     @EnvironmentObject var dataManager: DataManager
     
     @StateObject var viewModel = ContentViewModel()
@@ -146,7 +146,7 @@ struct ContentView: View {
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView()
+        CalculationView()
             .environmentObject(ContentViewModel())
     }
 }

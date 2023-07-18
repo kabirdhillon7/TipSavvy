@@ -14,7 +14,7 @@ struct TippyApp: App {
     var body: some Scene {
         WindowGroup {
             TabView {
-                ContentView()
+                CalculationView()
                     .tabItem {
                         Label("Calculate", systemImage: "percent")
                             .accessibilityLabel("Calculate")
