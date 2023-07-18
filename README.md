@@ -2,8 +2,7 @@
 
 TipSavvy is a simple tip calculator iOS app built using [SwiftUI](https://developer.apple.com/xcode/swiftui/). It allows users to calculate the total amount with tip and split the bill among multiple people. With Tippy, you can quickly and accurately calculate tips for your dining or any other bill-splitting needs.
 
-[![Download on the App Store](https://img.shields.io/badge/App%20Store-Download-blue.svg)](https://apps.apple.com/app/tipsavvy/id6449447909)
-
+[![Available on the App Store](http://cl.ly/WouG/Download_on_the_App_Store_Badge_US-UK_135x40.svg)](https://apps.apple.com/app/tipsavvy/id6449447909)
 
 ## Table of Contents
 
@@ -29,13 +28,19 @@ Some of the main features include:
 
 ## Requirements
 
-- iOS 16.1 or later
+- iOS 16 or later
 - iPhone 8, iPhone SE (2nd Generation), or newer
 
 ## Demo
 ### Current Progress Walkthrough
+<img src="https://github.com/kabirdhillon7/TipSavvy/assets/74223402/1046ebd0-183c-498a-b455-d2ad05c05901" width=250><br>
 
-<img src="https://github.com/kabirdhillon7/TipSavvy/assets/74223402/b4061fa5-578b-496e-a7ca-b0d27fe0f4e3" width=250><br>
+### Progress 2 Walkthrough
+<details>
+  <summary>Click to view</summary>
+  
+  <img src="https://github.com/kabirdhillon7/TipSavvy/assets/74223402/b4061fa5-578b-496e-a7ca-b0d27fe0f4e3" width=250><br>
+</details>
 
 ### Progress 1 Walkthrough
 <details>
