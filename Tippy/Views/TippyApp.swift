@@ -16,7 +16,8 @@ struct TippyApp: App {
             TabView {
                 CalculationView()
                     .tabItem {
-                        Label("Calculate", systemImage: "percent")
+                        let calculateLocalizedString = NSLocalizedString("calculate_tab", comment: "Calculate Tab Name")
+                        Label(calculateLocalizedString, systemImage: "percent")
                             .accessibilityLabel("Calculate")
                             .accessibilityHint("Calculate tip amounts")
                     }
@@ -24,7 +25,8 @@ struct TippyApp: App {
                 
                 SavedView()
                     .tabItem {
-                        Label("Saved", systemImage: "bookmark")
+                        let savedLocalizaedString = NSLocalizedString("saved_tab", comment: "Saved Tab Name")
+                        Label(savedLocalizaedString, systemImage: "bookmark")
                             .accessibilityLabel("Saved")
                             .accessibilityHint("View and manage saved tip calculations")
                     }

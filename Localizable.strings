@@ -1,0 +1,31 @@
+/* 
+  Localizable.strings
+  Tippy
+
+  Created by Kabir Dhillon on 8/15/23.
+  
+*/
+
+// MARK: TipSavvy App
+"calculate_tab" = "Calculate";
+"saved_tab" = "Saved";
+
+// MARK: CalculationView
+"bill_amount" = "Bill Amount";
+"bill_information" = "Bill Information";
+"bill_totals" = "Bill Totals";
+"cancel" = "Cancel";
+"enter_bill_amount" = "Enter Bill Amount";
+"enter_name" = "Enter Name";
+"number_of_people" = "Number of People";
+"ok" = "OK";
+"reset" = "Reset";
+"save_tip_calculation" = "Save Tip Calculation";
+"save_tip_calculation_accessibilityHint" = "Adjust the tip percentage using the slider";
+"select_tip_amount" = "Select Tip Amount";
+"subtotal" = "Subtotal";
+"tip" = "Tip";
+"tip_percentage" = "Tip Percentage";
+"tip_percentage_accessibilityHint" = "Slide to select the desired tip percentage";
+"total_per_person" = "Total Per Person";
+"total_with_tip" = "Total With Tip";

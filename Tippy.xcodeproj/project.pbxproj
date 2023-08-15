@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		4841E29E2A144DF70074CC0B /* ContentViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4841E29D2A144DF70074CC0B /* ContentViewModel.swift */; };
+		4876A6742A8B5ABC009D8D93 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 4876A6732A8B5ABC009D8D93 /* Localizable.strings */; };
 		4882DCE42A11CCD6000E8882 /* TippyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4882DCE32A11CCD6000E8882 /* TippyApp.swift */; };
 		4882DCE62A11CCD6000E8882 /* CalculationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4882DCE52A11CCD6000E8882 /* CalculationView.swift */; };
 		4882DCE82A11CCD7000E8882 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4882DCE72A11CCD7000E8882 /* Assets.xcassets */; };
@@ -58,6 +59,7 @@
 /* Begin PBXFileReference section */
 		4841E29D2A144DF70074CC0B /* ContentViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentViewModel.swift; sourceTree = "<group>"; };
 		4841E29F2A145CBB0074CC0B /* Tippy.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = Tippy.xctestplan; sourceTree = "<group>"; };
+		4876A6732A8B5ABC009D8D93 /* Localizable.strings */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; path = Localizable.strings; sourceTree = "<group>"; };
 		4882DCE02A11CCD6000E8882 /* Tippy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Tippy.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4882DCE32A11CCD6000E8882 /* TippyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TippyApp.swift; sourceTree = "<group>"; };
 		4882DCE52A11CCD6000E8882 /* CalculationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalculationView.swift; sourceTree = "<group>"; };
@@ -122,6 +124,7 @@
 		4882DCD72A11CCD6000E8882 = {
 			isa = PBXGroup;
 			children = (
+				4876A6732A8B5ABC009D8D93 /* Localizable.strings */,
 				48DE4E2B2A36E20200BB3E98 /* SavedTip+CoreDataClass.swift */,
 				48DE4E2C2A36E20200BB3E98 /* SavedTip+CoreDataProperties.swift */,
 				4841E29F2A145CBB0074CC0B /* Tippy.xctestplan */,
@@ -362,6 +365,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				48D6251E2A1C673C00825A66 /* LaunchScreen.storyboard in Resources */,
+				4876A6742A8B5ABC009D8D93 /* Localizable.strings in Resources */,
 				4882DCEB2A11CCD7000E8882 /* Preview Assets.xcassets in Resources */,
 				4882DCE82A11CCD7000E8882 /* Assets.xcassets in Resources */,
 			);
