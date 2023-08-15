@@ -62,11 +62,9 @@ struct CalculationView: View {
                     HStack {
                         Text("Subtotal")
                         Spacer()
-                        if let billAmount = viewModel.billAmount {
-                            Text(billAmount, format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
-                        } else {
-                            Text(0, format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
-                        }
+                        let billAmount = viewModel.billAmount ?? 0
+                        Text(billAmount,
+                             format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
                     }
                     HStack {
                         Text("Tip")
