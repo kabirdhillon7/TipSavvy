@@ -11,30 +11,35 @@ struct SavedView: View {
     @EnvironmentObject var dataManager: DataManager
     
     var body: some View {
+        let savedTipsLocalizedString = NSLocalizedString("saved_tips", comment: "Saved Tips Navigation Title")
+        
         NavigationStack {
             if dataManager.savedTips.isEmpty {
-                Text("No Saved Tips")
-                    .accessibilityLabel("No Saved Tips")
-                    .navigationTitle("Saved Tips")
+                let noSavedTipsLocalizedString = NSLocalizedString("no_saved_tips", comment: "No Saved Tips")
+                Text(noSavedTipsLocalizedString)
+                    .accessibilityLabel(noSavedTipsLocalizedString)
+                    .navigationTitle(savedTipsLocalizedString)
             } else {
                 List() {
                     ForEach(dataManager.savedTips) { tip in
                         DisclosureGroup() {
                             SavedDetailView(tip: tip)
                         } label: {
+                            let savedTipAccessibilityHint = NSLocalizedString("saved_tip_accessibilityHint", comment: "Saved Tip Name accessibilityHint")
                             Text(tip.name ?? "")
                                 .accessibilityLabel(tip.name ?? "")
-                                .accessibilityHint("Select to get details")
+                                .accessibilityHint(savedTipAccessibilityHint)
                         }
                     }.onDelete { indexSet in
                         deleteTips(at: indexSet)
                     }
                 }
                 .toolbar {
+                    let editLocalizedString = NSLocalizedString("edit", comment: "Edit")
                     EditButton()
-                        .accessibilityLabel("Edit")
+                        .accessibilityLabel(editLocalizedString)
                 }
-                .navigationTitle("Saved Tips")
+                .navigationTitle(savedTipsLocalizedString)
             }
         }
     }

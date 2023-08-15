@@ -29,3 +29,9 @@
 "tip_percentage_accessibilityHint" = "Slide to select the desired tip percentage";
 "total_per_person" = "Total Per Person";
 "total_with_tip" = "Total With Tip";
+
+// MARK: SavedView
+"edit" = "Edit";
+"no_saved_tips" = "No Saved Tips";
+"saved_tips" = "Saved Tips";
+"saved_tip_accessibilityHint" = "Select to get details";
