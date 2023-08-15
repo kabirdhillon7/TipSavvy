@@ -123,7 +123,8 @@ struct CalculationView: View {
     
     func loadUserDefaults() {
         let defaults = UserDefaults.standard
-        viewModel.billAmount = defaults.double(forKey: "billAmount")
+        
+        viewModel.billAmount = defaults.getBillAmount()
         viewModel.tipPercentage = defaults.double(forKey: "tipPercentage")
         viewModel.numberOfPeople = defaults.integer(forKey: "numberOfPeople")
     }
@@ -153,5 +154,17 @@ extension View {
     func hideKeyboard() {
         let resign = #selector(UIResponder.resignFirstResponder)
         UIApplication.shared.sendAction(resign, to: nil, from: nil, for: nil)
+    }
+}
+
+extension UserDefaults {
+    enum DefaultTypes: String {
+        case billAmount
+        case tipPercentage
+        case numberOfPeople
+    }
+    
+    func getBillAmount() -> Double {
+        return UserDefaults.standard.double(forKey: DefaultTypes.billAmount.rawValue)
     }
 }
