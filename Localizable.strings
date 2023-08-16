@@ -35,3 +35,8 @@
 "no_saved_tips" = "No Saved Tips";
 "saved_tips" = "Saved Tips";
 "saved_tip_accessibilityHint" = "Select to get details";
+
+// MARK: SavedDetailView
+"date" = "Date";
+"tip_amount" = "Tip Amount";
+"total_bill_with_tip" = "Total Bill With Tip";

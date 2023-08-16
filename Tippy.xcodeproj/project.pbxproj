@@ -40,20 +40,6 @@
 			remoteGlobalIDString = 4882DCDF2A11CCD6000E8882;
 			remoteInfo = Tippy;
 		};
-		48CDC7072A1EA93E000EFCB1 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 4882DCD82A11CCD6000E8882 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 4882DCDF2A11CCD6000E8882;
-			remoteInfo = Tippy;
-		};
-		48CDC7182A1ECBAC000EFCB1 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 4882DCD82A11CCD6000E8882 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 4882DCDF2A11CCD6000E8882;
-			remoteInfo = Tippy;
-		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
@@ -71,8 +57,6 @@
 		4882DCFE2A11CCD8000E8882 /* TippyUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TippyUITests.swift; sourceTree = "<group>"; };
 		4882DD002A11CCD8000E8882 /* TippyUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TippyUITestsLaunchTests.swift; sourceTree = "<group>"; };
 		48BA30132A3281A500FAFC1C /* SavedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedView.swift; sourceTree = "<group>"; };
-		48CDC7012A1EA93E000EFCB1 /* Screenshots.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Screenshots.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		48CDC7122A1ECBAC000EFCB1 /* TippyScreenshots.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TippyScreenshots.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		48D6251D2A1C673C00825A66 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		48D6251F2A1C689200825A66 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		48DE4E292A36E17B00BB3E98 /* SavedTip.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = SavedTip.xcdatamodel; sourceTree = "<group>"; };
@@ -104,20 +88,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		48CDC6FE2A1EA93E000EFCB1 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		48CDC70F2A1ECBAC000EFCB1 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -141,8 +111,6 @@
 				4882DCE02A11CCD6000E8882 /* Tippy.app */,
 				4882DCF02A11CCD8000E8882 /* TippyTests.xctest */,
 				4882DCFA2A11CCD8000E8882 /* TippyUITests.xctest */,
-				48CDC7012A1EA93E000EFCB1 /* Screenshots.xctest */,
-				48CDC7122A1ECBAC000EFCB1 /* TippyScreenshots.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -270,42 +238,6 @@
 			productReference = 4882DCFA2A11CCD8000E8882 /* TippyUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
-		48CDC7002A1EA93E000EFCB1 /* Screenshots */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 48CDC70B2A1EA93E000EFCB1 /* Build configuration list for PBXNativeTarget "Screenshots" */;
-			buildPhases = (
-				48CDC6FD2A1EA93E000EFCB1 /* Sources */,
-				48CDC6FE2A1EA93E000EFCB1 /* Frameworks */,
-				48CDC6FF2A1EA93E000EFCB1 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				48CDC7082A1EA93E000EFCB1 /* PBXTargetDependency */,
-			);
-			name = Screenshots;
-			productName = Screenshots;
-			productReference = 48CDC7012A1EA93E000EFCB1 /* Screenshots.xctest */;
-			productType = "com.apple.product-type.bundle.ui-testing";
-		};
-		48CDC7112A1ECBAC000EFCB1 /* TippyScreenshots */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 48CDC71C2A1ECBAC000EFCB1 /* Build configuration list for PBXNativeTarget "TippyScreenshots" */;
-			buildPhases = (
-				48CDC70E2A1ECBAC000EFCB1 /* Sources */,
-				48CDC70F2A1ECBAC000EFCB1 /* Frameworks */,
-				48CDC7102A1ECBAC000EFCB1 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				48CDC7192A1ECBAC000EFCB1 /* PBXTargetDependency */,
-			);
-			name = TippyScreenshots;
-			productName = TippyScreenshots;
-			productReference = 48CDC7122A1ECBAC000EFCB1 /* TippyScreenshots.xctest */;
-			productType = "com.apple.product-type.bundle.ui-testing";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -327,14 +259,6 @@
 						CreatedOnToolsVersion = 14.3;
 						TestTargetID = 4882DCDF2A11CCD6000E8882;
 					};
-					48CDC7002A1EA93E000EFCB1 = {
-						CreatedOnToolsVersion = 14.3;
-						TestTargetID = 4882DCDF2A11CCD6000E8882;
-					};
-					48CDC7112A1ECBAC000EFCB1 = {
-						CreatedOnToolsVersion = 14.3;
-						TestTargetID = 4882DCDF2A11CCD6000E8882;
-					};
 				};
 			};
 			buildConfigurationList = 4882DCDB2A11CCD6000E8882 /* Build configuration list for PBXProject "Tippy" */;
@@ -353,8 +277,6 @@
 				4882DCDF2A11CCD6000E8882 /* Tippy */,
 				4882DCEF2A11CCD8000E8882 /* TippyTests */,
 				4882DCF92A11CCD8000E8882 /* TippyUITests */,
-				48CDC7002A1EA93E000EFCB1 /* Screenshots */,
-				48CDC7112A1ECBAC000EFCB1 /* TippyScreenshots */,
 			);
 		};
 /* End PBXProject section */
@@ -379,20 +301,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		4882DCF82A11CCD8000E8882 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		48CDC6FF2A1EA93E000EFCB1 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		48CDC7102A1ECBAC000EFCB1 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -435,20 +343,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		48CDC6FD2A1EA93E000EFCB1 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		48CDC70E2A1ECBAC000EFCB1 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -461,16 +355,6 @@
 			isa = PBXTargetDependency;
 			target = 4882DCDF2A11CCD6000E8882 /* Tippy */;
 			targetProxy = 4882DCFB2A11CCD8000E8882 /* PBXContainerItemProxy */;
-		};
-		48CDC7082A1EA93E000EFCB1 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 4882DCDF2A11CCD6000E8882 /* Tippy */;
-			targetProxy = 48CDC7072A1EA93E000EFCB1 /* PBXContainerItemProxy */;
-		};
-		48CDC7192A1ECBAC000EFCB1 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 4882DCDF2A11CCD6000E8882 /* Tippy */;
-			targetProxy = 48CDC7182A1ECBAC000EFCB1 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -735,78 +619,6 @@
 			};
 			name = Release;
 		};
-		48CDC7092A1EA93E000EFCB1 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = SBCRL8SBBK;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = kabir.Screenshots;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = Tippy;
-			};
-			name = Debug;
-		};
-		48CDC70A2A1EA93E000EFCB1 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = SBCRL8SBBK;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = kabir.Screenshots;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = Tippy;
-			};
-			name = Release;
-		};
-		48CDC71A2A1ECBAC000EFCB1 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = SBCRL8SBBK;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = kabir.TippyScreenshots;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = Tippy;
-			};
-			name = Debug;
-		};
-		48CDC71B2A1ECBAC000EFCB1 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = SBCRL8SBBK;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = kabir.TippyScreenshots;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = Tippy;
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -842,24 +654,6 @@
 			buildConfigurations = (
 				4882DD0B2A11CCD8000E8882 /* Debug */,
 				4882DD0C2A11CCD8000E8882 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		48CDC70B2A1EA93E000EFCB1 /* Build configuration list for PBXNativeTarget "Screenshots" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				48CDC7092A1EA93E000EFCB1 /* Debug */,
-				48CDC70A2A1EA93E000EFCB1 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		48CDC71C2A1ECBAC000EFCB1 /* Build configuration list for PBXNativeTarget "TippyScreenshots" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				48CDC71A2A1ECBAC000EFCB1 /* Debug */,
-				48CDC71B2A1ECBAC000EFCB1 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
