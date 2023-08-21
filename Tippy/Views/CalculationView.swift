@@ -118,10 +118,6 @@ struct CalculationView: View {
                     .frame(maxWidth: .infinity, alignment: .center)
                     .foregroundColor(.red)
                     .accessibilityLabel(resetLocalizedString)
-                    
-                    Button("Crash") {
-                      fatalError("Crash was triggered")
-                    }
                 }
             }
             .navigationTitle("TipSavvy")
