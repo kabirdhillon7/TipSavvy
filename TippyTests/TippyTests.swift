@@ -6,6 +6,8 @@
 //
 
 import XCTest
+import FirebaseCore
+
 @testable import Tippy
 
 final class TippyTests: XCTestCase {
