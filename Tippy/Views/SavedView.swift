@@ -11,35 +11,29 @@ struct SavedView: View {
     @EnvironmentObject var dataManager: DataManager
     
     var body: some View {
-        let savedTipsLocalizedString = NSLocalizedString("saved_tips", comment: "Saved Tips Navigation Title")
-        
         NavigationStack {
             if dataManager.savedTips.isEmpty {
-                let noSavedTipsLocalizedString = NSLocalizedString("no_saved_tips", comment: "No Saved Tips")
-                Text(noSavedTipsLocalizedString)
-                    .accessibilityLabel(noSavedTipsLocalizedString)
-                    .navigationTitle(savedTipsLocalizedString)
+                Text(String(localized: "No Saved Tips"))
+                    .accessibilityLabel(String(localized: "No Saved Tips"))
+                    .navigationTitle(String(localized: "Saved Tips"))
             } else {
                 List() {
                     ForEach(dataManager.savedTips) { tip in
                         DisclosureGroup() {
                             SavedDetailView(tip: tip)
                         } label: {
-                            let savedTipAccessibilityHint = NSLocalizedString("saved_tip_accessibilityHint", comment: "Saved Tip Name accessibilityHint")
                             Text(tip.name ?? "")
                                 .accessibilityLabel(tip.name ?? "")
-                                .accessibilityHint(savedTipAccessibilityHint)
                         }
                     }.onDelete { indexSet in
                         deleteTips(at: indexSet)
                     }
                 }
                 .toolbar {
-                    let editLocalizedString = NSLocalizedString("edit", comment: "Edit")
                     EditButton()
-                        .accessibilityLabel(editLocalizedString)
+                        .accessibilityLabel(String(localized: "Edit"))
                 }
-                .navigationTitle(savedTipsLocalizedString)
+                .navigationTitle(String(localized: "Saved Tips"))
             }
         }
     }

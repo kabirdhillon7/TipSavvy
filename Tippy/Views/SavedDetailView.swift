@@ -20,62 +20,55 @@ struct SavedDetailView: View {
     
     var body: some View {
         VStack(alignment: .leading) {
-            let dateLocalizedString = NSLocalizedString("date", comment: "Date accessibilityLabel")
             if let date = tip.date {
                 Text(date, format: dateFormatMMDDYYYY)
-                    .accessibilityLabel("\(dateLocalizedString): \(date, format: dateFormatMMDDYYYY)")
+                    .accessibilityLabel("\(date, format: dateFormatMMDDYYYY)")
             }
             HStack {
-                let billAmountLocalizedString = NSLocalizedString("bill_amount", comment: "Bill Amount")
-                Text("\(billAmountLocalizedString):")
+                Text(String(localized: "Bill Amount") + ":")
                     .bold()
-                    .accessibilityLabel(billAmountLocalizedString)
+                    .accessibilityLabel(String(localized: "Bill Amount"))
                 Spacer()
                 Text(tip.billAmount, format: .currency(code: localCurrency))
                     .accessibilityLabel("\(tip.billAmount, format: .currency(code: localCurrency))")
             }
             HStack {
-                let tipPercentageLocalizedString = NSLocalizedString("tip_percentage", comment: "Tip Percentage")
-                Text("\(tipPercentageLocalizedString):")
+                Text(String(localized: "Tip Percentage") + ":")
                     .bold()
-                    .accessibilityLabel(tipPercentageLocalizedString)
+                    .accessibilityLabel(String(localized: "Tip Percentage"))
                 Spacer()
                 Text("\(Int(tip.tipPercentage))%")
                     .accessibilityLabel("\(Int(tip.tipPercentage))%")
             }
 
             HStack {
-                let numberOfPeopleLocalizedString = NSLocalizedString("number_of_people", comment: "Number of People")
-                Text("\(numberOfPeopleLocalizedString):")
+                Text(String(localized: "Number of People") + ":")
                     .bold()
-                    .accessibilityLabel(numberOfPeopleLocalizedString)
+                    .accessibilityLabel(String(localized: "Number of People"))
                 Spacer()
                 Text("\(tip.numberOfPeople)")
                     .accessibilityLabel("\(tip.numberOfPeople)")
             }
             HStack {
-                let tipAmountLocalizedString = NSLocalizedString("tip_amount", comment: "Tip Amount")
-                Text("\(tipAmountLocalizedString):")
+                Text(String(localized: "Tip Amount") + ":")
                     .bold()
-                    .accessibilityLabel(tipAmountLocalizedString)
+                    .accessibilityLabel(String(localized: "Tip Amount"))
                 Spacer()
                 Text(tip.tipAmount, format: .currency(code: localCurrency))
                     .accessibilityLabel("\(tip.tipAmount, format: .currency(code: localCurrency))")
             }
             HStack {
-                let totalBillWithTipLocalizedString = NSLocalizedString("total_bill_with_tip", comment: "Total Bill With Tip")
-                Text("\(totalBillWithTipLocalizedString):")
+                Text(String(localized: "Total Bill With Tip") + ":")
                     .bold()
-                    .accessibilityLabel(totalBillWithTipLocalizedString)
+                    .accessibilityLabel(String(localized: "Total Bill With Tip"))
                 Spacer()
                 Text(tip.totalAmountWithTip, format: .currency(code: localCurrency))
                     .accessibilityLabel("\(tip.totalAmountWithTip, format: .currency(code: localCurrency))")
             }
             HStack {
-                let totalPerPersonLocalizedString = NSLocalizedString("total_per_person", comment: "Total Per Person")
-                Text("\(totalPerPersonLocalizedString):")
+                Text(String(localized: "Total Per Person") + ":")
                     .bold()
-                    .accessibilityLabel(totalPerPersonLocalizedString)
+                    .accessibilityLabel(String(localized: "Total Per Person"))
                 Spacer()
                 Text(tip.totalPerPerson, format: .currency(code: localCurrency))
                     .accessibilityLabel("\(tip.totalPerPerson, format: .currency(code: localCurrency))")

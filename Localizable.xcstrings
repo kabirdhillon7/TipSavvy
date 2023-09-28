@@ -1,0 +1,111 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "%.0f%%" : {
+
+    },
+    "%@" : {
+
+    },
+    "%lld" : {
+
+    },
+    "%lld%%" : {
+
+    },
+    "Bill Amount" : {
+
+    },
+    "Bill Information" : {
+
+    },
+    "Bill Totals" : {
+
+    },
+    "Calculate" : {
+
+    },
+    "Calculate tip amounts" : {
+
+    },
+    "Cancel" : {
+
+    },
+    "Edit" : {
+
+    },
+    "Enter Bil Amount" : {
+
+    },
+    "Enter Bill Amount" : {
+
+    },
+    "Enter Name" : {
+
+    },
+    "Enter Tip Calculation Name" : {
+
+    },
+    "No Saved Tips" : {
+
+    },
+    "Number of People" : {
+
+    },
+    "OK" : {
+
+    },
+    "Okay" : {
+
+    },
+    "Reset" : {
+
+    },
+    "Save Tip Calculation" : {
+
+    },
+    "Saved" : {
+
+    },
+    "Saved Tips" : {
+
+    },
+    "Saves the Tip Calculation" : {
+
+    },
+    "Selects the Tip Percentage" : {
+
+    },
+    "Subtotal" : {
+
+    },
+    "Tip" : {
+
+    },
+    "Tip Amount" : {
+
+    },
+    "Tip Percentage" : {
+
+    },
+    "Tip Percentage Select" : {
+
+    },
+    "TipSavvy" : {
+
+    },
+    "Total Bill With Tip" : {
+
+    },
+    "Total Per Person" : {
+
+    },
+    "Total With Tip" : {
+
+    },
+    "View and manage saved tip calculations" : {
+
+    }
+  },
+  "version" : "1.0"
+}

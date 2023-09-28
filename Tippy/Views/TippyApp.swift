@@ -26,19 +26,17 @@ struct TippyApp: App {
             TabView {
                 CalculationView()
                     .tabItem {
-                        let calculateLocalizedString = NSLocalizedString("calculate_tab", comment: "Calculate Tab Name")
-                        Label(calculateLocalizedString, systemImage: "percent")
-                            .accessibilityLabel("Calculate")
-                            .accessibilityHint("Calculate tip amounts")
+                        Label(String(localized: "Calculate"), systemImage: "percent")
+                            .accessibilityLabel(String(localized: "Calculate"))
+                            .accessibilityHint(String(localized: "Calculate tip amounts"))
                     }
                     .environmentObject(manager)
                 
                 SavedView()
                     .tabItem {
-                        let savedLocalizaedString = NSLocalizedString("saved_tab", comment: "Saved Tab Name")
-                        Label(savedLocalizaedString, systemImage: "bookmark")
-                            .accessibilityLabel("Saved")
-                            .accessibilityHint("View and manage saved tip calculations")
+                        Label(String(localized: "Saved"), systemImage: "bookmark")
+                            .accessibilityLabel(String(localized: "Saved"))
+                            .accessibilityHint(String(localized: "View and manage saved tip calculations"))
                     }
                     .environmentObject(manager)
             }

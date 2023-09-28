@@ -20,15 +20,10 @@ struct CalculationView: View {
     
     var body: some View {
         NavigationStack {
-            let saveTipCalcLocalizedString = NSLocalizedString("save_tip_calculation", comment: "Save Tip Calculation")
-            
             Form {
-                // Bill Information from User
-                let billInformationLocalizedString = NSLocalizedString("bill_information", comment: "Bill Information Header")
+                // MARK: Bill Information
                 Section {
-                    let enterBillAmountLocalizedString = NSLocalizedString("enter_bill_amount", comment: "Enter Bill Amount Title")
-                    let billAmountLocalizedString = NSLocalizedString("bill_amount", comment: "Bill Amount accessibilityLabel")
-                    TextField(enterBillAmountLocalizedString,
+                    TextField(String(localized: "Enter Bil Amount"),
                               value: $viewModel.billAmount,
                               format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
                     .keyboardType(.decimalPad)
@@ -36,111 +31,98 @@ struct CalculationView: View {
                     .onTapGesture {
                         hideKeyboard()
                     }
-                    .accessibilityLabel(billAmountLocalizedString)
+                    .accessibilityLabel(String(localized: "Enter Bill Amount"))
                     
-                    let numberOfPeopleLocalizedString = NSLocalizedString("number_of_people", comment: "Number of People")
-                    TextField(numberOfPeopleLocalizedString, value: $viewModel.numberOfPeople, format: .number)
+                    TextField(String(localized: "Number of People"),
+                              value: $viewModel.numberOfPeople,
+                              format: .number)
                         .keyboardType(.decimalPad)
                         .focused($numberOfPeopleIsFocused)
                         .onTapGesture {
                             hideKeyboard()
                         }
-                        .accessibilityLabel(numberOfPeopleLocalizedString)
+                        .accessibilityLabel(String(localized: "Number of People"))
                 } header: {
-                    Text(billInformationLocalizedString)
+                    Text(String(localized: "Bill Information"))
                 }
                 
-                // Selecting the Tip Percentage
-                let selectTipAmountLocalizedString = NSLocalizedString("select_tip_amount", comment: "Select Tip Amount Header")
+                // MARK: Tip Percentage Slider
                 Section {
                     HStack {
-                        let tipPercentageLocalizedString = NSLocalizedString("tip_percentage", comment: "Tip Percentage accessibilityLabel")
-                        let tipPercentageAccessibilityHint = NSLocalizedString("tip_percentage_accessibilityHint", comment: "Tip Percentage accessibilityHint")
                         Slider(value: $viewModel.tipPercentage, in: 0...30, step: 1)
-                            .accessibilityLabel(tipPercentageLocalizedString)
-                            .accessibilityHint(tipPercentageAccessibilityHint)
+                            .accessibilityLabel(String(localized: "Tip Percentage Select"))
+                            .accessibilityHint(String(localized: "Selects the Tip Percentage"))
                         Text("\(viewModel.tipPercentage, specifier: "%.0f")%")
-                            .fixedSize(horizontal: true, vertical: false)
+                            .frame(width: 40, alignment: .trailing)
                     }
                 } header: {
-                    Text(selectTipAmountLocalizedString)
+                    Text(String(localized: "Tip Amount"))
                 }
                 
-                // Final Totals
-                let billTotalsLocalizedString = NSLocalizedString("bill_totals", comment: "Bill Totals")
+                // MARK: Final Totals
                 Section {
                     HStack {
-                        let subtotalLocalizedString = NSLocalizedString("subtotal", comment: "Subtotal")
-                        Text(subtotalLocalizedString)
+                        Text(String(localized: "Subtotal"))
                         Spacer()
                         let billAmount = viewModel.billAmount ?? 0
                         Text(billAmount,
                              format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
                     }
                     HStack {
-                        let tipLocalizedString = NSLocalizedString("tip", comment: "Tip")
-                        Text(tipLocalizedString)
+                        Text(String(localized: "Tip"))
                         Spacer()
                         Text(viewModel.tipAmount,
                              format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
                     }
                     HStack {
-                        let totalWithTipLocalizedString = NSLocalizedString("total_with_tip", comment: "Total With Tip")
-                        Text(totalWithTipLocalizedString)
+                        Text(String(localized: "Total With Tip"))
                         Spacer()
                         Text(viewModel.totalAmountWithTip,
                              format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
                     }
                     HStack {
-                        let totalPerPersonLocalizedString = NSLocalizedString("total_per_person", comment: "Total Per Person")
-                        Text(totalPerPersonLocalizedString)
+                        Text(String(localized: "Total Per Person"))
                         Spacer()
                         Text(viewModel.totalPerPerson, format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
                     }
                 } header: {
-                    Text(billTotalsLocalizedString)
+                    Text(String(localized: "Bill Totals"))
                 }
                 
                 Section {
-//                    let saveTipCalcLocalizedString = NSLocalizedString("save_tip_calculation", comment: "Save Tip Calculation")
-                    let saveTipCalcAccessibilityHintLocalizedString = NSLocalizedString("save_tip_calculation_accessibilityHint", comment: "Save Tip Calculation accessibilityHint")
-                    Button(saveTipCalcLocalizedString) {
+                    Button(String(localized: "Save Tip Calculation")) {
                         showingSavedAlert = true
                     }
                     .frame(maxWidth: .infinity, alignment: .center)
-                    .accessibilityLabel(saveTipCalcLocalizedString)
-                    .accessibilityHint(saveTipCalcAccessibilityHintLocalizedString)
+                    .accessibilityLabel(String(localized: "Save Tip Calculation"))
+                    .accessibilityHint(String(localized: "Saves the Tip Calculation"))
                     
-                    let resetLocalizedString = NSLocalizedString("reset", comment: "Reset")
-                    Button(resetLocalizedString) {
+                    Button(String(localized: "Reset")) {
                         viewModel.resetValues()
                     }
                     .frame(maxWidth: .infinity, alignment: .center)
                     .foregroundColor(.red)
-                    .accessibilityLabel(resetLocalizedString)
+                    .accessibilityLabel(String(localized: "Reset"))
                 }
             }
             .navigationTitle("TipSavvy")
-            .alert(saveTipCalcLocalizedString, isPresented: $showingSavedAlert,  actions: {
-                let enterNameLocalizedString = NSLocalizedString("enter_name", comment: "Enter Name")
-                TextField(enterNameLocalizedString, text: $viewModel.tipItemName)
-                    .accessibilityLabel("Enter Tip Calculation Name")
+            .alert(String(localized: "Save Tip Calculation"), isPresented: $showingSavedAlert,  actions: {
+                TextField(String(localized: "Enter Name"), text: $viewModel.tipItemName)
+                    .accessibilityLabel(String(localized: "Enter Tip Calculation Name"))
                 
-                let okLocalizedString = NSLocalizedString("ok", comment: "OK Title")
-                Button(okLocalizedString, role: nil) {
+                Button(String(localized: "OK"), role: nil) {
                     saveTipInfo()
                     
                     DispatchQueue.main.async {
                         viewModel.resetValues()
                     }
                 }
-                .accessibilityLabel(okLocalizedString)
+                .accessibilityLabel(String(localized: "Okay"))
                 
-                let cancelLocalizedString = NSLocalizedString("cancel", comment: "Cancel Title")
-                Button(cancelLocalizedString, role: .cancel) {
+                Button(String(localized: "Cancel"), role: .cancel) {
                     viewModel.tipItemName = ""
                 }
-                .accessibilityLabel(cancelLocalizedString)
+                .accessibilityLabel(String(localized: "Cancel"))
             })
         }
     }
