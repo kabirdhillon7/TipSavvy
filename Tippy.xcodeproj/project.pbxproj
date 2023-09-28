@@ -48,6 +48,7 @@
 /* Begin PBXFileReference section */
 		483809EF2AC54E0B00A9D486 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		483809F92AC55A9E00A9D486 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "../../../../Downloads/GoogleService-Info.plist"; sourceTree = "<group>"; };
+		483809FB2AC55BF600A9D486 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		4841E29D2A144DF70074CC0B /* ContentViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentViewModel.swift; sourceTree = "<group>"; };
 		4841E29F2A145CBB0074CC0B /* Tippy.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = Tippy.xctestplan; sourceTree = "<group>"; };
 		4882DCE02A11CCD6000E8882 /* Tippy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Tippy.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -111,6 +112,7 @@
 				48DE4E2B2A36E20200BB3E98 /* SavedTip+CoreDataClass.swift */,
 				48DE4E2C2A36E20200BB3E98 /* SavedTip+CoreDataProperties.swift */,
 				4841E29F2A145CBB0074CC0B /* Tippy.xctestplan */,
+				483809FB2AC55BF600A9D486 /* GoogleService-Info.plist */,
 				4882DCE22A11CCD6000E8882 /* Tippy */,
 				4882DCF32A11CCD8000E8882 /* TippyTests */,
 				4882DCFD2A11CCD8000E8882 /* TippyUITests */,
