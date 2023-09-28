@@ -11,6 +11,8 @@
 		480875052A933EB80036A3C4 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 480875042A933EB80036A3C4 /* FirebaseCrashlytics */; };
 		483809F02AC54E0B00A9D486 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 483809EF2AC54E0B00A9D486 /* Localizable.xcstrings */; };
 		483809FD2AC55CF300A9D486 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 483809FC2AC55CF300A9D486 /* GoogleService-Info.plist */; };
+		483809FE2AC55FC800A9D486 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 483809FC2AC55CF300A9D486 /* GoogleService-Info.plist */; };
+		483809FF2AC55FC800A9D486 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 483809FC2AC55CF300A9D486 /* GoogleService-Info.plist */; };
 		4841E29E2A144DF70074CC0B /* ContentViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4841E29D2A144DF70074CC0B /* ContentViewModel.swift */; };
 		4882DCE42A11CCD6000E8882 /* TippyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4882DCE32A11CCD6000E8882 /* TippyApp.swift */; };
 		4882DCE62A11CCD6000E8882 /* CalculationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4882DCE52A11CCD6000E8882 /* CalculationView.swift */; };
@@ -323,6 +325,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				483809FE2AC55FC800A9D486 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -330,6 +333,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				483809FF2AC55FC800A9D486 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
