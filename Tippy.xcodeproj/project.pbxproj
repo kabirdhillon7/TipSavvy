@@ -107,11 +107,11 @@
 		4882DCD72A11CCD6000E8882 = {
 			isa = PBXGroup;
 			children = (
+				4841E29F2A145CBB0074CC0B /* Tippy.xctestplan */,
+				48380A022AC5624100A9D486 /* GoogleService-Info.plist */,
 				483809EF2AC54E0B00A9D486 /* Localizable.xcstrings */,
 				48DE4E2B2A36E20200BB3E98 /* SavedTip+CoreDataClass.swift */,
 				48DE4E2C2A36E20200BB3E98 /* SavedTip+CoreDataProperties.swift */,
-				4841E29F2A145CBB0074CC0B /* Tippy.xctestplan */,
-				48380A022AC5624100A9D486 /* GoogleService-Info.plist */,
 				4882DCE22A11CCD6000E8882 /* Tippy */,
 				4882DCF32A11CCD8000E8882 /* TippyTests */,
 				4882DCFD2A11CCD8000E8882 /* TippyUITests */,
