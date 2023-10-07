@@ -23,7 +23,7 @@ struct CalculationView: View {
             Form {
                 // MARK: Bill Information
                 Section {
-                    TextField(String(localized: "Enter Bil Amount"),
+                    TextField(String(localized: "Enter Bill Amount"),
                               value: $viewModel.billAmount,
                               format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
                     .keyboardType(.decimalPad)
