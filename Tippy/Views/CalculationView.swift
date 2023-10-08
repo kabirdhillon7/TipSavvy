@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+/// A view that calculates a tip calculation.
 struct CalculationView: View {
     @EnvironmentObject var dataManager: DataManager
     

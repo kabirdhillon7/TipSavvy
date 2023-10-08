@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+/// A view that displays the details of a saved tip calculation.
 struct SavedDetailView: View {
     private var tip: SavedTip
     

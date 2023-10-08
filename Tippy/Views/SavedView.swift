@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+/// A view that displays a list of saved tip calculations, or a message indicating that there are no saved tip calculations.
 struct SavedView: View {
     @EnvironmentObject var dataManager: DataManager
     
@@ -46,6 +47,7 @@ struct SavedView: View {
         }
     }
     
+    /// Deletes a saved tip calculation.
     func deleteTips(at offsets: IndexSet) {
         // First, delete the selected tips from Core Data
         let context = dataManager.container.viewContext

@@ -8,7 +8,8 @@
 import Foundation
 import Combine
 
-final class CalculationViewModel: ObservableObject  {    
+/// A view model responsible for managing bill information and calculating tip information.
+final class CalculationViewModel: ObservableObject  {
     @Published var billAmount: Double?
     @Published var tipPercentage = 0.0
     @Published var numberOfPeople: Int?
@@ -45,6 +46,7 @@ final class CalculationViewModel: ObservableObject  {
         return 0
     }
     
+    /// Resets the tip calculation values.
     func resetValues() {
         billAmount = nil
         tipPercentage = 0
