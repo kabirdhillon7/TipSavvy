@@ -50,7 +50,7 @@ struct CalculationView: View {
                 Section {
                     HStack {
                         Slider(value: $viewModel.tipPercentage, in: 0...30, step: 1)
-                            .accessibilityLabel(String(localized: "Tip Percentage Select"))
+                            .accessibilityLabel(String(localized: "Tip Percentage Selection"))
                             .accessibilityHint(String(localized: "Selects the Tip Percentage"))
                         Text("\(viewModel.tipPercentage, specifier: "%.0f")%")
                             .frame(width: 40, alignment: .trailing)
