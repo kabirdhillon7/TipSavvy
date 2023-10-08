@@ -12,10 +12,6 @@ struct CalculationView: View {
     
     @StateObject var viewModel = ContentViewModel()
     
-    @FocusState private var amountIsFocused: Bool
-    @FocusState private var numberOfPeopleIsFocused: Bool
-    @FocusState private var nameIsFocused: Bool
-    
     @State private var showingSavedAlert = false
     
     var body: some View {
@@ -27,7 +23,6 @@ struct CalculationView: View {
                               value: $viewModel.billAmount,
                               format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
                     .keyboardType(.decimalPad)
-                    .focused($amountIsFocused)
                     .onTapGesture {
                         hideKeyboard()
                     }
@@ -37,7 +32,6 @@ struct CalculationView: View {
                               value: $viewModel.numberOfPeople,
                               format: .number)
                         .keyboardType(.decimalPad)
-                        .focused($numberOfPeopleIsFocused)
                         .onTapGesture {
                             hideKeyboard()
                         }
@@ -93,14 +87,12 @@ struct CalculationView: View {
                     Button(String(localized: "Save Tip Calculation")) {
                         showingSavedAlert = true
                     }
-                    .frame(maxWidth: .infinity, alignment: .center)
                     .accessibilityLabel(String(localized: "Save Tip Calculation"))
                     .accessibilityHint(String(localized: "Saves the Tip Calculation"))
                     
                     Button(String(localized: "Reset")) {
                         viewModel.resetValues()
                     }
-                    .frame(maxWidth: .infinity, alignment: .center)
                     .foregroundColor(.red)
                     .accessibilityLabel(String(localized: "Reset"))
                 }
@@ -127,6 +119,7 @@ struct CalculationView: View {
         }
     }
     
+    /// Loads the user defaults for the bill amount, tip percentage, and number of people.
     func loadUserDefaults() {
         let defaults = UserDefaults.standard
         
@@ -135,6 +128,7 @@ struct CalculationView: View {
         viewModel.numberOfPeople = defaults.integer(forKey: "numberOfPeople")
     }
     
+    /// Saves the tip information to the data manager.
     func saveTipInfo() {
         guard let billAmount = viewModel.billAmount, let numberOfPeople = viewModel.numberOfPeople  else {
             return
@@ -157,6 +151,7 @@ struct ContentView_Previews: PreviewProvider {
 }
 
 extension View {
+    /// Dismisses the keyboard if it is currently displaying.
     func hideKeyboard() {
         let resign = #selector(UIResponder.resignFirstResponder)
         UIApplication.shared.sendAction(resign, to: nil, from: nil, for: nil)
@@ -170,6 +165,7 @@ extension UserDefaults {
         case numberOfPeople
     }
     
+    /// Returns the bill amount stored in user defaults.
     func getBillAmount() -> Double {
         return UserDefaults.standard.double(forKey: DefaultTypes.billAmount.rawValue)
     }
