@@ -13,7 +13,15 @@ struct SavedView: View {
     var body: some View {
         NavigationStack {
             if dataManager.savedTips.isEmpty {
+                Image(systemName: "percent")
+                    .fontWeight(.medium)
+                    .font(.system(size: 50))
+                    .foregroundColor(Color(UIColor.lightGray))
+                Spacer()
+                    .frame(height: 5)
                 Text(String(localized: "No Saved Tips"))
+                    .fontWeight(.medium)
+                    .foregroundStyle(Color(UIColor.lightGray))
                     .accessibilityLabel(String(localized: "No Saved Tips"))
                     .navigationTitle(String(localized: "Saved Tips"))
             } else {
