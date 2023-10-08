@@ -40,7 +40,7 @@ struct CalculationView: View {
                     Text(String(localized: "Bill Information"))
                 }
                 
-                // MARK: Tip Percentage Slider
+                // MARK: Tip Amount: Percentage Slider
                 Section {
                     HStack {
                         Slider(value: $viewModel.tipPercentage, in: 0...30, step: 1)
@@ -53,7 +53,7 @@ struct CalculationView: View {
                     Text(String(localized: "Tip Amount"))
                 }
                 
-                // MARK: Final Totals
+                // MARK: Bill Totals
                 Section {
                     HStack {
                         Text(String(localized: "Subtotal"))
