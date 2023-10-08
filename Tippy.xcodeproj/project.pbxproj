@@ -11,7 +11,7 @@
 		480875052A933EB80036A3C4 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 480875042A933EB80036A3C4 /* FirebaseCrashlytics */; };
 		483809F02AC54E0B00A9D486 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 483809EF2AC54E0B00A9D486 /* Localizable.xcstrings */; };
 		48380A032AC5624100A9D486 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 48380A022AC5624100A9D486 /* GoogleService-Info.plist */; };
-		4841E29E2A144DF70074CC0B /* ContentViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4841E29D2A144DF70074CC0B /* ContentViewModel.swift */; };
+		4841E29E2A144DF70074CC0B /* CalculationViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4841E29D2A144DF70074CC0B /* CalculationViewModel.swift */; };
 		4882DCE42A11CCD6000E8882 /* TippyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4882DCE32A11CCD6000E8882 /* TippyApp.swift */; };
 		4882DCE62A11CCD6000E8882 /* CalculationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4882DCE52A11CCD6000E8882 /* CalculationView.swift */; };
 		4882DCE82A11CCD7000E8882 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4882DCE72A11CCD7000E8882 /* Assets.xcassets */; };
@@ -48,7 +48,7 @@
 /* Begin PBXFileReference section */
 		483809EF2AC54E0B00A9D486 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		48380A022AC5624100A9D486 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
-		4841E29D2A144DF70074CC0B /* ContentViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentViewModel.swift; sourceTree = "<group>"; };
+		4841E29D2A144DF70074CC0B /* CalculationViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalculationViewModel.swift; sourceTree = "<group>"; };
 		4841E29F2A145CBB0074CC0B /* Tippy.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = Tippy.xctestplan; sourceTree = "<group>"; };
 		4882DCE02A11CCD6000E8882 /* Tippy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Tippy.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4882DCE32A11CCD6000E8882 /* TippyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TippyApp.swift; sourceTree = "<group>"; };
@@ -192,7 +192,7 @@
 		48DE4E352A3834A200BB3E98 /* View Models */ = {
 			isa = PBXGroup;
 			children = (
-				4841E29D2A144DF70074CC0B /* ContentViewModel.swift */,
+				4841E29D2A144DF70074CC0B /* CalculationViewModel.swift */,
 			);
 			path = "View Models";
 			sourceTree = "<group>";
@@ -375,7 +375,7 @@
 				4882DCE42A11CCD6000E8882 /* TippyApp.swift in Sources */,
 				48DE4E2E2A36E20200BB3E98 /* SavedTip+CoreDataProperties.swift in Sources */,
 				48DE4E2D2A36E20200BB3E98 /* SavedTip+CoreDataClass.swift in Sources */,
-				4841E29E2A144DF70074CC0B /* ContentViewModel.swift in Sources */,
+				4841E29E2A144DF70074CC0B /* CalculationViewModel.swift in Sources */,
 				48DE4E3D2A38426B00BB3E98 /* SavedDetailView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

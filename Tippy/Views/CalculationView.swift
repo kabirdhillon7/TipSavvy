@@ -10,7 +10,7 @@ import SwiftUI
 struct CalculationView: View {
     @EnvironmentObject var dataManager: DataManager
     
-    @StateObject var viewModel = ContentViewModel()
+    @StateObject var viewModel = CalculationViewModel()
     
     @State private var showingSavedAlert = false
     
@@ -146,7 +146,7 @@ struct CalculationView: View {
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         CalculationView()
-            .environmentObject(ContentViewModel())
+            .environmentObject(CalculationViewModel())
     }
 }
 

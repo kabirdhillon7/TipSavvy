@@ -8,7 +8,7 @@
 import Foundation
 import Combine
 
-class ContentViewModel: ObservableObject  {    
+final class CalculationViewModel: ObservableObject  {    
     @Published var billAmount: Double?
     @Published var tipPercentage = 0.0
     @Published var numberOfPeople: Int?

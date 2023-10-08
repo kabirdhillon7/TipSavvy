@@ -32,7 +32,7 @@ final class TippyTests: XCTestCase {
     
     // Regular Use
     func test_totalAmountWithTip_shouldBeTrue() {
-        let viewModel = ContentViewModel()
+        let viewModel = CalculationViewModel()
         
         viewModel.billAmount = 25.00
         viewModel.tipPercentage = 15
@@ -43,7 +43,7 @@ final class TippyTests: XCTestCase {
     }
     
     func test_billAmount_shouldAcceptLargeValue() {
-        let viewModel = ContentViewModel()
+        let viewModel = CalculationViewModel()
         
         viewModel.billAmount = 1_000_000_000_000_000
         viewModel.tipPercentage = 20
@@ -56,7 +56,7 @@ final class TippyTests: XCTestCase {
     
     // Large Bill Amount
     func test_totalPerPerson_shouldBeTrue() {
-        let viewModel = ContentViewModel()
+        let viewModel = CalculationViewModel()
         
         viewModel.billAmount = 129.99
         viewModel.tipPercentage = 20
@@ -70,7 +70,7 @@ final class TippyTests: XCTestCase {
     
     // Max People Split
     func test_totalPerPerson_shouldBeZero() {
-        let viewModel = ContentViewModel()
+        let viewModel = CalculationViewModel()
         
         viewModel.billAmount = 0
         viewModel.tipPercentage = 0
@@ -83,7 +83,7 @@ final class TippyTests: XCTestCase {
     
     // Check for 0 bill total, but multiple people
     func test_totalPerPerson_shouldReturnTrueForZeroBillAmount() {
-        let viewModel = ContentViewModel()
+        let viewModel = CalculationViewModel()
         
         viewModel.billAmount = 0
         viewModel.numberOfPeople = 10
@@ -96,7 +96,7 @@ final class TippyTests: XCTestCase {
 
     // Min Tip
     func test_tipPercentage_shouldAcceptMinimum() {
-        let viewModel = ContentViewModel()
+        let viewModel = CalculationViewModel()
         
         viewModel.tipPercentage = 0
         viewModel.billAmount = 100
@@ -108,7 +108,7 @@ final class TippyTests: XCTestCase {
     
     // Max Tip
     func test_tipPercentage_shouldAcceptMaximum() {
-        let viewModel = ContentViewModel()
+        let viewModel = CalculationViewModel()
         
         viewModel.tipPercentage = 25
         viewModel.billAmount = 100
@@ -120,7 +120,7 @@ final class TippyTests: XCTestCase {
     
     // Zero Bill Amount
     func test_totalAmountWithTip_shouldBeZero() {
-        let viewModel = ContentViewModel()
+        let viewModel = CalculationViewModel()
         
         viewModel.billAmount = 0
         viewModel.tipPercentage = 0
@@ -132,7 +132,7 @@ final class TippyTests: XCTestCase {
     
     // Min People Split
     func test_numberOfPeople_shouldAcceptMin() {
-        let viewModel = ContentViewModel()
+        let viewModel = CalculationViewModel()
         
         viewModel.numberOfPeople = 2
         viewModel.billAmount = 6
@@ -145,7 +145,7 @@ final class TippyTests: XCTestCase {
     
     // tip amount
     func test_tipAmount_shouldBeEqual() {
-        let viewModel = ContentViewModel()
+        let viewModel = CalculationViewModel()
         
         viewModel.billAmount = 100
         viewModel.tipPercentage = 15
@@ -157,7 +157,7 @@ final class TippyTests: XCTestCase {
     
     func test_tipAmount_shouldBeEqualForNilBillAmount() {
         // Arrange
-        let viewModel = ContentViewModel()
+        let viewModel = CalculationViewModel()
         viewModel.billAmount = nil
         viewModel.tipPercentage = 15
         
@@ -171,7 +171,7 @@ final class TippyTests: XCTestCase {
 
     
     func test_tipItemName_shouldBeEmptyString() {
-        let viewModel = ContentViewModel()
+        let viewModel = CalculationViewModel()
                 
         viewModel.tipItemName = ""
         
@@ -179,7 +179,7 @@ final class TippyTests: XCTestCase {
     }
     
     func test_tipItemName_shouldBeEqual() {
-        let viewModel = ContentViewModel()
+        let viewModel = CalculationViewModel()
         
         viewModel.tipItemName = "Pizza"
         
@@ -187,7 +187,7 @@ final class TippyTests: XCTestCase {
     }
     
     func test_resetValues_shouldResetValues() {
-        let viewModel = ContentViewModel()
+        let viewModel = CalculationViewModel()
         
         viewModel.billAmount = 15.99
         viewModel.tipPercentage = 15
@@ -203,7 +203,7 @@ final class TippyTests: XCTestCase {
     }
     
     func test_resetValues_shouldReturnTrue() {
-        let viewModel = ContentViewModel()
+        let viewModel = CalculationViewModel()
                 
         viewModel.resetValues()
         
