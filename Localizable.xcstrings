@@ -8,12 +8,24 @@
             "state" : "translated",
             "value" : ""
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ""
+          }
         }
       }
     },
     "%@" : {
       "localizations" : {
         "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ""
+          }
+        },
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : ""
@@ -28,12 +40,24 @@
             "state" : "translated",
             "value" : ""
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ""
+          }
         }
       }
     },
     "%lld%%" : {
       "localizations" : {
         "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ""
+          }
+        },
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : ""
@@ -48,6 +72,12 @@
             "state" : "translated",
             "value" : "Importe de la factura"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Montant de la facture"
+          }
         }
       }
     },
@@ -57,6 +87,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Información de la factura"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Informations sur le projet de loi"
           }
         }
       }
@@ -68,6 +104,12 @@
             "state" : "translated",
             "value" : "Totales de facturas"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Total des factures"
+          }
         }
       }
     },
@@ -77,6 +119,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Calcular"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Calculer"
           }
         }
       }
@@ -88,6 +136,12 @@
             "state" : "translated",
             "value" : "Calcular las cantidades de propinas"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Calculer les montants des pourboires"
+          }
         }
       }
     },
@@ -97,6 +151,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cancelar"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Annuler"
           }
         }
       }
@@ -108,6 +168,12 @@
             "state" : "translated",
             "value" : "Editar"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Éditer"
+          }
         }
       }
     },
@@ -117,6 +183,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Introduzca el importe de la factura"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entrez le montant de la facture"
           }
         }
       }
@@ -128,6 +200,12 @@
             "state" : "translated",
             "value" : "Introduzca el nombre"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entrez le nom"
+          }
         }
       }
     },
@@ -137,6 +215,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Introduzca el nombre del cálculo de la propina"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entrez le nom du calcul du pourboire"
           }
         }
       }
@@ -148,6 +232,12 @@
             "state" : "translated",
             "value" : "Sin consejos guardados"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun pourboire enregistré"
+          }
         }
       }
     },
@@ -157,6 +247,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Número de personas"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nombre de personnes"
           }
         }
       }
@@ -168,6 +264,12 @@
             "state" : "translated",
             "value" : "Bien"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "D'accord"
+          }
         }
       }
     },
@@ -177,6 +279,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bien"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "D'accord"
           }
         }
       }
@@ -188,6 +296,12 @@
             "state" : "translated",
             "value" : "Reajustar"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Réinitialiser"
+          }
         }
       }
     },
@@ -197,6 +311,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Guardar cálculo de propinas"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sauvegarder le calcul du pourboire"
           }
         }
       }
@@ -208,6 +328,12 @@
             "state" : "translated",
             "value" : "Guardado"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sauvé"
+          }
         }
       }
     },
@@ -217,6 +343,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Consejos guardados"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conseils sauvegardés"
           }
         }
       }
@@ -228,6 +360,12 @@
             "state" : "translated",
             "value" : "Guarda el cálculo de la propina"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sauvegarde le calcul du pourboire"
+          }
         }
       }
     },
@@ -237,6 +375,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Selecciona el porcentaje de propina"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sélectionne le pourcentage de pourboire"
           }
         }
       }
@@ -248,6 +392,12 @@
             "state" : "translated",
             "value" : "El subtotal"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sous-total"
+          }
         }
       }
     },
@@ -257,6 +407,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "La propina"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conseil"
           }
         }
       }
@@ -268,6 +424,12 @@
             "state" : "translated",
             "value" : "Cantidad de la propina"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Montant du pourboire"
+          }
         }
       }
     },
@@ -277,6 +439,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Porcentaje de propinas"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pourcentage de pourboire"
           }
         }
       }
@@ -288,12 +456,24 @@
             "state" : "translated",
             "value" : "Selección del porcentaje de propinas"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sélection du pourcentage de pourboire"
+          }
         }
       }
     },
     "TipSavvy" : {
       "localizations" : {
         "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ""
+          }
+        },
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : ""
@@ -308,6 +488,12 @@
             "state" : "translated",
             "value" : "Factura total con propina"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Facture totale avec pourboire"
+          }
         }
       }
     },
@@ -317,6 +503,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Total por persona"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Total par personne"
           }
         }
       }
@@ -328,6 +520,12 @@
             "state" : "translated",
             "value" : "Total con propina"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Total avec pourboire"
+          }
         }
       }
     },
@@ -337,6 +535,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ver y administrar los cálculos de propinas guardados"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Afficher et gérer les calculs de pourboires enregistrés"
           }
         }
       }
