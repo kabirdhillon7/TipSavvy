@@ -117,6 +117,7 @@ struct CalculationView: View {
                 }
                 .accessibilityLabel(String(localized: "Cancel"))
             })
+            .scrollDismissesKeyboard(.immediately)
         }
     }
     
