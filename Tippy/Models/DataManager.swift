@@ -27,6 +27,7 @@ class DataManager: NSObject, ObservableObject {
         fetchSavedTips()
     }
     
+    /// Saves a new tip to Core Data.
     func saveTip(name: String, billAmount: Double, tipPercentage: Double, numberOfPeople: Int, tipAmount: Double, totalAmountWithTip: Double, totalPerPerson: Double) {
         let context = container.viewContext
         
@@ -48,6 +49,7 @@ class DataManager: NSObject, ObservableObject {
         }
     }
     
+    /// Fetches all saved tips from Core Data.
     private func fetchSavedTips() {
         let context = container.viewContext
         
