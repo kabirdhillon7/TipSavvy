@@ -110,7 +110,7 @@ struct CalculationView: View {
                         viewModel.resetValues()
                     }
                 }
-                .accessibilityLabel(String(localized: "Okay"))
+                .accessibilityLabel(String(localized: "OK"))
                 
                 Button(String(localized: "Cancel"), role: .cancel) {
                     viewModel.tipItemName = ""

@@ -274,6 +274,7 @@
       }
     },
     "Okay" : {
+      "extractionState" : "stale",
       "localizations" : {
         "es" : {
           "stringUnit" : {
