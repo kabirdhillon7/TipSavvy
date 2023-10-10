@@ -160,8 +160,8 @@
 			isa = PBXGroup;
 			children = (
 				4882DCF42A11CCD8000E8882 /* TippyTests.swift */,
-				48D9A58F2AD49AFE0044FC40 /* CalculationViewModelTests.swift */,
 				487284D62AD4D25F0059F872 /* DataManagerTests.swift */,
+				48D9A58F2AD49AFE0044FC40 /* CalculationViewModelTests.swift */,
 			);
 			path = TippyTests;
 			sourceTree = "<group>";

@@ -11,12 +11,12 @@ import SwiftUI
 struct SavedDetailView: View {
     private var tip: SavedTip
     
-    private var dateFormatMMDDYYYY = Date.FormatStyle.dateTime.month().day().year()
+    // MARK: Formatting
+    private let dateFormatMMDDYYYY = Date.FormatStyle.dateTime.month().day().year()
     private let localCurrency = Locale.current.currency?.identifier ?? "USD"
     
-    init(tip: SavedTip, dateFormatMMDDYYYY: Foundation.Date.FormatStyle = Date.FormatStyle.dateTime.month().day().year()) {
+    init(tip: SavedTip) {
         self.tip = tip
-        self.dateFormatMMDDYYYY = dateFormatMMDDYYYY
     }
     
     var body: some View {
