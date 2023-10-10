@@ -17,12 +17,18 @@ TipSavvy is a simple tip calculator iOS app built using [SwiftUI](https://develo
 - iPhone 8, iPhone SE (2nd Generation), or newer
 
 ## Demo
-### Current Version (3.0) Walkthrough
-<img src="https://github.com/kabirdhillon7/TipSavvy/assets/74223402/8924c5f6-4c5a-415d-a10a-02ffc502f78e" width=250><br>
+### Current Version (3.2) Walkthrough
+<img src="https://github.com/kabirdhillon7/TipSavvy/assets/74223402/6498f81c-2d44-450f-ac0e-a3f88c7c82b1" width=250><br>
 
 ### Previous Version Walkthroughs
 <details>
   <summary>Click to view</summary>
+
+  #### Version 3.0
+  <details>
+    <summary>Click to view</summary>
+      <img src="https://github.com/kabirdhillon7/TipSavvy/assets/74223402/8924c5f6-4c5a-415d-a10a-02ffc502f78e" width=250><br>
+  </details>
   
   #### Version 2.2
   <details>
@@ -47,6 +53,7 @@ TipSavvy is a simple tip calculator iOS app built using [SwiftUI](https://develo
 This app uses the following dependencies:
 
 - [CoreData](https://developer.apple.com/documentation/coredata)
+- [Crashlytics](https://github.com/firebase/firebase-ios-sdk)
 
 ## Contact
 
