@@ -25,7 +25,6 @@ final class DataManagerTests: XCTestCase {
     func test_saveTip_shouldBeTrue() {
         dataManager.saveTip(name: "Test Tip", billAmount: 100.0, tipPercentage: 0.15, numberOfPeople: 2, tipAmount: 15.0, totalAmountWithTip: 115.0, totalPerPerson: 57.5)
         
-        // Add assertions to verify the correctness of the saveTip method.
         XCTAssertEqual(dataManager.savedTips.last?.name, "Test Tip")
     }
 }
