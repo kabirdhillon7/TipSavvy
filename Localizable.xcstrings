@@ -273,23 +273,6 @@
         }
       }
     },
-    "Okay" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bien"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "D'accord"
-          }
-        }
-      }
-    },
     "Reset" : {
       "localizations" : {
         "es" : {
