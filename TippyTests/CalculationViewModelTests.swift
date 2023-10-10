@@ -18,6 +18,7 @@ final class CalculationViewModelTests: XCTestCase {
     }
     
     override func tearDown() {
+        calculationViewModel = nil
         super.tearDown()
     }
 
@@ -67,7 +68,7 @@ final class CalculationViewModelTests: XCTestCase {
         XCTAssertTrue(totalPerPerson == 0)
     }
     
-    func testTotalPerPerson_withInvalidTotal() {
+    func test_TotalPerPerson_withInvalidTotal() {
         calculationViewModel.billAmount = 100
         calculationViewModel.tipPercentage = 15
         calculationViewModel.numberOfPeople = 0
@@ -77,7 +78,7 @@ final class CalculationViewModelTests: XCTestCase {
         XCTAssertEqual(totalPerPerson, 0)
     }
     
-    func testTotalPerPerson_withNaNTotal() {
+    func test_TotalPerPerson_withNaNTotal() {
         calculationViewModel.billAmount = Double.nan
         calculationViewModel.tipPercentage = 15
         calculationViewModel.numberOfPeople = 2
@@ -87,7 +88,7 @@ final class CalculationViewModelTests: XCTestCase {
         XCTAssertEqual(totalPerPerson, 0)
     }
     
-    func testTotalPerPerson_withInfiniteTotal() {
+    func test_TotalPerPerson_withInfiniteTotal() {
         calculationViewModel.billAmount = Double.infinity
         calculationViewModel.tipPercentage = 15
         calculationViewModel.numberOfPeople = 2

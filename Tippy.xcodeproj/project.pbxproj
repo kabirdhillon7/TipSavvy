@@ -12,6 +12,7 @@
 		483809F02AC54E0B00A9D486 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 483809EF2AC54E0B00A9D486 /* Localizable.xcstrings */; };
 		48380A032AC5624100A9D486 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 48380A022AC5624100A9D486 /* GoogleService-Info.plist */; };
 		4841E29E2A144DF70074CC0B /* CalculationViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4841E29D2A144DF70074CC0B /* CalculationViewModel.swift */; };
+		487284D72AD4D25F0059F872 /* DataManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 487284D62AD4D25F0059F872 /* DataManagerTests.swift */; };
 		4882DCE42A11CCD6000E8882 /* TippyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4882DCE32A11CCD6000E8882 /* TippyApp.swift */; };
 		4882DCE62A11CCD6000E8882 /* CalculationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4882DCE52A11CCD6000E8882 /* CalculationView.swift */; };
 		4882DCE82A11CCD7000E8882 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4882DCE72A11CCD7000E8882 /* Assets.xcassets */; };
@@ -51,6 +52,7 @@
 		48380A022AC5624100A9D486 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		4841E29D2A144DF70074CC0B /* CalculationViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalculationViewModel.swift; sourceTree = "<group>"; };
 		4841E29F2A145CBB0074CC0B /* Tippy.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = Tippy.xctestplan; sourceTree = "<group>"; };
+		487284D62AD4D25F0059F872 /* DataManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataManagerTests.swift; sourceTree = "<group>"; };
 		4882DCE02A11CCD6000E8882 /* Tippy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Tippy.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4882DCE32A11CCD6000E8882 /* TippyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TippyApp.swift; sourceTree = "<group>"; };
 		4882DCE52A11CCD6000E8882 /* CalculationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalculationView.swift; sourceTree = "<group>"; };
@@ -159,6 +161,7 @@
 			children = (
 				4882DCF42A11CCD8000E8882 /* TippyTests.swift */,
 				48D9A58F2AD49AFE0044FC40 /* CalculationViewModelTests.swift */,
+				487284D62AD4D25F0059F872 /* DataManagerTests.swift */,
 			);
 			path = TippyTests;
 			sourceTree = "<group>";
@@ -388,6 +391,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				48D9A5902AD49AFE0044FC40 /* CalculationViewModelTests.swift in Sources */,
+				487284D72AD4D25F0059F872 /* DataManagerTests.swift in Sources */,
 				4882DCF52A11CCD8000E8882 /* TippyTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
