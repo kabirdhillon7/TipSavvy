@@ -3,6 +3,12 @@
   "strings" : {
     "%.0f%%" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ""
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -19,6 +25,12 @@
     },
     "%@" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ""
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -35,6 +47,12 @@
     },
     "%lld" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ""
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -51,6 +69,12 @@
     },
     "%lld%%" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ""
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -67,6 +91,12 @@
     },
     "Bill Amount" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rechnungsbetrag"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -83,6 +113,12 @@
     },
     "Bill Information" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Informationen zur Rechnung"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -99,6 +135,12 @@
     },
     "Bill Totals" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rechnungsbeträge"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -115,6 +157,12 @@
     },
     "Calculate" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Berechnen Sie"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -131,6 +179,12 @@
     },
     "Calculate tip amounts" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Berechnung der Trinkgeldbeträge"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -147,6 +201,12 @@
     },
     "Cancel" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abbrechen"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -163,6 +223,12 @@
     },
     "Edit" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "bearbeiten"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -179,6 +245,12 @@
     },
     "Enter Bill Amount" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rechnungsbetrag eingeben"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -195,6 +267,12 @@
     },
     "Enter Name" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Name eingeben"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -211,6 +289,12 @@
     },
     "Enter Tip Calculation Name" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Name der Trinkgeldberechnung eingeben"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -227,6 +311,12 @@
     },
     "No Saved Tips" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine gespeicherten Tipps"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -243,6 +333,12 @@
     },
     "Number of People" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anzahl der Personen"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -259,6 +355,12 @@
     },
     "OK" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "okay"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -275,6 +377,12 @@
     },
     "Reset" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zurücksetzen"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -291,6 +399,12 @@
     },
     "Save Tip Calculation" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trinkgeldberechnung speichern"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -307,6 +421,12 @@
     },
     "Saved" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gerettet"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -323,6 +443,12 @@
     },
     "Saved Tips" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gespeicherte Tipps"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -339,6 +465,12 @@
     },
     "Saves the Tip Calculation" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Speichert die Trinkgeldberechnung"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -355,6 +487,12 @@
     },
     "Selects the Tip Percentage" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wählt den Prozentsatz des Trinkgeldes"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -371,6 +509,12 @@
     },
     "Subtotal" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zwischensumme"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -387,6 +531,12 @@
     },
     "Tip" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tipp"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -403,6 +553,12 @@
     },
     "Tip Amount" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tipp-Betrag"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -419,6 +575,12 @@
     },
     "Tip Percentage" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tipp Prozentsatz"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -435,6 +597,12 @@
     },
     "Tip Percentage Selection" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auswahl des Tipp-Prozentsatzes"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -451,6 +619,12 @@
     },
     "TipSavvy" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ""
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -467,6 +641,12 @@
     },
     "Total Bill With Tip" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gesamtrechnung mit Trinkgeld"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -483,6 +663,12 @@
     },
     "Total Per Person" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gesamt pro Person"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -499,6 +685,12 @@
     },
     "Total With Tip" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gesamt mit Trinkgeld"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -515,6 +707,12 @@
     },
     "View and manage saved tip calculations" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gespeicherte Trinkgeldberechnungen anzeigen und verwalten"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
