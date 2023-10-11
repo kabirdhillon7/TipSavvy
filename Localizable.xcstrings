@@ -20,6 +20,12 @@
             "state" : "translated",
             "value" : ""
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ""
+          }
         }
       }
     },
@@ -38,6 +44,12 @@
           }
         },
         "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ""
+          }
+        },
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : ""
@@ -64,6 +76,12 @@
             "state" : "translated",
             "value" : ""
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ""
+          }
         }
       }
     },
@@ -82,6 +100,12 @@
           }
         },
         "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ""
+          }
+        },
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : ""
@@ -108,6 +132,12 @@
             "state" : "translated",
             "value" : "Montant de la facture"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rekening Bedrag"
+          }
         }
       }
     },
@@ -129,6 +159,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Informations sur le projet de loi"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rekeninginformatie"
           }
         }
       }
@@ -152,6 +188,12 @@
             "state" : "translated",
             "value" : "Total des factures"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Totaal rekeningen"
+          }
         }
       }
     },
@@ -173,6 +215,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Calculer"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bereken"
           }
         }
       }
@@ -196,6 +244,12 @@
             "state" : "translated",
             "value" : "Calculer les montants des pourboires"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fooi berekenen"
+          }
         }
       }
     },
@@ -217,6 +271,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Annuler"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Annuleren"
           }
         }
       }
@@ -240,6 +300,12 @@
             "state" : "translated",
             "value" : "Éditer"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bewerk"
+          }
         }
       }
     },
@@ -261,6 +327,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Entrez le montant de la facture"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rekeningbedrag invoeren"
           }
         }
       }
@@ -284,6 +356,12 @@
             "state" : "translated",
             "value" : "Entrez le nom"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Naam invoeren"
+          }
         }
       }
     },
@@ -305,6 +383,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Entrez le nom du calcul du pourboire"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voer de naam van de tipberekening in"
           }
         }
       }
@@ -328,6 +412,12 @@
             "state" : "translated",
             "value" : "Aucun pourboire enregistré"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geen opgeslagen tips"
+          }
         }
       }
     },
@@ -349,6 +439,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nombre de personnes"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aantal mensen"
           }
         }
       }
@@ -372,6 +468,12 @@
             "state" : "translated",
             "value" : "D'accord"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oké"
+          }
         }
       }
     },
@@ -393,6 +495,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Réinitialiser"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "opnieuw instellen"
           }
         }
       }
@@ -416,6 +524,12 @@
             "state" : "translated",
             "value" : "Sauvegarder le calcul du pourboire"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tipberekening opslaan"
+          }
         }
       }
     },
@@ -437,6 +551,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sauvé"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opgeslagen"
           }
         }
       }
@@ -460,6 +580,12 @@
             "state" : "translated",
             "value" : "Conseils sauvegardés"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opgeslagen tips"
+          }
         }
       }
     },
@@ -481,6 +607,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sauvegarde le calcul du pourboire"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bespaart de fooiberekening"
           }
         }
       }
@@ -504,6 +636,12 @@
             "state" : "translated",
             "value" : "Sélectionne le pourcentage de pourboire"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selecteert het fooipercentage"
+          }
         }
       }
     },
@@ -525,6 +663,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sous-total"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Subtotaal"
           }
         }
       }
@@ -548,6 +692,12 @@
             "state" : "translated",
             "value" : "Conseil"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tip"
+          }
         }
       }
     },
@@ -569,6 +719,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Montant du pourboire"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tip Bedrag"
           }
         }
       }
@@ -592,6 +748,12 @@
             "state" : "translated",
             "value" : "Pourcentage de pourboire"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tippercentage"
+          }
         }
       }
     },
@@ -614,6 +776,12 @@
             "state" : "translated",
             "value" : "Sélection du pourcentage de pourboire"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tippercentageselectie"
+          }
         }
       }
     },
@@ -632,6 +800,12 @@
           }
         },
         "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ""
+          }
+        },
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : ""
@@ -658,6 +832,12 @@
             "state" : "translated",
             "value" : "Facture totale avec pourboire"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Totale rekening met fooi"
+          }
         }
       }
     },
@@ -679,6 +859,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Total par personne"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Totaal per persoon"
           }
         }
       }
@@ -702,6 +888,12 @@
             "state" : "translated",
             "value" : "Total avec pourboire"
           }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Totaal met fooi"
+          }
         }
       }
     },
@@ -723,6 +915,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Afficher et gérer les calculs de pourboires enregistrés"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bekijk en beheer opgeslagen fooiberekeningen"
           }
         }
       }
