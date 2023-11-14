@@ -21,6 +21,12 @@
             "value" : ""
           }
         },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ""
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
@@ -44,6 +50,12 @@
           }
         },
         "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ""
+          }
+        },
+        "it" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : ""
@@ -77,6 +89,12 @@
             "value" : ""
           }
         },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ""
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
@@ -100,6 +118,12 @@
           }
         },
         "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ""
+          }
+        },
+        "it" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : ""
@@ -133,6 +157,12 @@
             "value" : "Montant de la facture"
           }
         },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Importo della fattura"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
@@ -159,6 +189,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Informations sur le projet de loi"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Informazioni sulla fattura"
           }
         },
         "nl" : {
@@ -189,6 +225,12 @@
             "value" : "Total des factures"
           }
         },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Totali delle fatture"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
@@ -215,6 +257,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Calculer"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Calcolare"
           }
         },
         "nl" : {
@@ -245,6 +293,12 @@
             "value" : "Calculer les montants des pourboires"
           }
         },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Calcola gli importi delle mancia"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
@@ -271,6 +325,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Annuler"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Annulla"
           }
         },
         "nl" : {
@@ -301,6 +361,12 @@
             "value" : "Éditer"
           }
         },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Editare"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
@@ -327,6 +393,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Entrez le montant de la facture"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inserisci l'importo della fattura"
           }
         },
         "nl" : {
@@ -357,6 +429,12 @@
             "value" : "Entrez le nom"
           }
         },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inserisci nome"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
@@ -383,6 +461,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Entrez le nom du calcul du pourboire"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inserisci il nome del calcolo della punta"
           }
         },
         "nl" : {
@@ -413,6 +497,12 @@
             "value" : "Aucun pourboire enregistré"
           }
         },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nessun consiglio salvato"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
@@ -439,6 +529,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nombre de personnes"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Numero di persone"
           }
         },
         "nl" : {
@@ -469,6 +565,12 @@
             "value" : "D'accord"
           }
         },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Va bene"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
@@ -495,6 +597,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Réinitialiser"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resettare"
           }
         },
         "nl" : {
@@ -525,6 +633,12 @@
             "value" : "Sauvegarder le calcul du pourboire"
           }
         },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salva calcolo della punta"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
@@ -551,6 +665,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sauvé"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salvato"
           }
         },
         "nl" : {
@@ -581,6 +701,12 @@
             "value" : "Conseils sauvegardés"
           }
         },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suggerimenti salvati"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
@@ -607,6 +733,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sauvegarde le calcul du pourboire"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salva il calcolo della mancia"
           }
         },
         "nl" : {
@@ -637,6 +769,12 @@
             "value" : "Sélectionne le pourcentage de pourboire"
           }
         },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seleziona la percentuale di punta"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
@@ -663,6 +801,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sous-total"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Subtotale"
           }
         },
         "nl" : {
@@ -693,6 +837,12 @@
             "value" : "Conseil"
           }
         },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mancia"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
@@ -719,6 +869,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Montant du pourboire"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Importo della mancia"
           }
         },
         "nl" : {
@@ -749,6 +905,12 @@
             "value" : "Pourcentage de pourboire"
           }
         },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Percentuale di punta"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
@@ -777,6 +939,12 @@
             "value" : "Sélection du pourcentage de pourboire"
           }
         },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selezione percentuale punta"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
@@ -800,6 +968,12 @@
           }
         },
         "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ""
+          }
+        },
+        "it" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : ""
@@ -833,6 +1007,12 @@
             "value" : "Facture totale avec pourboire"
           }
         },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fattura totale con mancia"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
@@ -859,6 +1039,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Total par personne"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Totale per persona"
           }
         },
         "nl" : {
@@ -889,6 +1075,12 @@
             "value" : "Total avec pourboire"
           }
         },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Totale Con Mancia"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
@@ -915,6 +1107,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Afficher et gérer les calculs de pourboires enregistrés"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Visualizza e gestisci i calcoli delle mancia salvate"
           }
         },
         "nl" : {

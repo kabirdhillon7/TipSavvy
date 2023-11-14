@@ -300,6 +300,7 @@
 				fr,
 				de,
 				nl,
+				it,
 			);
 			mainGroup = 4882DCD72A11CCD6000E8882;
 			packageReferences = (
