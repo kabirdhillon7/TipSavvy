@@ -334,7 +334,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Berechnen Sie"
+            "value" : "Berechnen"
           }
         },
         "es" : {
@@ -472,7 +472,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "bearbeiten"
+            "value" : "Bearbeiten"
           }
         },
         "es" : {
@@ -656,7 +656,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Keine gespeicherten Tipps"
+            "value" : "Keine Gespeicherten Trinkgeld"
           }
         },
         "es" : {
@@ -748,7 +748,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "okay"
+            "value" : "Okay"
           }
         },
         "es" : {
@@ -840,7 +840,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Trinkgeldberechnung speichern"
+            "value" : "Speichern Trinkgeld ausrechnen"
           }
         },
         "es" : {
@@ -932,7 +932,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Gespeicherte Tipps"
+            "value" : "Speichern Trinkgeld"
           }
         },
         "es" : {
@@ -1116,7 +1116,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tipp"
+            "value" : "Trinkgeld"
           }
         },
         "es" : {
@@ -1140,7 +1140,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tip"
+            "value" : "Fooi"
           }
         },
         "pt-PT" : {
@@ -1162,7 +1162,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tipp-Betrag"
+            "value" : "Trinkgeldbetrag"
           }
         },
         "es" : {
@@ -1186,7 +1186,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tip Bedrag"
+            "value" : "Bedrag van de fooi"
           }
         },
         "pt-PT" : {
@@ -1208,7 +1208,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tipp Prozentsatz"
+            "value" : "Prozentsatz für das Trinkgeld"
           }
         },
         "es" : {
@@ -1232,7 +1232,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tippercentage"
+            "value" : "Percentage van de fooi "
           }
         },
         "pt-PT" : {
@@ -1254,7 +1254,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Auswahl des Tipp-Prozentsatzes"
+            "value" : "Selektionen für Prozentsatz für das Trinkgeld"
           }
         },
         "es" : {
@@ -1278,7 +1278,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tippercentageselectie"
+            "value" : "Selections for tip percentages"
           }
         },
         "pt-PT" : {
