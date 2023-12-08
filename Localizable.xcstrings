@@ -3,6 +3,12 @@
   "strings" : {
     "%.0f%%" : {
       "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ""
+          }
+        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -28,6 +34,12 @@
           }
         },
         "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ""
+          }
+        },
+        "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : ""
@@ -37,6 +49,12 @@
     },
     "%@" : {
       "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ""
+          }
+        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -62,6 +80,12 @@
           }
         },
         "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ""
+          }
+        },
+        "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : ""
@@ -71,6 +95,12 @@
     },
     "%lld" : {
       "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ""
+          }
+        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -96,6 +126,12 @@
           }
         },
         "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ""
+          }
+        },
+        "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : ""
@@ -105,6 +141,12 @@
     },
     "%lld%%" : {
       "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ""
+          }
+        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -134,11 +176,23 @@
             "state" : "translated",
             "value" : ""
           }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ""
+          }
         }
       }
     },
     "Bill Amount" : {
       "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مبلغ الفاتورة"
+          }
+        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -168,11 +222,23 @@
             "state" : "translated",
             "value" : "Rekening Bedrag"
           }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Valor da Conta"
+          }
         }
       }
     },
     "Bill Information" : {
       "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "معلومات الفاتورة"
+          }
+        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -202,11 +268,23 @@
             "state" : "translated",
             "value" : "Rekeninginformatie"
           }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Informações da conta"
+          }
         }
       }
     },
     "Bill Totals" : {
       "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مجاميع الفاتورة"
+          }
+        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -236,11 +314,23 @@
             "state" : "translated",
             "value" : "Totaal rekeningen"
           }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Totais da conta"
+          }
         }
       }
     },
     "Calculate" : {
       "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "حسب"
+          }
+        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -270,11 +360,23 @@
             "state" : "translated",
             "value" : "Bereken"
           }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Calcular"
+          }
         }
       }
     },
     "Calculate tip amounts" : {
       "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "احسب مبالغ البقشيش"
+          }
+        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -304,11 +406,23 @@
             "state" : "translated",
             "value" : "Fooi berekenen"
           }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Calcular valores de ponta"
+          }
         }
       }
     },
     "Cancel" : {
       "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ألغى"
+          }
+        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -338,11 +452,23 @@
             "state" : "translated",
             "value" : "Annuleren"
           }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancelar"
+          }
         }
       }
     },
     "Edit" : {
       "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "حرر"
+          }
+        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -372,11 +498,23 @@
             "state" : "translated",
             "value" : "Bewerk"
           }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Editar"
+          }
         }
       }
     },
     "Enter Bill Amount" : {
       "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أدخل مبلغ الفاتورة"
+          }
+        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -406,11 +544,23 @@
             "state" : "translated",
             "value" : "Rekeningbedrag invoeren"
           }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entrar Valor da Conta"
+          }
         }
       }
     },
     "Enter Name" : {
       "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أدخل الاسم"
+          }
+        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -440,11 +590,23 @@
             "state" : "translated",
             "value" : "Naam invoeren"
           }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Digite Nome"
+          }
         }
       }
     },
     "Enter Tip Calculation Name" : {
       "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أدخل اسم حساب البقشيش"
+          }
+        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -474,11 +636,23 @@
             "state" : "translated",
             "value" : "Voer de naam van de tipberekening in"
           }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Introduzir o nome do cálculo da gorjeta"
+          }
         }
       }
     },
     "No Saved Tips" : {
       "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لا توجد نصائح محفوظة"
+          }
+        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -508,11 +682,23 @@
             "state" : "translated",
             "value" : "Geen opgeslagen tips"
           }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sem Dicas Salvas"
+          }
         }
       }
     },
     "Number of People" : {
       "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "عدد الأشخاص"
+          }
+        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -542,11 +728,23 @@
             "state" : "translated",
             "value" : "Aantal mensen"
           }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Número de Pessoas"
+          }
         }
       }
     },
     "OK" : {
       "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "حسنا"
+          }
+        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -576,11 +774,23 @@
             "state" : "translated",
             "value" : "Oké"
           }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Está bem"
+          }
         }
       }
     },
     "Reset" : {
       "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "عَدَّلَ"
+          }
+        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -610,11 +820,23 @@
             "state" : "translated",
             "value" : "opnieuw instellen"
           }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Redefinir"
+          }
         }
       }
     },
     "Save Tip Calculation" : {
       "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "حفظ حساب البقشيش"
+          }
+        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -644,11 +866,23 @@
             "state" : "translated",
             "value" : "Tipberekening opslaan"
           }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salvar Cálculo da Dica"
+          }
         }
       }
     },
     "Saved" : {
       "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تم الحفظ"
+          }
+        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -678,11 +912,23 @@
             "state" : "translated",
             "value" : "Opgeslagen"
           }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salvo"
+          }
         }
       }
     },
     "Saved Tips" : {
       "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "البقشيش المحفوظ"
+          }
+        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -712,11 +958,23 @@
             "state" : "translated",
             "value" : "Opgeslagen tips"
           }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dicas Salvas"
+          }
         }
       }
     },
     "Saves the Tip Calculation" : {
       "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يحفظ حساب البقشيش"
+          }
+        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -746,11 +1004,23 @@
             "state" : "translated",
             "value" : "Bespaart de fooiberekening"
           }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salva o Cálculo da Dica"
+          }
         }
       }
     },
     "Selects the Tip Percentage" : {
       "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يحدد النسبة المئوية للبقشيش"
+          }
+        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -780,11 +1050,23 @@
             "state" : "translated",
             "value" : "Selecteert het fooipercentage"
           }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seleciona a Porcentagem de Dica"
+          }
         }
       }
     },
     "Subtotal" : {
       "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "حاصل الجمع"
+          }
+        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -814,11 +1096,23 @@
             "state" : "translated",
             "value" : "Subtotaal"
           }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Subtotais"
+          }
         }
       }
     },
     "Tip" : {
       "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "بقشيش "
+          }
+        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -848,11 +1142,23 @@
             "state" : "translated",
             "value" : "Tip"
           }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gorjeta"
+          }
         }
       }
     },
     "Tip Amount" : {
       "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مبلغ البقشيش"
+          }
+        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -882,11 +1188,23 @@
             "state" : "translated",
             "value" : "Tip Bedrag"
           }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Valor da gorjeta"
+          }
         }
       }
     },
     "Tip Percentage" : {
       "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "النسبة المئوية للبقشيش"
+          }
+        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -916,11 +1234,23 @@
             "state" : "translated",
             "value" : "Tippercentage"
           }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Percentagem de gorjeta"
+          }
         }
       }
     },
     "Tip Percentage Selection" : {
       "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اختيار النسبة المئوية للنصيحة"
+          }
+        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -950,11 +1280,23 @@
             "state" : "translated",
             "value" : "Tippercentageselectie"
           }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seleção da percentagem de gorjeta"
+          }
         }
       }
     },
     "TipSavvy" : {
       "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ""
+          }
+        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -984,11 +1326,23 @@
             "state" : "translated",
             "value" : ""
           }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ""
+          }
         }
       }
     },
     "Total Bill With Tip" : {
       "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إجمالي الفاتورة مع بقشيش"
+          }
+        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1018,11 +1372,23 @@
             "state" : "translated",
             "value" : "Totale rekening met fooi"
           }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Total da fatura com gorjeta"
+          }
         }
       }
     },
     "Total Per Person" : {
       "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "المجموع لكل شخص"
+          }
+        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1052,11 +1418,23 @@
             "state" : "translated",
             "value" : "Totaal per persoon"
           }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Total por pessoa"
+          }
         }
       }
     },
     "Total With Tip" : {
       "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "المجموع مع البقشيش"
+          }
+        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1086,11 +1464,23 @@
             "state" : "translated",
             "value" : "Totaal met fooi"
           }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Total com gorjeta"
+          }
         }
       }
     },
     "View and manage saved tip calculations" : {
       "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "عرض وإدارة حسابات البقشيش المحفوظة"
+          }
+        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1119,6 +1509,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bekijk en beheer opgeslagen fooiberekeningen"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Visualize e gerencie cálculos de dicas salvos"
           }
         }
       }
