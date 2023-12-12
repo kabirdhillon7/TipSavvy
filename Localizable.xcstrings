@@ -680,7 +680,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Geen opgeslagen tips"
+            "value" : "Geen opgeslagen fooi"
           }
         },
         "pt-PT" : {
@@ -818,7 +818,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "opnieuw instellen"
+            "value" : "Herstellen"
           }
         },
         "pt-PT" : {
@@ -864,7 +864,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tipberekening opslaan"
+            "value" : "Opslaan fooi berekening"
           }
         },
         "pt-PT" : {
@@ -956,7 +956,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Opgeslagen tips"
+            "value" : "Fooi bewaar"
           }
         },
         "pt-PT" : {
