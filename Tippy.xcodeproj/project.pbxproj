@@ -299,7 +299,6 @@
 				es,
 				fr,
 				de,
-				nl,
 				it,
 				ar,
 				"pt-PT",

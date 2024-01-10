@@ -33,12 +33,6 @@
             "value" : ""
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : ""
-          }
-        },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
@@ -74,12 +68,6 @@
           }
         },
         "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : ""
-          }
-        },
-        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : ""
@@ -125,12 +113,6 @@
             "value" : ""
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : ""
-          }
-        },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
@@ -166,12 +148,6 @@
           }
         },
         "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : ""
-          }
-        },
-        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : ""
@@ -217,12 +193,6 @@
             "value" : "Importo della fattura"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rekening Bedrag"
-          }
-        },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
@@ -261,12 +231,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Informazioni sulla fattura"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rekeninginformatie"
           }
         },
         "pt-PT" : {
@@ -309,12 +273,6 @@
             "value" : "Totali delle fatture"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Totaal rekeningen"
-          }
-        },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
@@ -353,12 +311,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Calcolare"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bereken"
           }
         },
         "pt-PT" : {
@@ -401,12 +353,6 @@
             "value" : "Calcola gli importi delle mancia"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fooi berekenen"
-          }
-        },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
@@ -445,12 +391,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Annulla"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Annuleren"
           }
         },
         "pt-PT" : {
@@ -493,12 +433,6 @@
             "value" : "Editare"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bewerk"
-          }
-        },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
@@ -537,12 +471,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Inserisci l'importo della fattura"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rekeningbedrag invoeren"
           }
         },
         "pt-PT" : {
@@ -585,12 +513,6 @@
             "value" : "Inserisci nome"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Naam invoeren"
-          }
-        },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
@@ -629,12 +551,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Inserisci il nome del calcolo della punta"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Voer de naam van de tipberekening in"
           }
         },
         "pt-PT" : {
@@ -677,12 +593,6 @@
             "value" : "Nessun consiglio salvato"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Geen opgeslagen fooi"
-          }
-        },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
@@ -721,12 +631,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Numero di persone"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aantal mensen"
           }
         },
         "pt-PT" : {
@@ -769,12 +673,6 @@
             "value" : "Va bene"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Oké"
-          }
-        },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
@@ -813,12 +711,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Resettare"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Herstellen"
           }
         },
         "pt-PT" : {
@@ -861,12 +753,6 @@
             "value" : "Salva calcolo della punta"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Opslaan fooi berekening"
-          }
-        },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
@@ -905,12 +791,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Salvato"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Opgeslagen"
           }
         },
         "pt-PT" : {
@@ -953,12 +833,6 @@
             "value" : "Suggerimenti salvati"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fooi bewaar"
-          }
-        },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
@@ -997,12 +871,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Salva il calcolo della mancia"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bespaart de fooiberekening"
           }
         },
         "pt-PT" : {
@@ -1045,12 +913,6 @@
             "value" : "Seleziona la percentuale di punta"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Selecteert het fooipercentage"
-          }
-        },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1089,12 +951,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Subtotale"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Subtotaal"
           }
         },
         "pt-PT" : {
@@ -1137,12 +993,6 @@
             "value" : "Mancia"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fooi"
-          }
-        },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1181,12 +1031,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Importo della mancia"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bedrag van de fooi"
           }
         },
         "pt-PT" : {
@@ -1229,12 +1073,7 @@
             "value" : "Percentuale di punta"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Percentage van de fooi "
-          }
-        },
+
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1275,12 +1114,6 @@
             "value" : "Selezione percentuale punta"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Selections for tip percentages"
-          }
-        },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1316,12 +1149,6 @@
           }
         },
         "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : ""
-          }
-        },
-        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : ""
@@ -1367,12 +1194,6 @@
             "value" : "Fattura totale con mancia"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Totale rekening met fooi"
-          }
-        },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1411,12 +1232,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Totale per persona"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Totaal per persoon"
           }
         },
         "pt-PT" : {
@@ -1459,12 +1274,6 @@
             "value" : "Totale Con Mancia"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Totaal met fooi"
-          }
-        },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1503,12 +1312,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Visualizza e gestisci i calcoli delle mancia salvate"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bekijk en beheer opgeslagen fooiberekeningen"
           }
         },
         "pt-PT" : {
