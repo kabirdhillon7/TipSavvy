@@ -286,7 +286,7 @@
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "حسب"
+            "value" : "احسب"
           }
         },
         "de" : {
@@ -326,7 +326,7 @@
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "احسب مبالغ البقشيش"
+            "value" : "احسب مبلغ البقشيش"
           }
         },
         "de" : {
@@ -366,7 +366,7 @@
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ألغى"
+            "value" : "إلغاء"
           }
         },
         "de" : {
@@ -406,7 +406,7 @@
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "حرر"
+            "value" : "تعديل"
           }
         },
         "de" : {
@@ -486,7 +486,7 @@
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "أدخل الاسم"
+            "value" : "حفظ باسم"
           }
         },
         "de" : {
@@ -566,7 +566,7 @@
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "لا توجد نصائح محفوظة"
+            "value" : "لا توجد محفوظات"
           }
         },
         "de" : {
@@ -646,7 +646,7 @@
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "حسنا"
+            "value" : "حسناً"
           }
         },
         "de" : {
@@ -686,7 +686,7 @@
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "عَدَّلَ"
+            "value" : "إعادة ضبط"
           }
         },
         "de" : {
@@ -726,7 +726,7 @@
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "حفظ حساب البقشيش"
+            "value" : "احفظ حساب البقشيش"
           }
         },
         "de" : {
@@ -766,7 +766,7 @@
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "تم الحفظ"
+            "value" : "المحفوظات"
           }
         },
         "de" : {
@@ -846,7 +846,7 @@
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "يحفظ حساب البقشيش"
+            "value" : "لحفظ حساب البقشيش"
           }
         },
         "de" : {
@@ -886,7 +886,7 @@
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "يحدد النسبة المئوية للبقشيش"
+            "value" : "لتحديد النسبة المئوية للبقشيش"
           }
         },
         "de" : {
@@ -926,7 +926,7 @@
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "حاصل الجمع"
+            "value" : "المجموع"
           }
         },
         "de" : {
@@ -1073,7 +1073,6 @@
             "value" : "Percentuale di punta"
           }
         },
-
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1087,7 +1086,7 @@
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "اختيار النسبة المئوية للنصيحة"
+            "value" : "اختيار النسبة المئوية للبقشيش"
           }
         },
         "de" : {
@@ -1167,7 +1166,7 @@
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "إجمالي الفاتورة مع بقشيش"
+            "value" : "إجمالي الفاتورة مع البقشيش"
           }
         },
         "de" : {
