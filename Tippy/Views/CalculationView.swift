@@ -14,6 +14,7 @@ struct CalculationView: View {
     @StateObject var viewModel = CalculationViewModel()
     
     @State private var showingSavedAlert = false
+    @FocusState var keyboardFocusField: TipSavvyKeyboardField?
     
     var body: some View {
         NavigationStack {
@@ -24,18 +25,14 @@ struct CalculationView: View {
                               value: $viewModel.billAmount,
                               format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
                     .keyboardType(.decimalPad)
-                    .onTapGesture {
-                        hideKeyboard()
-                    }
+                    .focused($keyboardFocusField, equals: .billAmount)
                     .accessibilityLabel(String(localized: "Enter Bill Amount"))
                     
                     TextField(String(localized: "Number of People"),
                               value: $viewModel.numberOfPeople,
                               format: .number)
                         .keyboardType(.decimalPad)
-                        .onTapGesture {
-                            hideKeyboard()
-                        }
+                        .focused($keyboardFocusField, equals: .numberOfPeople)
                         .accessibilityLabel(String(localized: "Number of People"))
                 } header: {
                     Text(String(localized: "Bill Information"))
@@ -117,6 +114,21 @@ struct CalculationView: View {
                 }
                 .accessibilityLabel(String(localized: "Cancel"))
             })
+            .toolbar {
+                // MARK: Keyboard
+                ToolbarItem(placement: .keyboard) {
+                    Spacer()
+                }
+                
+                ToolbarItem(placement: .keyboard) {
+                    Button {
+                        keyboardFocusField = nil
+                    } label: {
+                        Text("Done")
+                            .accessibilityLabel(String(localized: "Done"))
+                    }
+                }
+            }
             .scrollDismissesKeyboard(.immediately)
         }
     }
@@ -145,19 +157,9 @@ struct CalculationView: View {
     }
 }
 
-struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        CalculationView()
-            .environmentObject(CalculationViewModel())
-    }
-}
-
-extension View {
-    /// Dismisses the keyboard if it is currently displaying.
-    func hideKeyboard() {
-        let resign = #selector(UIResponder.resignFirstResponder)
-        UIApplication.shared.sendAction(resign, to: nil, from: nil, for: nil)
-    }
+#Preview {
+    CalculationView()
+        .environmentObject(CalculationViewModel())
 }
 
 extension UserDefaults {
