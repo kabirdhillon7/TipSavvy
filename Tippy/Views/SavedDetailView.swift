@@ -9,19 +9,21 @@ import SwiftUI
 
 /// A view that displays the details of a saved tip calculation.
 struct SavedDetailView: View {
-    private var tip: SavedTip
+    @StateObject var viewModel: SavedDetailViewModel
+    
+    init(tip: SavedTip) {
+        self._viewModel = StateObject(wrappedValue: SavedDetailViewModel(tip: tip))
+    }
     
     // MARK: Formatting
     private let dateFormatMMDDYYYY = Date.FormatStyle.dateTime.month().day().year()
     private let localCurrency = Locale.current.currency?.identifier ?? "USD"
     
-    init(tip: SavedTip) {
-        self.tip = tip
-    }
-    
     var body: some View {
         VStack(alignment: .leading) {
-            if let date = tip.date {
+            let tip = viewModel.tip
+            
+            if let date = viewModel.tip.date {
                 Text(date, format: dateFormatMMDDYYYY)
                     .accessibilityLabel("\(date, format: dateFormatMMDDYYYY)")
             }

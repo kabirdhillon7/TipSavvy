@@ -401,6 +401,9 @@
         }
       }
     },
+    "Done" : {
+
+    },
     "Edit" : {
       "localizations" : {
         "ar" : {
@@ -1073,7 +1076,6 @@
             "value" : "Percentuale di punta"
           }
         },
-
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",

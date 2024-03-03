@@ -54,3 +54,7 @@ final class CalculationViewModel: ObservableObject  {
         tipItemName = ""
     }
 }
+
+enum TipSavvyKeyboardField: Int, Hashable {
+    case billAmount, numberOfPeople
+}
