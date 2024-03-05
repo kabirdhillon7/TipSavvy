@@ -42,6 +42,10 @@ struct CalculationView: View {
                 Section {
                     HStack {
                         Slider(value: $viewModel.tipPercentage, in: 0...30, step: 1)
+                            .onChange(of: viewModel.tipPercentage, perform: { _ in
+                                let generator = UISelectionFeedbackGenerator()
+                                generator.selectionChanged()
+                            })
                             .accessibilityLabel(String(localized: "Tip Percentage Selection"))
                             .accessibilityHint(String(localized: "Selects the Tip Percentage"))
                         Text("\(viewModel.tipPercentage, specifier: "%.0f")%")
@@ -98,6 +102,7 @@ struct CalculationView: View {
             .navigationTitle("TipSavvy")
             .alert(String(localized: "Save Tip Calculation"), isPresented: $showingSavedAlert,  actions: {
                 TextField(String(localized: "Enter Name"), text: $viewModel.tipItemName)
+                    .autocorrectionDisabled()
                     .accessibilityLabel(String(localized: "Enter Tip Calculation Name"))
                 
                 Button(String(localized: "OK"), role: nil) {
@@ -147,6 +152,12 @@ struct CalculationView: View {
         guard let billAmount = viewModel.billAmount, let numberOfPeople = viewModel.numberOfPeople  else {
             return
         }
+        
+        // Haptic Feedback
+        let generator = UINotificationFeedbackGenerator()
+        generator.notificationOccurred(.success)
+        
+        // Save Tip in Data Manager
         dataManager.saveTip(name: viewModel.tipItemName,
                             billAmount: billAmount,
                             tipPercentage: viewModel.tipPercentage,
