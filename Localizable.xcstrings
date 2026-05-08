@@ -604,6 +604,9 @@
         }
       }
     },
+    "No Matching Tips" : {
+
+    },
     "Number of People" : {
       "localizations" : {
         "ar" : {
@@ -685,6 +688,12 @@
       }
     },
     "Per Person" : {
+
+    },
+    "Rename" : {
+
+    },
+    "Rename Saved Tip" : {
 
     },
     "Reset" : {
@@ -846,6 +855,12 @@
           }
         }
       }
+    },
+    "Search Saved Tips" : {
+
+    },
+    "Selected" : {
+
     },
     "Saves the Tip Calculation" : {
       "localizations" : {

@@ -11,9 +11,24 @@ import Combine
 /// A view model responsible for managing bill information and calculating tip information.
 final class CalculationViewModel: ObservableObject  {
     @Published var billAmount: Double?
-    @Published var tipPercentage = 0.0
-    @Published var numberOfPeople = 1
+    @Published var tipPercentage: Double
+    @Published var numberOfPeople: Int
     @Published var tipItemName = ""
+
+    private let defaults: UserDefaults
+
+    private enum DefaultsKey {
+        static let tipPercentage = "tipPercentage"
+        static let numberOfPeople = "numberOfPeople"
+    }
+
+    init(defaults: UserDefaults = .standard) {
+        self.defaults = defaults
+        tipPercentage = Self.clampedTipPercentage(defaults.double(forKey: DefaultsKey.tipPercentage))
+
+        let savedPeople = defaults.object(forKey: DefaultsKey.numberOfPeople) as? Int ?? 1
+        numberOfPeople = Self.clampedNumberOfPeople(savedPeople)
+    }
 
     var hasValidCalculation: Bool {
         guard let billAmount = billAmount else {
@@ -25,6 +40,21 @@ final class CalculationViewModel: ObservableObject  {
 
     var canSaveTip: Bool {
         hasValidCalculation && !tipItemName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
+    static func clampedTipPercentage(_ percentage: Double) -> Double {
+        min(max(percentage, 0), 30)
+    }
+
+    static func clampedNumberOfPeople(_ people: Int) -> Int {
+        min(max(people, 1), 99)
+    }
+
+    func persistSmartDefaults() {
+        tipPercentage = Self.clampedTipPercentage(tipPercentage)
+        numberOfPeople = Self.clampedNumberOfPeople(numberOfPeople)
+        defaults.set(tipPercentage, forKey: DefaultsKey.tipPercentage)
+        defaults.set(numberOfPeople, forKey: DefaultsKey.numberOfPeople)
     }
     
     var tipAmount: Double {
@@ -64,6 +94,7 @@ final class CalculationViewModel: ObservableObject  {
         tipPercentage = 0
         numberOfPeople = 1
         tipItemName = ""
+        persistSmartDefaults()
     }
 }
 

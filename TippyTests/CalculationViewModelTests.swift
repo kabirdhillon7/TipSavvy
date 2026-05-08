@@ -11,14 +11,19 @@ import XCTest
 final class CalculationViewModelTests: XCTestCase {
     
     private var calculationViewModel: CalculationViewModel!
+    private var defaults: UserDefaults!
     
     override func setUp() {
         super.setUp()
-        calculationViewModel = CalculationViewModel()
+        defaults = UserDefaults(suiteName: "CalculationViewModelTests")
+        defaults.removePersistentDomain(forName: "CalculationViewModelTests")
+        calculationViewModel = CalculationViewModel(defaults: defaults)
     }
     
     override func tearDown() {
         calculationViewModel = nil
+        defaults.removePersistentDomain(forName: "CalculationViewModelTests")
+        defaults = nil
         super.tearDown()
     }
 
@@ -202,6 +207,48 @@ final class CalculationViewModelTests: XCTestCase {
         XCTAssertTrue(calculationViewModel.tipPercentage == 0)
         XCTAssertTrue(calculationViewModel.numberOfPeople == 1)
         XCTAssertTrue(calculationViewModel.tipItemName == "")
+    }
+
+    func test_init_withSavedPeopleBelowMinimum_shouldClampToOne() {
+        defaults.set(0, forKey: "numberOfPeople")
+
+        calculationViewModel = CalculationViewModel(defaults: defaults)
+
+        XCTAssertEqual(calculationViewModel.numberOfPeople, 1)
+    }
+
+    func test_init_withSavedPeopleAboveMaximum_shouldClampToNinetyNine() {
+        defaults.set(120, forKey: "numberOfPeople")
+
+        calculationViewModel = CalculationViewModel(defaults: defaults)
+
+        XCTAssertEqual(calculationViewModel.numberOfPeople, 99)
+    }
+
+    func test_init_withSavedTipBelowMinimum_shouldClampToZero() {
+        defaults.set(-5.0, forKey: "tipPercentage")
+
+        calculationViewModel = CalculationViewModel(defaults: defaults)
+
+        XCTAssertEqual(calculationViewModel.tipPercentage, 0)
+    }
+
+    func test_init_withSavedTipAboveMaximum_shouldClampToThirty() {
+        defaults.set(35.0, forKey: "tipPercentage")
+
+        calculationViewModel = CalculationViewModel(defaults: defaults)
+
+        XCTAssertEqual(calculationViewModel.tipPercentage, 30)
+    }
+
+    func test_resetValues_shouldPersistDefaultTipAndPeople() {
+        calculationViewModel.tipPercentage = 20
+        calculationViewModel.numberOfPeople = 4
+
+        calculationViewModel.resetValues()
+
+        XCTAssertEqual(defaults.double(forKey: "tipPercentage"), 0)
+        XCTAssertEqual(defaults.integer(forKey: "numberOfPeople"), 1)
     }
 
     func test_hasValidCalculation_withMissingBill_shouldBeFalse() {

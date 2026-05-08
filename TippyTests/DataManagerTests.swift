@@ -46,4 +46,48 @@ final class DataManagerTests: XCTestCase {
 
         XCTAssertTrue(dataManager.savedTips.isEmpty)
     }
+
+    func test_renameTip_shouldUpdateExpectedTip() {
+        dataManager.saveTip(name: "Dinner", billAmount: 100.0, tipPercentage: 20, numberOfPeople: 2, tipAmount: 20.0, totalAmountWithTip: 120.0, totalPerPerson: 60.0)
+
+        guard let tip = dataManager.savedTips.first else {
+            XCTFail("Expected saved tip")
+            return
+        }
+
+        dataManager.renameTip(tip, to: "Team Dinner")
+
+        XCTAssertEqual(dataManager.savedTips.first?.name, "Team Dinner")
+    }
+
+    func test_renameTip_withBlankName_shouldKeepExistingName() {
+        dataManager.saveTip(name: "Dinner", billAmount: 100.0, tipPercentage: 20, numberOfPeople: 2, tipAmount: 20.0, totalAmountWithTip: 120.0, totalPerPerson: 60.0)
+
+        guard let tip = dataManager.savedTips.first else {
+            XCTFail("Expected saved tip")
+            return
+        }
+
+        dataManager.renameTip(tip, to: "   ")
+
+        XCTAssertEqual(dataManager.savedTips.first?.name, "Dinner")
+    }
+
+    func test_renameTip_shouldPreserveNewestFirstOrdering() {
+        let olderDate = Date(timeIntervalSince1970: 1)
+        let newerDate = Date(timeIntervalSince1970: 2)
+
+        dataManager.saveTip(name: "Older Tip", billAmount: 50.0, tipPercentage: 15, numberOfPeople: 1, tipAmount: 7.5, totalAmountWithTip: 57.5, totalPerPerson: 57.5, date: olderDate)
+        dataManager.saveTip(name: "Newer Tip", billAmount: 100.0, tipPercentage: 20, numberOfPeople: 2, tipAmount: 20.0, totalAmountWithTip: 120.0, totalPerPerson: 60.0, date: newerDate)
+
+        guard let olderTip = dataManager.savedTips.last else {
+            XCTFail("Expected older tip")
+            return
+        }
+
+        dataManager.renameTip(olderTip, to: "Renamed Older Tip")
+
+        XCTAssertEqual(dataManager.savedTips.first?.name, "Newer Tip")
+        XCTAssertEqual(dataManager.savedTips.last?.name, "Renamed Older Tip")
+    }
 }

@@ -47,25 +47,32 @@ struct CalculationView: View {
                 
                 // MARK: Tip Amount: Percentage Slider
                 Section {
-                    HStack {
+                    HStack(spacing: 8) {
                         ForEach(tipPresets, id: \.self) { preset in
                             Button {
-                                viewModel.tipPercentage = preset
+                                withAnimation(.spring(response: 0.28, dampingFraction: 0.78)) {
+                                    viewModel.tipPercentage = preset
+                                    viewModel.persistSmartDefaults()
+                                }
                             } label: {
                                 Text("\(preset, specifier: "%.0f")%")
                                     .frame(maxWidth: .infinity)
                             }
-                            .buttonStyle(.bordered)
-                            .tint(viewModel.tipPercentage == preset ? .accentColor : .secondary)
+                            .buttonStyle(TipPresetButtonStyle(isSelected: viewModel.tipPercentage == preset))
+                            .accessibilityLabel("\(preset, specifier: "%.0f")%")
+                            .accessibilityValue(viewModel.tipPercentage == preset ? String(localized: "Selected") : "")
                         }
                     }
+                    .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 8, trailing: 16))
 
                     HStack {
                         Slider(value: $viewModel.tipPercentage, in: 0...30, step: 1)
                             .onChange(of: viewModel.tipPercentage, perform: { _ in
                                 let generator = UISelectionFeedbackGenerator()
                                 generator.selectionChanged()
+                                viewModel.persistSmartDefaults()
                             })
+                            .animation(.easeInOut(duration: 0.2), value: viewModel.tipPercentage)
                             .accessibilityLabel(String(localized: "Tip Percentage Selection"))
                             .accessibilityHint(String(localized: "Selects the Tip Percentage"))
                         Text("\(viewModel.tipPercentage, specifier: "%.0f")%")
@@ -77,31 +84,9 @@ struct CalculationView: View {
                 
                 // MARK: Bill Totals
                 Section {
-                    HStack {
-                        Text(String(localized: "Subtotal"))
-                        Spacer()
-                        let billAmount = viewModel.billAmount ?? 0
-                        Text(billAmount,
-                             format: .currency(code: localCurrency))
-                    }
-                    HStack {
-                        Text(String(localized: "Tip"))
-                        Spacer()
-                        Text(viewModel.tipAmount,
-                             format: .currency(code: localCurrency))
-                    }
-                    HStack {
-                        Text(String(localized: "Total With Tip"))
-                        Spacer()
-                        Text(viewModel.totalAmountWithTip,
-                             format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
-                    }
-                    HStack {
-                        Text(String(localized: "Total Per Person"))
-                        Spacer()
-                        Text(viewModel.totalPerPerson, format: .currency(code: localCurrency))
-                            .fontWeight(.semibold)
-                    }
+                    totalsSummaryPanel
+                        .listRowInsets(EdgeInsets(top: 10, leading: 16, bottom: 10, trailing: 16))
+                        .listRowBackground(Color.clear)
                 } header: {
                     Text(String(localized: "Bill Totals"))
                 }
@@ -115,7 +100,9 @@ struct CalculationView: View {
                     .disabled(!viewModel.hasValidCalculation)
                     
                     Button(String(localized: "Reset")) {
-                        viewModel.resetValues()
+                        withAnimation(.spring(response: 0.32, dampingFraction: 0.82)) {
+                            viewModel.resetValues()
+                        }
                     }
                     .foregroundColor(.red)
                     .accessibilityLabel(String(localized: "Reset"))
@@ -138,6 +125,12 @@ struct CalculationView: View {
                 }
                 .accessibilityLabel(String(localized: "Cancel"))
             })
+            .onChange(of: viewModel.numberOfPeople, perform: { _ in
+                viewModel.persistSmartDefaults()
+            })
+            .animation(.easeInOut(duration: 0.2), value: viewModel.numberOfPeople)
+            .animation(.easeInOut(duration: 0.2), value: viewModel.totalAmountWithTip)
+            .animation(.easeInOut(duration: 0.2), value: viewModel.totalPerPerson)
             .toolbar {
                 // MARK: Keyboard
                 ToolbarItem(placement: .keyboard) {
@@ -156,16 +149,51 @@ struct CalculationView: View {
             .scrollDismissesKeyboard(.immediately)
         }
     }
-    
-    /// Loads the user defaults for the bill amount, tip percentage, and number of people.
-    func loadUserDefaults() {
-        let defaults = UserDefaults.standard
-        
-        viewModel.billAmount = defaults.getBillAmount()
-        viewModel.tipPercentage = defaults.double(forKey: "tipPercentage")
-        viewModel.numberOfPeople = max(defaults.integer(forKey: "numberOfPeople"), 1)
+
+    private var totalsSummaryPanel: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(alignment: .firstTextBaseline) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(String(localized: "Total Per Person"))
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                    Text(viewModel.totalPerPerson, format: .currency(code: localCurrency))
+                        .font(.system(.title2, design: .rounded).weight(.bold))
+                }
+
+                Spacer()
+
+                VStack(alignment: .trailing, spacing: 4) {
+                    Text(String(localized: "Total With Tip"))
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                    Text(viewModel.totalAmountWithTip, format: .currency(code: localCurrency))
+                        .fontWeight(.semibold)
+                }
+            }
+
+            Divider()
+
+            totalDetailRow(title: String(localized: "Subtotal"), amount: viewModel.billAmount ?? 0)
+            totalDetailRow(title: String(localized: "Tip"), amount: viewModel.tipAmount)
+        }
+        .padding(16)
+        .glassPanel()
+        .contentTransition(.opacity)
+        .accessibilityElement(children: .combine)
     }
-    
+
+    private func totalDetailRow(title: String, amount: Double) -> some View {
+        HStack {
+            Text(title)
+                .foregroundStyle(.secondary)
+            Spacer()
+            Text(amount, format: .currency(code: localCurrency))
+                .fontWeight(.medium)
+        }
+        .font(.subheadline)
+    }
+
     /// Saves the tip information to the data manager.
     func saveTipInfo() {
         guard let billAmount = viewModel.billAmount, viewModel.canSaveTip else {
@@ -186,7 +214,9 @@ struct CalculationView: View {
                             totalPerPerson: viewModel.totalPerPerson)
 
         DispatchQueue.main.async {
-            viewModel.resetValues()
+            withAnimation(.spring(response: 0.32, dampingFraction: 0.82)) {
+                viewModel.resetValues()
+            }
         }
     }
 }
@@ -196,15 +226,50 @@ struct CalculationView: View {
         .environmentObject(DataManager(inMemory: true))
 }
 
-extension UserDefaults {
-    enum DefaultTypes: String {
-        case billAmount
-        case tipPercentage
-        case numberOfPeople
+private struct GlassPanelModifier: ViewModifier {
+    let cornerRadius: CGFloat
+    let interactive: Bool
+
+    @ViewBuilder
+    func body(content: Content) -> some View {
+        if #available(iOS 26.0, *) {
+            content
+                .glassEffect(.regular.interactive(interactive), in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+        } else {
+            content
+                .background(.regularMaterial, in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+                .overlay {
+                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                        .strokeBorder(.white.opacity(0.35), lineWidth: 1)
+                }
+                .shadow(color: .black.opacity(0.08), radius: 12, y: 6)
+        }
     }
-    
-    /// Returns the bill amount stored in user defaults.
-    func getBillAmount() -> Double {
-        return UserDefaults.standard.double(forKey: DefaultTypes.billAmount.rawValue)
+}
+
+private extension View {
+    func glassPanel(cornerRadius: CGFloat = 18, interactive: Bool = false) -> some View {
+        modifier(GlassPanelModifier(cornerRadius: cornerRadius, interactive: interactive))
+    }
+}
+
+private struct TipPresetButtonStyle: ButtonStyle {
+    let isSelected: Bool
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.subheadline.weight(.semibold))
+            .foregroundStyle(isSelected ? Color.accentColor : Color.primary)
+            .padding(.vertical, 9)
+            .background {
+                if isSelected {
+                    Capsule()
+                        .fill(Color.accentColor.opacity(0.16))
+                }
+            }
+            .glassPanel(cornerRadius: 16, interactive: true)
+            .scaleEffect(configuration.isPressed ? 0.96 : 1)
+            .animation(.easeInOut(duration: 0.18), value: configuration.isPressed)
+            .animation(.easeInOut(duration: 0.18), value: isSelected)
     }
 }

@@ -60,10 +60,15 @@ class DataManager: NSObject, ObservableObject {
 
     /// Deletes saved tip calculations at the supplied offsets.
     func deleteTips(at offsets: IndexSet) {
+        let tips = offsets.map { savedTips[$0] }
+        deleteTips(tips)
+    }
+
+    /// Deletes the supplied saved tip calculations.
+    func deleteTips(_ tips: [SavedTip]) {
         let context = container.viewContext
 
-        for index in offsets {
-            let tip = savedTips[index]
+        for tip in tips {
             context.delete(tip)
         }
 
@@ -72,6 +77,24 @@ class DataManager: NSObject, ObservableObject {
             fetchSavedTips()
         } catch {
             fatalError("Failed to delete tips: \(error)")
+        }
+    }
+
+    /// Renames an existing saved tip calculation.
+    func renameTip(_ tip: SavedTip, to name: String) {
+        let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedName.isEmpty else {
+            return
+        }
+
+        let context = container.viewContext
+        tip.name = trimmedName
+
+        do {
+            try context.save()
+            fetchSavedTips()
+        } catch {
+            fatalError("Failed to rename tip: \(error)")
         }
     }
     
