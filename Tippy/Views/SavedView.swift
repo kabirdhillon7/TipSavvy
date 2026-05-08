@@ -10,6 +10,7 @@ import SwiftUI
 /// A view that displays a list of saved tip calculations, or a message indicating that there are no saved tip calculations.
 struct SavedView: View {
     @EnvironmentObject var dataManager: DataManager
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     @State private var searchText = ""
     @State private var renameText = ""
@@ -56,14 +57,14 @@ struct SavedView: View {
                             }
                         }
                     }.onDelete { indexSet in
-                        withAnimation(.easeInOut(duration: 0.22)) {
+                        performAnimated(.easeInOut(duration: 0.22)) {
                             dataManager.deleteTips(indexSet.map { filteredTips[$0] })
                         }
                     }
                 }
                 .searchable(text: $searchText, prompt: String(localized: "Search Saved Tips"))
-                .animation(.easeInOut(duration: 0.22), value: filteredTips.map(\.objectID))
-                .animation(.easeInOut(duration: 0.18), value: searchText)
+                .animation(reduceMotion ? nil : .easeInOut(duration: 0.22), value: filteredTips.map(\.objectID))
+                .animation(reduceMotion ? nil : .easeInOut(duration: 0.18), value: searchText)
                 .toolbar {
                     EditButton()
                         .accessibilityLabel(String(localized: "Edit"))
@@ -92,28 +93,37 @@ struct SavedView: View {
 
     private func savedTipRow(for tip: SavedTip) -> some View {
         VStack(alignment: .leading, spacing: 6) {
-            HStack {
-                Text(tip.name ?? String(localized: "Untitled Tip"))
-                    .font(.headline)
-                Spacer()
-                Text(tip.totalAmountWithTip, format: .currency(code: localCurrency))
-                    .fontWeight(.semibold)
-            }
-
-            HStack {
-                if let date = tip.date {
-                    Text(date, format: dateFormatMMDDYYYY)
+            ViewThatFits(in: .horizontal) {
+                HStack(alignment: .firstTextBaseline) {
+                    savedTipName(for: tip)
+                    Spacer(minLength: 12)
+                    savedTipTotal(for: tip)
                 }
 
-                Spacer()
+                VStack(alignment: .leading, spacing: 2) {
+                    savedTipName(for: tip)
+                    savedTipTotal(for: tip)
+                }
+            }
 
-                Text(String(localized: "Per Person"))
-                Text(tip.totalPerPerson, format: .currency(code: localCurrency))
+            ViewThatFits(in: .horizontal) {
+                HStack {
+                    savedTipDate(for: tip)
+                    Spacer(minLength: 12)
+                    savedTipPerPerson(for: tip)
+                }
+
+                VStack(alignment: .leading, spacing: 2) {
+                    savedTipDate(for: tip)
+                    savedTipPerPerson(for: tip)
+                }
             }
             .font(.subheadline)
             .foregroundStyle(.secondary)
         }
-        .accessibilityElement(children: .combine)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(tip.accessibilitySummary(currencyCode: localCurrency, dateFormat: dateFormatMMDDYYYY))
+        .accessibilityHint(String(localized: "Double tap to expand saved tip details"))
     }
 
     private func emptyState(title: String, systemImage: String) -> some View {
@@ -125,16 +135,39 @@ struct SavedView: View {
                     Image(systemName: systemImage)
                         .fontWeight(.medium)
                         .font(.system(size: 50))
-                        .foregroundColor(Color(UIColor.lightGray))
+                        .foregroundStyle(.secondary)
 
                     Text(title)
                         .fontWeight(.medium)
-                        .foregroundStyle(Color(UIColor.lightGray))
+                        .foregroundStyle(.secondary)
                 }
             }
         }
         .accessibilityLabel(title)
-        .transition(.opacity.combined(with: .scale(scale: 0.98)))
+        .transition(reduceMotion ? .identity : .opacity.combined(with: .scale(scale: 0.98)))
+    }
+
+    private func savedTipName(for tip: SavedTip) -> some View {
+        Text(tip.name ?? String(localized: "Untitled Tip"))
+            .font(.headline)
+    }
+
+    private func savedTipTotal(for tip: SavedTip) -> some View {
+        Text(tip.totalAmountWithTip, format: .currency(code: localCurrency))
+            .fontWeight(.semibold)
+            .monospacedDigit()
+    }
+
+    @ViewBuilder
+    private func savedTipDate(for tip: SavedTip) -> some View {
+        if let date = tip.date {
+            Text(date, format: dateFormatMMDDYYYY)
+        }
+    }
+
+    private func savedTipPerPerson(for tip: SavedTip) -> some View {
+        Text(String(localized: "Per Person") + " " + tip.totalPerPerson.formatted(.currency(code: localCurrency)))
+            .monospacedDigit()
     }
 
     private func startRename(for tip: SavedTip) {
@@ -148,11 +181,19 @@ struct SavedView: View {
             return
         }
 
-        withAnimation(.easeInOut(duration: 0.22)) {
+        performAnimated(.easeInOut(duration: 0.22)) {
             dataManager.renameTip(tipBeingRenamed, to: renameText)
         }
         self.tipBeingRenamed = nil
         renameText = ""
+    }
+
+    private func performAnimated(_ animation: Animation, _ updates: () -> Void) {
+        if reduceMotion {
+            updates()
+        } else {
+            withAnimation(animation, updates)
+        }
     }
 }
 

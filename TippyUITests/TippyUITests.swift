@@ -98,6 +98,21 @@ final class TippyUITests: XCTestCase {
         XCTAssertEqual(app.collectionViews.buttons["20%"].value as? String, "Selected")
     }
 
+    func test_calculatorAccessibilityElements_shouldBeDiscoverable() {
+        let app = XCUIApplication()
+        app.launchArguments += ["-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryXXXL"]
+        app.launchArguments += ["-UIAccessibilityReduceMotionEnabled", "YES"]
+        app.launch()
+
+        XCTAssertTrue(app.collectionViews.textFields["Enter Bill Amount"].exists)
+        XCTAssertTrue(app.collectionViews.steppers["Number of People"].exists)
+        XCTAssertTrue(app.collectionViews.buttons["15%"].exists)
+        XCTAssertTrue(app.collectionViews.sliders["Tip Percentage Selection"].exists)
+        XCTAssertTrue(app.collectionViews.buttons["Save Tip Calculation"].exists)
+        XCTAssertTrue(app.collectionViews.buttons["Reset"].exists)
+        XCTAssertTrue(app.collectionViews.otherElements["Bill Totals Summary"].exists)
+    }
+
     func test_tipPreset_shouldPersistAfterRelaunch() {
         let app = XCUIApplication()
         app.launch()
@@ -203,6 +218,17 @@ final class TippyUITests: XCTestCase {
         app.alerts["Rename Saved Tip"].scrollViews.otherElements.buttons["OK"].tap()
 
         XCTAssertTrue(app.collectionViews.staticTexts["Rename Dinner Updated"].exists)
+    }
+
+    func test_savedRowAccessibilitySummary_shouldBeDiscoverable() {
+        let app = XCUIApplication()
+        app.launch()
+
+        saveTip(named: "Accessible Dinner", in: app)
+        app.tabBars["Tab Bar"].buttons["Saved"].tap()
+
+        XCTAssertTrue(app.collectionViews.staticTexts["Accessible Dinner"].exists)
+        XCTAssertTrue(app.collectionViews.staticTexts.containing(NSPredicate(format: "label CONTAINS %@", "Per Person")).element.exists)
     }
     
     func test_keyboardDoneButton_shouldDimissKeyboard() {

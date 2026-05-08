@@ -114,3 +114,19 @@ class DataManager: NSObject, ObservableObject {
         }
     }
 }
+
+extension SavedTip {
+    func accessibilitySummary(currencyCode: String, dateFormat: Date.FormatStyle = .dateTime.month().day().year()) -> String {
+        let savedName = name ?? String(localized: "Untitled Tip")
+        let dateText = date.map { $0.formatted(dateFormat) }
+
+        var parts = [savedName]
+        if let dateText {
+            parts.append(dateText)
+        }
+        parts.append(String(localized: "Total With Tip") + ": " + totalAmountWithTip.formatted(.currency(code: currencyCode)))
+        parts.append(String(localized: "Per Person") + ": " + totalPerPerson.formatted(.currency(code: currencyCode)))
+
+        return parts.joined(separator: ", ")
+    }
+}

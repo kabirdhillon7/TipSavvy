@@ -281,4 +281,21 @@ final class CalculationViewModelTests: XCTestCase {
         XCTAssertTrue(calculationViewModel.canSaveTip)
     }
 
+    func test_accessibilityTotalsSummary_shouldIncludeCalculatedAmounts() {
+        calculationViewModel.billAmount = 100
+        calculationViewModel.tipPercentage = 20
+        calculationViewModel.numberOfPeople = 4
+
+        let summary = calculationViewModel.accessibilityTotalsSummary(currencyCode: "USD")
+
+        XCTAssertTrue(summary.contains("Subtotal"))
+        XCTAssertTrue(summary.contains("100.00"))
+        XCTAssertTrue(summary.contains("Tip"))
+        XCTAssertTrue(summary.contains("20.00"))
+        XCTAssertTrue(summary.contains("Total With Tip"))
+        XCTAssertTrue(summary.contains("120.00"))
+        XCTAssertTrue(summary.contains("Total Per Person"))
+        XCTAssertTrue(summary.contains("30.00"))
+    }
+
 }

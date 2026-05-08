@@ -90,4 +90,25 @@ final class DataManagerTests: XCTestCase {
         XCTAssertEqual(dataManager.savedTips.first?.name, "Newer Tip")
         XCTAssertEqual(dataManager.savedTips.last?.name, "Renamed Older Tip")
     }
+
+    func test_savedTipAccessibilitySummary_shouldIncludeNameDateTotalAndPerPerson() {
+        let savedDate = Date(timeIntervalSince1970: 1_704_067_200)
+        let dateFormat = Date.FormatStyle.dateTime.month().day().year()
+
+        dataManager.saveTip(name: "Accessibility Dinner", billAmount: 100.0, tipPercentage: 20, numberOfPeople: 2, tipAmount: 20.0, totalAmountWithTip: 120.0, totalPerPerson: 60.0, date: savedDate)
+
+        guard let tip = dataManager.savedTips.first else {
+            XCTFail("Expected saved tip")
+            return
+        }
+
+        let summary = tip.accessibilitySummary(currencyCode: "USD", dateFormat: dateFormat)
+
+        XCTAssertTrue(summary.contains("Accessibility Dinner"))
+        XCTAssertTrue(summary.contains(savedDate.formatted(dateFormat)))
+        XCTAssertTrue(summary.contains("Total With Tip"))
+        XCTAssertTrue(summary.contains("120.00"))
+        XCTAssertTrue(summary.contains("Per Person"))
+        XCTAssertTrue(summary.contains("60.00"))
+    }
 }

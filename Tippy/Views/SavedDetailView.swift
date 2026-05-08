@@ -20,63 +20,56 @@ struct SavedDetailView: View {
     private let localCurrency = Locale.current.currency?.identifier ?? "USD"
     
     var body: some View {
-        VStack(alignment: .leading) {
+        VStack(alignment: .leading, spacing: 8) {
             let tip = viewModel.tip
             
             if let date = viewModel.tip.date {
                 Text(date, format: dateFormatMMDDYYYY)
-                    .accessibilityLabel("\(date, format: dateFormatMMDDYYYY)")
-            }
-            HStack {
-                Text(String(localized: "Bill Amount") + ":")
-                    .bold()
-                    .accessibilityLabel(String(localized: "Bill Amount"))
-                Spacer()
-                Text(tip.billAmount, format: .currency(code: localCurrency))
-                    .accessibilityLabel("\(tip.billAmount, format: .currency(code: localCurrency))")
-            }
-            HStack {
-                Text(String(localized: "Tip Percentage") + ":")
-                    .bold()
-                    .accessibilityLabel(String(localized: "Tip Percentage"))
-                Spacer()
-                Text("\(Int(tip.tipPercentage))%")
-                    .accessibilityLabel("\(Int(tip.tipPercentage))%")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .accessibilityLabel(String(localized: "Date"))
+                    .accessibilityValue("\(date, format: dateFormatMMDDYYYY)")
             }
 
-            HStack {
-                Text(String(localized: "Number of People") + ":")
-                    .bold()
-                    .accessibilityLabel(String(localized: "Number of People"))
-                Spacer()
-                Text("\(tip.numberOfPeople)")
-                    .accessibilityLabel("\(tip.numberOfPeople)")
+            detailRow(title: String(localized: "Bill Amount"), value: tip.billAmount.formatted(.currency(code: localCurrency)))
+            detailRow(title: String(localized: "Tip Percentage"), value: "\(Int(tip.tipPercentage))%")
+            detailRow(title: String(localized: "Number of People"), value: "\(tip.numberOfPeople)")
+            detailRow(title: String(localized: "Tip Amount"), value: tip.tipAmount.formatted(.currency(code: localCurrency)))
+            detailRow(title: String(localized: "Total Bill With Tip"), value: tip.totalAmountWithTip.formatted(.currency(code: localCurrency)))
+            detailRow(title: String(localized: "Total Per Person"), value: tip.totalPerPerson.formatted(.currency(code: localCurrency)))
+        }
+        .padding(.vertical, 4)
+    }
+
+    private func detailRow(title: String, value: String) -> some View {
+        ViewThatFits(in: .horizontal) {
+            HStack(alignment: .firstTextBaseline) {
+                detailTitle(title)
+                Spacer(minLength: 12)
+                detailValue(value)
             }
-            HStack {
-                Text(String(localized: "Tip Amount") + ":")
-                    .bold()
-                    .accessibilityLabel(String(localized: "Tip Amount"))
-                Spacer()
-                Text(tip.tipAmount, format: .currency(code: localCurrency))
-                    .accessibilityLabel("\(tip.tipAmount, format: .currency(code: localCurrency))")
-            }
-            HStack {
-                Text(String(localized: "Total Bill With Tip") + ":")
-                    .bold()
-                    .accessibilityLabel(String(localized: "Total Bill With Tip"))
-                Spacer()
-                Text(tip.totalAmountWithTip, format: .currency(code: localCurrency))
-                    .accessibilityLabel("\(tip.totalAmountWithTip, format: .currency(code: localCurrency))")
-            }
-            HStack {
-                Text(String(localized: "Total Per Person") + ":")
-                    .bold()
-                    .accessibilityLabel(String(localized: "Total Per Person"))
-                Spacer()
-                Text(tip.totalPerPerson, format: .currency(code: localCurrency))
-                    .accessibilityLabel("\(tip.totalPerPerson, format: .currency(code: localCurrency))")
+
+            VStack(alignment: .leading, spacing: 2) {
+                detailTitle(title)
+                detailValue(value)
             }
         }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(title)
+        .accessibilityValue(value)
+    }
+
+    private func detailTitle(_ title: String) -> some View {
+        Text(title + ":")
+            .font(.subheadline.weight(.semibold))
+            .foregroundStyle(.primary)
+    }
+
+    private func detailValue(_ value: String) -> some View {
+        Text(value)
+            .font(.subheadline)
+            .foregroundStyle(.secondary)
+            .monospacedDigit()
     }
 }
 

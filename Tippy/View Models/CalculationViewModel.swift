@@ -87,6 +87,19 @@ final class CalculationViewModel: ObservableObject  {
         }
         return 0
     }
+
+    func accessibilityTotalsSummary(currencyCode: String) -> String {
+        [
+            String(localized: "Subtotal") + ": " + Self.currencyString(billAmount ?? 0, currencyCode: currencyCode),
+            String(localized: "Tip") + ": " + Self.currencyString(tipAmount, currencyCode: currencyCode),
+            String(localized: "Total With Tip") + ": " + Self.currencyString(totalAmountWithTip, currencyCode: currencyCode),
+            String(localized: "Total Per Person") + ": " + Self.currencyString(totalPerPerson, currencyCode: currencyCode)
+        ].joined(separator: ", ")
+    }
+
+    private static func currencyString(_ amount: Double, currencyCode: String) -> String {
+        amount.formatted(.currency(code: currencyCode))
+    }
     
     /// Resets the tip calculation values.
     func resetValues() {
