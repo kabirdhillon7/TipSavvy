@@ -10,6 +10,9 @@ import SwiftUI
 /// A view that displays a list of saved tip calculations, or a message indicating that there are no saved tip calculations.
 struct SavedView: View {
     @EnvironmentObject var dataManager: DataManager
+
+    private let dateFormatMMDDYYYY = Date.FormatStyle.dateTime.month().day().year()
+    private let localCurrency = Locale.current.currency?.identifier ?? "USD"
     
     var body: some View {
         NavigationStack {
@@ -31,11 +34,10 @@ struct SavedView: View {
                         DisclosureGroup() {
                             SavedDetailView(tip: tip)
                         } label: {
-                            Text(tip.name ?? "")
-                                .accessibilityLabel(tip.name ?? "")
+                            savedTipRow(for: tip)
                         }
                     }.onDelete { indexSet in
-                        deleteTips(at: indexSet)
+                        dataManager.deleteTips(at: indexSet)
                     }
                 }
                 .toolbar {
@@ -46,28 +48,35 @@ struct SavedView: View {
             }
         }
     }
-    
-    /// Deletes a saved tip calculation.
-    func deleteTips(at offsets: IndexSet) {
-        // First, delete the selected tips from Core Data
-        let context = dataManager.container.viewContext
-        for index in offsets {
-            let tip = dataManager.savedTips[index]
-            context.delete(tip)
+
+    private func savedTipRow(for tip: SavedTip) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack {
+                Text(tip.name ?? String(localized: "Untitled Tip"))
+                    .font(.headline)
+                Spacer()
+                Text(tip.totalAmountWithTip, format: .currency(code: localCurrency))
+                    .fontWeight(.semibold)
+            }
+
+            HStack {
+                if let date = tip.date {
+                    Text(date, format: dateFormatMMDDYYYY)
+                }
+
+                Spacer()
+
+                Text(String(localized: "Per Person"))
+                Text(tip.totalPerPerson, format: .currency(code: localCurrency))
+            }
+            .font(.subheadline)
+            .foregroundStyle(.secondary)
         }
-        
-        dataManager.savedTips.remove(atOffsets: offsets)
-        
-        // Save the changes
-        do {
-            try context.save()
-        } catch {
-            fatalError("Failed to delete tips: \(error)")
-        }
+        .accessibilityElement(children: .combine)
     }
 }
 
 #Preview {
     SavedView()
-        .environmentObject(DataManager())
+        .environmentObject(DataManager(inMemory: true))
 }

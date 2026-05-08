@@ -53,6 +53,7 @@ final class TippyUITests: XCTestCase {
     
     func test_contentView_shouldCancelSaving() {
         let app = XCUIApplication()
+        enterBillAmount("25", in: app)
         app.collectionViews/*@START_MENU_TOKEN@*/.buttons["Save Tip Calculation"]/*[[".cells.buttons[\"Save Tip Calculation\"]",".buttons[\"Save Tip Calculation\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
         app.alerts["Save Tip Calculation"].scrollViews.otherElements.buttons["Cancel"].tap()
     }
@@ -80,12 +81,21 @@ final class TippyUITests: XCTestCase {
         tipPercentageSelectionSlider.swipeRight()
     }
     
-    func test_picker_shouldSelectInput() {
+    func test_stepper_shouldAdjustNumberOfPeople() {
         let app = XCUIApplication()
         app.launch()
         
-        app.collectionViews/*@START_MENU_TOKEN@*/.textFields["Number of People"]/*[[".cells.textFields[\"Number of People\"]",".textFields[\"Number of People\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
-        app/*@START_MENU_TOKEN@*/.keys["5"]/*[[".keyboards.keys[\"5\"]",".keys[\"5\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
+        let peopleStepper = app.collectionViews.steppers["Number of People"]
+        peopleStepper.buttons["Increment"].tap()
+        peopleStepper.buttons["Decrement"].tap()
+    }
+
+    func test_tipPreset_shouldSelectTwentyPercent() {
+        let app = XCUIApplication()
+        app.launch()
+
+        app.collectionViews.buttons["20%"].tap()
+        XCTAssertTrue(app.collectionViews.staticTexts["20%"].exists)
     }
     
     func test_tabBar_shouldSelectSavedTab() {
@@ -106,25 +116,29 @@ final class TippyUITests: XCTestCase {
         resetButton.tap()
     }
     
-    func test_saveTipCalculationButton_shouldTap() {
+    func test_saveTipCalculationButton_shouldBeDisabledForInvalidCalculation() {
         let app = XCUIApplication()
         app.launch()
         
-        app.collectionViews/*@START_MENU_TOKEN@*/.buttons["Save Tip Calculation"]/*[[".cells.buttons[\"Save Tip Calculation\"]",".buttons[\"Save Tip Calculation\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
+        XCTAssertFalse(app.collectionViews/*@START_MENU_TOKEN@*/.buttons["Save Tip Calculation"]/*[[".cells.buttons[\"Save Tip Calculation\"]",".buttons[\"Save Tip Calculation\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.isEnabled)
     }
     
     func test_saveTipCalculationButton_shouldSave() {
         let app = XCUIApplication()
         app.launch()
-        
+
+        enterBillAmount("25", in: app)
+
         app.collectionViews/*@START_MENU_TOKEN@*/.buttons["Save Tip Calculation"]/*[[".cells.buttons[\"Save Tip Calculation\"]",".buttons[\"Save Tip Calculation\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
+        app.alerts["Save Tip Calculation"].scrollViews.otherElements.textFields["Enter Name"].typeText("Lunch")
         app.alerts["Save Tip Calculation"].scrollViews.otherElements.buttons["OK"].tap()
     }
     
     func test_saveTipCalculationButton_shouldCancel() {
         let app = XCUIApplication()
         app.launch()
-        
+
+        enterBillAmount("25", in: app)
         app.collectionViews/*@START_MENU_TOKEN@*/.buttons["Save Tip Calculation"]/*[[".cells.buttons[\"Save Tip Calculation\"]",".buttons[\"Save Tip Calculation\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
         app.alerts["Save Tip Calculation"].scrollViews.otherElements.buttons["Cancel"].tap()
     }
@@ -132,6 +146,13 @@ final class TippyUITests: XCTestCase {
     func test_keyboardDoneButton_shouldDimissKeyboard() {
         let app = XCUIApplication()
         app.collectionViews/*@START_MENU_TOKEN@*/.textFields["Enter Bill Amount"]/*[[".cells.textFields[\"Enter Bill Amount\"]",".textFields[\"Enter Bill Amount\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
+        app.toolbars["Toolbar"]/*@START_MENU_TOKEN@*/.buttons["Done"]/*[[".otherElements[\"Done\"].buttons[\"Done\"]",".buttons[\"Done\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
+    }
+
+    private func enterBillAmount(_ amount: String, in app: XCUIApplication) {
+        let enterBillAmountTextField = app.collectionViews/*@START_MENU_TOKEN@*/.textFields["Enter Bill Amount"]/*[[".cells.textFields[\"Enter Bill Amount\"]",".textFields[\"Enter Bill Amount\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/
+        enterBillAmountTextField.tap()
+        enterBillAmountTextField.typeText(amount)
         app.toolbars["Toolbar"]/*@START_MENU_TOKEN@*/.buttons["Done"]/*[[".otherElements[\"Done\"].buttons[\"Done\"]",".buttons[\"Done\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
     }
 }

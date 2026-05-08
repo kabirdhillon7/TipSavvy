@@ -12,8 +12,20 @@ import Combine
 final class CalculationViewModel: ObservableObject  {
     @Published var billAmount: Double?
     @Published var tipPercentage = 0.0
-    @Published var numberOfPeople: Int?
+    @Published var numberOfPeople = 1
     @Published var tipItemName = ""
+
+    var hasValidCalculation: Bool {
+        guard let billAmount = billAmount else {
+            return false
+        }
+
+        return billAmount > 0 && numberOfPeople >= 1
+    }
+
+    var canSaveTip: Bool {
+        hasValidCalculation && !tipItemName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
     
     var tipAmount: Double {
         if let billAmount = billAmount {
@@ -31,8 +43,8 @@ final class CalculationViewModel: ObservableObject  {
     }
     
     var totalPerPerson: Double {
-        if let billAmount = billAmount, let people = numberOfPeople, people != 0 {
-            let numOfPeople = Double(people)
+        if let billAmount = billAmount, numberOfPeople != 0 {
+            let numOfPeople = Double(numberOfPeople)
             let tipValue = billAmount / 100 * tipPercentage
             let totalBillPlusTip = billAmount + tipValue
             var total = totalBillPlusTip / numOfPeople
@@ -50,11 +62,11 @@ final class CalculationViewModel: ObservableObject  {
     func resetValues() {
         billAmount = nil
         tipPercentage = 0
-        numberOfPeople = nil
+        numberOfPeople = 1
         tipItemName = ""
     }
 }
 
 enum TipSavvyKeyboardField: Int, Hashable {
-    case billAmount, numberOfPeople
+    case billAmount
 }

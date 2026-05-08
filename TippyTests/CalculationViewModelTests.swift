@@ -191,7 +191,7 @@ final class CalculationViewModelTests: XCTestCase {
         
         XCTAssertNil(calculationViewModel.billAmount)
         XCTAssertEqual(calculationViewModel.tipPercentage, 0.0)
-        XCTAssertNil(calculationViewModel.numberOfPeople)
+        XCTAssertEqual(calculationViewModel.numberOfPeople, 1)
         XCTAssertEqual(calculationViewModel.tipItemName, "")
     }
     
@@ -200,8 +200,38 @@ final class CalculationViewModelTests: XCTestCase {
         
         XCTAssertTrue(calculationViewModel.billAmount == nil)
         XCTAssertTrue(calculationViewModel.tipPercentage == 0)
-        XCTAssertTrue(calculationViewModel.numberOfPeople == nil)
+        XCTAssertTrue(calculationViewModel.numberOfPeople == 1)
         XCTAssertTrue(calculationViewModel.tipItemName == "")
+    }
+
+    func test_hasValidCalculation_withMissingBill_shouldBeFalse() {
+        calculationViewModel.billAmount = nil
+        calculationViewModel.numberOfPeople = 1
+
+        XCTAssertFalse(calculationViewModel.hasValidCalculation)
+    }
+
+    func test_hasValidCalculation_withZeroBill_shouldBeFalse() {
+        calculationViewModel.billAmount = 0
+        calculationViewModel.numberOfPeople = 1
+
+        XCTAssertFalse(calculationViewModel.hasValidCalculation)
+    }
+
+    func test_canSaveTip_withBlankName_shouldBeFalse() {
+        calculationViewModel.billAmount = 25
+        calculationViewModel.numberOfPeople = 2
+        calculationViewModel.tipItemName = "   "
+
+        XCTAssertFalse(calculationViewModel.canSaveTip)
+    }
+
+    func test_canSaveTip_withValidCalculationAndName_shouldBeTrue() {
+        calculationViewModel.billAmount = 25
+        calculationViewModel.numberOfPeople = 2
+        calculationViewModel.tipItemName = "Lunch"
+
+        XCTAssertTrue(calculationViewModel.canSaveTip)
     }
 
 }

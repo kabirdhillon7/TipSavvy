@@ -14,7 +14,7 @@ final class DataManagerTests: XCTestCase {
     
     override func setUp() {
         super.setUp()
-        dataManager = DataManager()
+        dataManager = DataManager(inMemory: true)
     }
     
     override func tearDown() {
@@ -26,5 +26,24 @@ final class DataManagerTests: XCTestCase {
         dataManager.saveTip(name: "Test Tip", billAmount: 100.0, tipPercentage: 0.15, numberOfPeople: 2, tipAmount: 15.0, totalAmountWithTip: 115.0, totalPerPerson: 57.5)
         
         XCTAssertEqual(dataManager.savedTips.last?.name, "Test Tip")
+    }
+
+    func test_saveTip_shouldSortNewestFirst() {
+        let olderDate = Date(timeIntervalSince1970: 1)
+        let newerDate = Date(timeIntervalSince1970: 2)
+
+        dataManager.saveTip(name: "Older Tip", billAmount: 50.0, tipPercentage: 15, numberOfPeople: 1, tipAmount: 7.5, totalAmountWithTip: 57.5, totalPerPerson: 57.5, date: olderDate)
+        dataManager.saveTip(name: "Newer Tip", billAmount: 100.0, tipPercentage: 20, numberOfPeople: 2, tipAmount: 20.0, totalAmountWithTip: 120.0, totalPerPerson: 60.0, date: newerDate)
+
+        XCTAssertEqual(dataManager.savedTips.first?.name, "Newer Tip")
+        XCTAssertEqual(dataManager.savedTips.last?.name, "Older Tip")
+    }
+
+    func test_deleteTips_shouldRemoveTip() {
+        dataManager.saveTip(name: "Tip to Delete", billAmount: 100.0, tipPercentage: 20, numberOfPeople: 2, tipAmount: 20.0, totalAmountWithTip: 120.0, totalPerPerson: 60.0)
+
+        dataManager.deleteTips(at: IndexSet(integer: 0))
+
+        XCTAssertTrue(dataManager.savedTips.isEmpty)
     }
 }

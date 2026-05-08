@@ -684,6 +684,9 @@
         }
       }
     },
+    "Per Person" : {
+
+    },
     "Reset" : {
       "localizations" : {
         "ar" : {
@@ -1283,6 +1286,9 @@
           }
         }
       }
+    },
+    "Untitled Tip" : {
+
     },
     "View and manage saved tip calculations" : {
       "localizations" : {

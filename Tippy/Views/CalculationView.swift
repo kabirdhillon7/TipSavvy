@@ -15,6 +15,9 @@ struct CalculationView: View {
     
     @State private var showingSavedAlert = false
     @FocusState var keyboardFocusField: TipSavvyKeyboardField?
+
+    private let tipPresets = [15.0, 18.0, 20.0, 25.0]
+    private let localCurrency = Locale.current.currency?.identifier ?? "USD"
     
     var body: some View {
         NavigationStack {
@@ -23,23 +26,40 @@ struct CalculationView: View {
                 Section {
                     TextField(String(localized: "Enter Bill Amount"),
                               value: $viewModel.billAmount,
-                              format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
+                              format: .currency(code: localCurrency))
                     .keyboardType(.decimalPad)
                     .focused($keyboardFocusField, equals: .billAmount)
                     .accessibilityLabel(String(localized: "Enter Bill Amount"))
                     
-                    TextField(String(localized: "Number of People"),
-                              value: $viewModel.numberOfPeople,
-                              format: .number)
-                        .keyboardType(.decimalPad)
-                        .focused($keyboardFocusField, equals: .numberOfPeople)
+                    Stepper(value: $viewModel.numberOfPeople, in: 1...99) {
+                        HStack {
+                            Text(String(localized: "Number of People"))
+                            Spacer()
+                            Text(viewModel.numberOfPeople, format: .number)
+                                .foregroundStyle(.secondary)
+                        }
                         .accessibilityLabel(String(localized: "Number of People"))
+                        .accessibilityValue("\(viewModel.numberOfPeople)")
+                    }
                 } header: {
                     Text(String(localized: "Bill Information"))
                 }
                 
                 // MARK: Tip Amount: Percentage Slider
                 Section {
+                    HStack {
+                        ForEach(tipPresets, id: \.self) { preset in
+                            Button {
+                                viewModel.tipPercentage = preset
+                            } label: {
+                                Text("\(preset, specifier: "%.0f")%")
+                                    .frame(maxWidth: .infinity)
+                            }
+                            .buttonStyle(.bordered)
+                            .tint(viewModel.tipPercentage == preset ? .accentColor : .secondary)
+                        }
+                    }
+
                     HStack {
                         Slider(value: $viewModel.tipPercentage, in: 0...30, step: 1)
                             .onChange(of: viewModel.tipPercentage, perform: { _ in
@@ -62,13 +82,13 @@ struct CalculationView: View {
                         Spacer()
                         let billAmount = viewModel.billAmount ?? 0
                         Text(billAmount,
-                             format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
+                             format: .currency(code: localCurrency))
                     }
                     HStack {
                         Text(String(localized: "Tip"))
                         Spacer()
                         Text(viewModel.tipAmount,
-                             format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
+                             format: .currency(code: localCurrency))
                     }
                     HStack {
                         Text(String(localized: "Total With Tip"))
@@ -79,7 +99,8 @@ struct CalculationView: View {
                     HStack {
                         Text(String(localized: "Total Per Person"))
                         Spacer()
-                        Text(viewModel.totalPerPerson, format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
+                        Text(viewModel.totalPerPerson, format: .currency(code: localCurrency))
+                            .fontWeight(.semibold)
                     }
                 } header: {
                     Text(String(localized: "Bill Totals"))
@@ -91,6 +112,7 @@ struct CalculationView: View {
                     }
                     .accessibilityLabel(String(localized: "Save Tip Calculation"))
                     .accessibilityHint(String(localized: "Saves the Tip Calculation"))
+                    .disabled(!viewModel.hasValidCalculation)
                     
                     Button(String(localized: "Reset")) {
                         viewModel.resetValues()
@@ -107,11 +129,8 @@ struct CalculationView: View {
                 
                 Button(String(localized: "OK"), role: nil) {
                     saveTipInfo()
-                    
-                    DispatchQueue.main.async {
-                        viewModel.resetValues()
-                    }
                 }
+                .disabled(!viewModel.canSaveTip)
                 .accessibilityLabel(String(localized: "OK"))
                 
                 Button(String(localized: "Cancel"), role: .cancel) {
@@ -144,12 +163,12 @@ struct CalculationView: View {
         
         viewModel.billAmount = defaults.getBillAmount()
         viewModel.tipPercentage = defaults.double(forKey: "tipPercentage")
-        viewModel.numberOfPeople = defaults.integer(forKey: "numberOfPeople")
+        viewModel.numberOfPeople = max(defaults.integer(forKey: "numberOfPeople"), 1)
     }
     
     /// Saves the tip information to the data manager.
     func saveTipInfo() {
-        guard let billAmount = viewModel.billAmount, let numberOfPeople = viewModel.numberOfPeople  else {
+        guard let billAmount = viewModel.billAmount, viewModel.canSaveTip else {
             return
         }
         
@@ -158,19 +177,23 @@ struct CalculationView: View {
         generator.notificationOccurred(.success)
         
         // Save Tip in Data Manager
-        dataManager.saveTip(name: viewModel.tipItemName,
+        dataManager.saveTip(name: viewModel.tipItemName.trimmingCharacters(in: .whitespacesAndNewlines),
                             billAmount: billAmount,
                             tipPercentage: viewModel.tipPercentage,
-                            numberOfPeople: numberOfPeople,
+                            numberOfPeople: viewModel.numberOfPeople,
                             tipAmount: viewModel.tipAmount,
                             totalAmountWithTip: viewModel.totalAmountWithTip,
                             totalPerPerson: viewModel.totalPerPerson)
+
+        DispatchQueue.main.async {
+            viewModel.resetValues()
+        }
     }
 }
 
 #Preview {
     CalculationView()
-        .environmentObject(CalculationViewModel())
+        .environmentObject(DataManager(inMemory: true))
 }
 
 extension UserDefaults {
