@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -11,25 +11,8 @@
 		480875052A933EB80036A3C4 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 480875042A933EB80036A3C4 /* FirebaseCrashlytics */; };
 		483809F02AC54E0B00A9D486 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 483809EF2AC54E0B00A9D486 /* Localizable.xcstrings */; };
 		48380A032AC5624100A9D486 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 48380A022AC5624100A9D486 /* GoogleService-Info.plist */; };
-		4841E29E2A144DF70074CC0B /* CalculationViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4841E29D2A144DF70074CC0B /* CalculationViewModel.swift */; };
-		487284D72AD4D25F0059F872 /* DataManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 487284D62AD4D25F0059F872 /* DataManagerTests.swift */; };
-		4882B8A62B940B3D006C96EF /* SavedDetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4882B8A52B940B3D006C96EF /* SavedDetailViewModel.swift */; };
-		4882B8A82B96A91F006C96EF /* SavedDetailViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4882B8A72B96A91F006C96EF /* SavedDetailViewModelTests.swift */; };
-		4882DCE42A11CCD6000E8882 /* TipSavvyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4882DCE32A11CCD6000E8882 /* TipSavvyApp.swift */; };
-		4882DCE62A11CCD6000E8882 /* CalculationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4882DCE52A11CCD6000E8882 /* CalculationView.swift */; };
-		4882DCE82A11CCD7000E8882 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4882DCE72A11CCD7000E8882 /* Assets.xcassets */; };
-		4882DCEB2A11CCD7000E8882 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4882DCEA2A11CCD7000E8882 /* Preview Assets.xcassets */; };
-		4882DCF52A11CCD8000E8882 /* TippyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4882DCF42A11CCD8000E8882 /* TippyTests.swift */; };
-		4882DCFF2A11CCD8000E8882 /* TippyUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4882DCFE2A11CCD8000E8882 /* TippyUITests.swift */; };
-		4882DD012A11CCD8000E8882 /* TippyUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4882DD002A11CCD8000E8882 /* TippyUITestsLaunchTests.swift */; };
-		48BA30142A3281A500FAFC1C /* SavedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48BA30132A3281A500FAFC1C /* SavedView.swift */; };
-		48D6251E2A1C673C00825A66 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 48D6251D2A1C673C00825A66 /* LaunchScreen.storyboard */; };
-		48D9A5902AD49AFE0044FC40 /* CalculationViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48D9A58F2AD49AFE0044FC40 /* CalculationViewModelTests.swift */; };
-		48DE4E2A2A36E17B00BB3E98 /* SavedTip.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 48DE4E282A36E17B00BB3E98 /* SavedTip.xcdatamodeld */; };
 		48DE4E2D2A36E20200BB3E98 /* SavedTip+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48DE4E2B2A36E20200BB3E98 /* SavedTip+CoreDataClass.swift */; };
 		48DE4E2E2A36E20200BB3E98 /* SavedTip+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48DE4E2C2A36E20200BB3E98 /* SavedTip+CoreDataProperties.swift */; };
-		48DE4E322A36E4B400BB3E98 /* DataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48DE4E312A36E4B400BB3E98 /* DataManager.swift */; };
-		48DE4E3D2A38426B00BB3E98 /* SavedDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48DE4E3C2A38426B00BB3E98 /* SavedDetailView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -52,31 +35,29 @@
 /* Begin PBXFileReference section */
 		483809EF2AC54E0B00A9D486 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		48380A022AC5624100A9D486 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
-		4841E29D2A144DF70074CC0B /* CalculationViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalculationViewModel.swift; sourceTree = "<group>"; };
 		4841E29F2A145CBB0074CC0B /* Tippy.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = Tippy.xctestplan; sourceTree = "<group>"; };
-		487284D62AD4D25F0059F872 /* DataManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataManagerTests.swift; sourceTree = "<group>"; };
-		4882B8A52B940B3D006C96EF /* SavedDetailViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedDetailViewModel.swift; sourceTree = "<group>"; };
-		4882B8A72B96A91F006C96EF /* SavedDetailViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedDetailViewModelTests.swift; sourceTree = "<group>"; };
 		4882DCE02A11CCD6000E8882 /* Tippy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Tippy.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		4882DCE32A11CCD6000E8882 /* TipSavvyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TipSavvyApp.swift; sourceTree = "<group>"; };
-		4882DCE52A11CCD6000E8882 /* CalculationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalculationView.swift; sourceTree = "<group>"; };
-		4882DCE72A11CCD7000E8882 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		4882DCEA2A11CCD7000E8882 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		4882DCF02A11CCD8000E8882 /* TippyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TippyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		4882DCF42A11CCD8000E8882 /* TippyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TippyTests.swift; sourceTree = "<group>"; };
 		4882DCFA2A11CCD8000E8882 /* TippyUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TippyUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		4882DCFE2A11CCD8000E8882 /* TippyUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TippyUITests.swift; sourceTree = "<group>"; };
-		4882DD002A11CCD8000E8882 /* TippyUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TippyUITestsLaunchTests.swift; sourceTree = "<group>"; };
-		48BA30132A3281A500FAFC1C /* SavedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedView.swift; sourceTree = "<group>"; };
-		48D6251D2A1C673C00825A66 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
-		48D6251F2A1C689200825A66 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		48D9A58F2AD49AFE0044FC40 /* CalculationViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalculationViewModelTests.swift; sourceTree = "<group>"; };
-		48DE4E292A36E17B00BB3E98 /* SavedTip.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = SavedTip.xcdatamodel; sourceTree = "<group>"; };
 		48DE4E2B2A36E20200BB3E98 /* SavedTip+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SavedTip+CoreDataClass.swift"; sourceTree = "<group>"; };
 		48DE4E2C2A36E20200BB3E98 /* SavedTip+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SavedTip+CoreDataProperties.swift"; sourceTree = "<group>"; };
-		48DE4E312A36E4B400BB3E98 /* DataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataManager.swift; sourceTree = "<group>"; };
-		48DE4E3C2A38426B00BB3E98 /* SavedDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedDetailView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		481AE7912FAE9F9C004A67D1 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 4882DCDF2A11CCD6000E8882 /* Tippy */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		481AE7822FAE9F9C004A67D1 /* Tippy */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (481AE7912FAE9F9C004A67D1 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = Tippy; sourceTree = "<group>"; };
+		481AE7962FAE9F9F004A67D1 /* TippyTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = TippyTests; sourceTree = "<group>"; };
+		481AE79D2FAE9FA5004A67D1 /* TippyUITests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = TippyUITests; sourceTree = "<group>"; };
+/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		4882DCDD2A11CCD6000E8882 /* Frameworks */ = {
@@ -120,9 +101,9 @@
 				483809EF2AC54E0B00A9D486 /* Localizable.xcstrings */,
 				48DE4E2B2A36E20200BB3E98 /* SavedTip+CoreDataClass.swift */,
 				48DE4E2C2A36E20200BB3E98 /* SavedTip+CoreDataProperties.swift */,
-				4882DCE22A11CCD6000E8882 /* Tippy */,
-				4882DCF32A11CCD8000E8882 /* TippyTests */,
-				4882DCFD2A11CCD8000E8882 /* TippyUITests */,
+				481AE7822FAE9F9C004A67D1 /* Tippy */,
+				481AE7962FAE9F9F004A67D1 /* TippyTests */,
+				481AE79D2FAE9FA5004A67D1 /* TippyUITests */,
 				4882DCE12A11CCD6000E8882 /* Products */,
 				480875032A933EB80036A3C4 /* Frameworks */,
 			);
@@ -136,77 +117,6 @@
 				4882DCFA2A11CCD8000E8882 /* TippyUITests.xctest */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		4882DCE22A11CCD6000E8882 /* Tippy */ = {
-			isa = PBXGroup;
-			children = (
-				48D6251F2A1C689200825A66 /* Info.plist */,
-				4882DCE72A11CCD7000E8882 /* Assets.xcassets */,
-				48D6251D2A1C673C00825A66 /* LaunchScreen.storyboard */,
-				48DE4E332A38347800BB3E98 /* Models */,
-				48DE4E342A38349800BB3E98 /* Views */,
-				48DE4E352A3834A200BB3E98 /* View Models */,
-				4882DCE92A11CCD7000E8882 /* Preview Content */,
-			);
-			path = Tippy;
-			sourceTree = "<group>";
-		};
-		4882DCE92A11CCD7000E8882 /* Preview Content */ = {
-			isa = PBXGroup;
-			children = (
-				4882DCEA2A11CCD7000E8882 /* Preview Assets.xcassets */,
-			);
-			path = "Preview Content";
-			sourceTree = "<group>";
-		};
-		4882DCF32A11CCD8000E8882 /* TippyTests */ = {
-			isa = PBXGroup;
-			children = (
-				4882DCF42A11CCD8000E8882 /* TippyTests.swift */,
-				487284D62AD4D25F0059F872 /* DataManagerTests.swift */,
-				48D9A58F2AD49AFE0044FC40 /* CalculationViewModelTests.swift */,
-				4882B8A72B96A91F006C96EF /* SavedDetailViewModelTests.swift */,
-			);
-			path = TippyTests;
-			sourceTree = "<group>";
-		};
-		4882DCFD2A11CCD8000E8882 /* TippyUITests */ = {
-			isa = PBXGroup;
-			children = (
-				4882DCFE2A11CCD8000E8882 /* TippyUITests.swift */,
-				4882DD002A11CCD8000E8882 /* TippyUITestsLaunchTests.swift */,
-			);
-			path = TippyUITests;
-			sourceTree = "<group>";
-		};
-		48DE4E332A38347800BB3E98 /* Models */ = {
-			isa = PBXGroup;
-			children = (
-				48DE4E282A36E17B00BB3E98 /* SavedTip.xcdatamodeld */,
-				48DE4E312A36E4B400BB3E98 /* DataManager.swift */,
-			);
-			path = Models;
-			sourceTree = "<group>";
-		};
-		48DE4E342A38349800BB3E98 /* Views */ = {
-			isa = PBXGroup;
-			children = (
-				4882DCE32A11CCD6000E8882 /* TipSavvyApp.swift */,
-				4882DCE52A11CCD6000E8882 /* CalculationView.swift */,
-				48BA30132A3281A500FAFC1C /* SavedView.swift */,
-				48DE4E3C2A38426B00BB3E98 /* SavedDetailView.swift */,
-			);
-			path = Views;
-			sourceTree = "<group>";
-		};
-		48DE4E352A3834A200BB3E98 /* View Models */ = {
-			isa = PBXGroup;
-			children = (
-				4841E29D2A144DF70074CC0B /* CalculationViewModel.swift */,
-				4882B8A52B940B3D006C96EF /* SavedDetailViewModel.swift */,
-			);
-			path = "View Models";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -224,6 +134,9 @@
 			buildRules = (
 			);
 			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				481AE7822FAE9F9C004A67D1 /* Tippy */,
 			);
 			name = Tippy;
 			packageProductDependencies = (
@@ -246,6 +159,9 @@
 			dependencies = (
 				4882DCF22A11CCD8000E8882 /* PBXTargetDependency */,
 			);
+			fileSystemSynchronizedGroups = (
+				481AE7962FAE9F9F004A67D1 /* TippyTests */,
+			);
 			name = TippyTests;
 			packageProductDependencies = (
 				480875042A933EB80036A3C4 /* FirebaseCrashlytics */,
@@ -266,6 +182,9 @@
 			);
 			dependencies = (
 				4882DCFC2A11CCD8000E8882 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				481AE79D2FAE9FA5004A67D1 /* TippyUITests */,
 			);
 			name = TippyUITests;
 			productName = TippyUITests;
@@ -329,11 +248,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				48D6251E2A1C673C00825A66 /* LaunchScreen.storyboard in Resources */,
 				483809F02AC54E0B00A9D486 /* Localizable.xcstrings in Resources */,
 				48380A032AC5624100A9D486 /* GoogleService-Info.plist in Resources */,
-				4882DCEB2A11CCD7000E8882 /* Preview Assets.xcassets in Resources */,
-				4882DCE82A11CCD7000E8882 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -384,16 +300,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4882DCE62A11CCD6000E8882 /* CalculationView.swift in Sources */,
-				48DE4E322A36E4B400BB3E98 /* DataManager.swift in Sources */,
-				48DE4E2A2A36E17B00BB3E98 /* SavedTip.xcdatamodeld in Sources */,
-				48BA30142A3281A500FAFC1C /* SavedView.swift in Sources */,
-				4882DCE42A11CCD6000E8882 /* TipSavvyApp.swift in Sources */,
 				48DE4E2E2A36E20200BB3E98 /* SavedTip+CoreDataProperties.swift in Sources */,
 				48DE4E2D2A36E20200BB3E98 /* SavedTip+CoreDataClass.swift in Sources */,
-				4882B8A62B940B3D006C96EF /* SavedDetailViewModel.swift in Sources */,
-				4841E29E2A144DF70074CC0B /* CalculationViewModel.swift in Sources */,
-				48DE4E3D2A38426B00BB3E98 /* SavedDetailView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -401,10 +309,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				48D9A5902AD49AFE0044FC40 /* CalculationViewModelTests.swift in Sources */,
-				487284D72AD4D25F0059F872 /* DataManagerTests.swift in Sources */,
-				4882DCF52A11CCD8000E8882 /* TippyTests.swift in Sources */,
-				4882B8A82B96A91F006C96EF /* SavedDetailViewModelTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -412,8 +316,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4882DCFF2A11CCD8000E8882 /* TippyUITests.swift in Sources */,
-				4882DD012A11CCD8000E8882 /* TippyUITestsLaunchTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -626,7 +528,6 @@
 		4882DD082A11CCD8000E8882 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -646,7 +547,6 @@
 		4882DD092A11CCD8000E8882 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -666,7 +566,6 @@
 		4882DD0B2A11CCD8000E8882 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = SBCRL8SBBK;
@@ -684,7 +583,6 @@
 		4882DD0C2A11CCD8000E8882 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = SBCRL8SBBK;
@@ -763,19 +661,6 @@
 			productName = FirebaseCrashlytics;
 		};
 /* End XCSwiftPackageProductDependency section */
-
-/* Begin XCVersionGroup section */
-		48DE4E282A36E17B00BB3E98 /* SavedTip.xcdatamodeld */ = {
-			isa = XCVersionGroup;
-			children = (
-				48DE4E292A36E17B00BB3E98 /* SavedTip.xcdatamodel */,
-			);
-			currentVersion = 48DE4E292A36E17B00BB3E98 /* SavedTip.xcdatamodel */;
-			path = SavedTip.xcdatamodeld;
-			sourceTree = "<group>";
-			versionGroupType = wrapper.xcdatamodel;
-		};
-/* End XCVersionGroup section */
 	};
 	rootObject = 4882DCD82A11CCD6000E8882 /* Project object */;
 }

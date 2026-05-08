@@ -1,0 +1,180 @@
+//
+//  GlassUI.swift
+//  Tippy
+//
+//  Created by Codex on 5/8/26.
+//
+
+import SwiftUI
+
+struct GlassPanelModifier: ViewModifier {
+    @Environment(\.colorSchemeContrast) private var colorSchemeContrast
+
+    let cornerRadius: CGFloat
+    let interactive: Bool
+    let highContrast: Bool
+
+    @ViewBuilder
+    func body(content: Content) -> some View {
+        let useHighContrast = highContrast || colorSchemeContrast == .increased
+
+        if #available(iOS 26.0, *) {
+            content
+                .glassEffect(.regular.interactive(interactive), in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+                .overlay {
+                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                        .strokeBorder(.primary.opacity(useHighContrast ? 0.45 : 0.18), lineWidth: useHighContrast ? 1.5 : 1)
+                }
+        } else {
+            content
+                .background(.regularMaterial, in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+                .overlay {
+                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                        .strokeBorder(.primary.opacity(useHighContrast ? 0.5 : 0.18), lineWidth: useHighContrast ? 1.5 : 1)
+                }
+                .shadow(color: .primary.opacity(useHighContrast ? 0.05 : 0.08), radius: 12, y: 6)
+        }
+    }
+}
+
+extension View {
+    func glassPanel(cornerRadius: CGFloat = 18, interactive: Bool = false, highContrast: Bool = false) -> some View {
+        modifier(GlassPanelModifier(cornerRadius: cornerRadius, interactive: interactive, highContrast: highContrast))
+    }
+
+    func animatedTextChange<Value: Equatable>(value: Value) -> some View {
+        modifier(AnimatedTextChangeModifier(value: value))
+    }
+}
+
+private struct AnimatedTextChangeModifier<Value: Equatable>: ViewModifier {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    let value: Value
+
+    @ViewBuilder
+    func body(content: Content) -> some View {
+        if reduceMotion {
+            content
+        } else if #available(iOS 17.0, *) {
+            content
+                .contentTransition(.numericText())
+                .animation(.easeInOut(duration: 0.22), value: value)
+        } else {
+            content
+                .contentTransition(.opacity)
+                .animation(.easeInOut(duration: 0.18), value: value)
+        }
+    }
+}
+
+struct TipPresetButtonStyle: ButtonStyle {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.colorSchemeContrast) private var colorSchemeContrast
+
+    let isSelected: Bool
+
+    func makeBody(configuration: Configuration) -> some View {
+        let highContrast = colorSchemeContrast == .increased
+
+        configuration.label
+            .font(.subheadline.weight(.semibold))
+            .foregroundStyle(isSelected ? Color.accentColor : Color.primary)
+            .padding(.vertical, 9)
+            .background {
+                if isSelected {
+                    Capsule()
+                        .fill(Color.accentColor.opacity(highContrast ? 0.28 : 0.16))
+                }
+            }
+            .overlay {
+                Capsule()
+                    .strokeBorder(isSelected ? Color.accentColor : Color.primary.opacity(highContrast ? 0.35 : 0), lineWidth: isSelected || highContrast ? 1.5 : 0)
+            }
+            .glassPanel(cornerRadius: 16, interactive: true, highContrast: highContrast || isSelected)
+            .scaleEffect(!reduceMotion && configuration.isPressed ? 0.96 : 1)
+            .animation(reduceMotion ? nil : .easeInOut(duration: 0.18), value: configuration.isPressed)
+            .animation(reduceMotion ? nil : .easeInOut(duration: 0.18), value: isSelected)
+    }
+}
+
+struct MetricCard: View {
+    let title: String
+    let value: String
+    var prominence: Prominence = .regular
+
+    enum Prominence: Equatable {
+        case regular
+        case primary
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(title)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+            Text(value)
+                .font(prominence == .primary ? .title2.weight(.bold) : .headline.weight(.semibold))
+                .foregroundStyle(.primary)
+                .monospacedDigit()
+                .minimumScaleFactor(0.85)
+                .animatedTextChange(value: value)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(14)
+        .glassPanel(cornerRadius: 16)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(title)
+        .accessibilityValue(value)
+    }
+}
+
+struct InfoRow: View {
+    let title: String
+    let value: String
+
+    var body: some View {
+        ViewThatFits(in: .horizontal) {
+            HStack(alignment: .firstTextBaseline) {
+                titleView
+                Spacer(minLength: 12)
+                valueView
+            }
+
+            VStack(alignment: .leading, spacing: 3) {
+                titleView
+                valueView
+            }
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(title)
+        .accessibilityValue(value)
+    }
+
+    private var titleView: some View {
+        Text(title)
+            .font(.subheadline.weight(.medium))
+            .foregroundStyle(.secondary)
+    }
+
+    private var valueView: some View {
+        Text(value)
+            .font(.subheadline.weight(.semibold))
+            .foregroundStyle(.primary)
+            .monospacedDigit()
+            .animatedTextChange(value: value)
+    }
+}
+
+struct SelectedAccessibilityTraitModifier: ViewModifier {
+    let isSelected: Bool
+
+    @ViewBuilder
+    func body(content: Content) -> some View {
+        if isSelected {
+            content.accessibilityAddTraits(.isSelected)
+        } else {
+            content
+        }
+    }
+}

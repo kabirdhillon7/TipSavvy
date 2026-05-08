@@ -402,7 +402,19 @@
         }
       }
     },
+    "Custom Tip" : {
+
+    },
     "Date" : {
+
+    },
+    "Decrease People" : {
+
+    },
+    "Delete" : {
+
+    },
+    "Delete Saved Tip" : {
 
     },
     "Done" : {
@@ -613,6 +625,12 @@
           }
         }
       }
+    },
+    "Opens saved tip details" : {
+
+    },
+    "People" : {
+
     },
     "Number of People" : {
       "localizations" : {
@@ -906,7 +924,13 @@
     "Search Saved Tips" : {
 
     },
+    "Saved Tip Details" : {
+
+    },
     "Selected" : {
+
+    },
+    "Increase People" : {
 
     },
     "Selects the Tip Percentage" : {
@@ -1068,6 +1092,9 @@
           }
         }
       }
+    },
+    "This saved tip will be permanently deleted." : {
+
     },
     "Tip Percentage" : {
       "localizations" : {

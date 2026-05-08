@@ -12,100 +12,42 @@ struct CalculationView: View {
     @EnvironmentObject var dataManager: DataManager
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.colorSchemeContrast) private var colorSchemeContrast
-    
+
     @StateObject var viewModel = CalculationViewModel()
-    
+
     @State private var showingSavedAlert = false
     @FocusState var keyboardFocusField: TipSavvyKeyboardField?
 
     private let tipPresets = [15.0, 18.0, 20.0, 25.0]
     private let localCurrency = Locale.current.currency?.identifier ?? "USD"
-    
+
     var body: some View {
         NavigationStack {
-            Form {
-                // MARK: Bill Information
-                Section {
-                    TextField(String(localized: "Enter Bill Amount"),
-                              value: $viewModel.billAmount,
-                              format: .currency(code: localCurrency))
-                    .keyboardType(.decimalPad)
-                    .focused($keyboardFocusField, equals: .billAmount)
-                    .accessibilityLabel(String(localized: "Enter Bill Amount"))
-                    
-                    Stepper(value: $viewModel.numberOfPeople, in: 1...99) {
-                        HStack {
-                            Text(String(localized: "Number of People"))
-                            Spacer()
-                            Text(viewModel.numberOfPeople, format: .number)
-                                .foregroundStyle(.secondary)
-                        }
-                        .accessibilityLabel(String(localized: "Number of People"))
-                        .accessibilityValue("\(viewModel.numberOfPeople)")
-                    }
-                } header: {
-                    Text(String(localized: "Bill Information"))
-                }
-                
-                // MARK: Tip Amount: Percentage Slider
-                Section {
-                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 68), spacing: 8)], spacing: 8) {
-                        ForEach(tipPresets, id: \.self) { preset in
-                            tipPresetButton(for: preset)
-                        }
-                    }
-                    .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 8, trailing: 16))
-
-                    ViewThatFits(in: .horizontal) {
-                        tipSliderRow
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("\(viewModel.tipPercentage, specifier: "%.0f")%")
-                                .font(.headline)
-                            tipSlider
-                        }
-                    }
-                } header: {
-                    Text(String(localized: "Tip Amount"))
-                }
-                
-                // MARK: Bill Totals
-                Section {
+            ScrollView {
+                VStack(spacing: 18) {
                     totalsSummaryPanel
-                        .listRowInsets(EdgeInsets(top: 10, leading: 16, bottom: 10, trailing: 16))
-                        .listRowBackground(Color.clear)
-                } header: {
-                    Text(String(localized: "Bill Totals"))
+                    billAmountCard
+                    splitCard
+                    tipCard
+                    actionButtons
                 }
-                
-                Section {
-                    Button(String(localized: "Save Tip Calculation")) {
-                        showingSavedAlert = true
-                    }
-                    .accessibilityLabel(String(localized: "Save Tip Calculation"))
-                    .accessibilityHint(String(localized: "Saves the Tip Calculation"))
-                    .disabled(!viewModel.hasValidCalculation)
-                    
-                    Button(String(localized: "Reset")) {
-                        performAnimated(.spring(response: 0.32, dampingFraction: 0.82)) {
-                            viewModel.resetValues()
-                        }
-                    }
-                    .foregroundStyle(.red)
-                    .accessibilityLabel(String(localized: "Reset"))
-                }
+                .padding(.horizontal, 18)
+                .padding(.top, 12)
+                .padding(.bottom, 28)
             }
+            .background(Color(.systemGroupedBackground))
             .navigationTitle("TipSavvy")
-            .alert(String(localized: "Save Tip Calculation"), isPresented: $showingSavedAlert,  actions: {
+            .alert(String(localized: "Save Tip Calculation"), isPresented: $showingSavedAlert, actions: {
                 TextField(String(localized: "Enter Name"), text: $viewModel.tipItemName)
                     .autocorrectionDisabled()
                     .accessibilityLabel(String(localized: "Enter Tip Calculation Name"))
-                
+
                 Button(String(localized: "OK"), role: nil) {
                     saveTipInfo()
                 }
                 .disabled(!viewModel.canSaveTip)
                 .accessibilityLabel(String(localized: "OK"))
-                
+
                 Button(String(localized: "Cancel"), role: .cancel) {
                     viewModel.tipItemName = ""
                 }
@@ -118,11 +60,10 @@ struct CalculationView: View {
             .animation(reduceMotion ? nil : .easeInOut(duration: 0.2), value: viewModel.totalAmountWithTip)
             .animation(reduceMotion ? nil : .easeInOut(duration: 0.2), value: viewModel.totalPerPerson)
             .toolbar {
-                // MARK: Keyboard
                 ToolbarItem(placement: .keyboard) {
                     Spacer()
                 }
-                
+
                 ToolbarItem(placement: .keyboard) {
                     Button {
                         keyboardFocusField = nil
@@ -136,14 +77,144 @@ struct CalculationView: View {
         }
     }
 
-    private var tipSliderRow: some View {
-        HStack {
-            tipSlider
-            Text("\(viewModel.tipPercentage, specifier: "%.0f")%")
-                .font(.body.monospacedDigit())
-                .frame(minWidth: 48, alignment: .trailing)
-                .lineLimit(1)
+    private var billAmountCard: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Label(String(localized: "Bill Amount"), systemImage: "receipt")
+                .font(.headline)
+                .foregroundStyle(.secondary)
+
+            TextField(String(localized: "Enter Bill Amount"),
+                      value: $viewModel.billAmount,
+                      format: .currency(code: localCurrency))
+                .font(.largeTitle.weight(.bold).monospacedDigit())
+                .keyboardType(.decimalPad)
+                .focused($keyboardFocusField, equals: .billAmount)
+                .textFieldStyle(.plain)
+                .accessibilityLabel(String(localized: "Enter Bill Amount"))
         }
+        .padding(18)
+        .glassPanel(cornerRadius: 22, interactive: true, highContrast: keyboardFocusField == .billAmount)
+    }
+
+    private var splitCard: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Label(String(localized: "Number of People"), systemImage: "person.2")
+                .font(.headline)
+                .foregroundStyle(.secondary)
+
+            ViewThatFits(in: .horizontal) {
+                HStack {
+                    peopleButton(systemImage: "minus", label: String(localized: "Decrease People"), isDisabled: viewModel.numberOfPeople <= 1) {
+                        viewModel.numberOfPeople = max(1, viewModel.numberOfPeople - 1)
+                    }
+
+                    Spacer(minLength: 16)
+                    peopleCount
+                    Spacer(minLength: 16)
+
+                    peopleButton(systemImage: "plus", label: String(localized: "Increase People"), isDisabled: viewModel.numberOfPeople >= 99) {
+                        viewModel.numberOfPeople = min(99, viewModel.numberOfPeople + 1)
+                    }
+                }
+
+                VStack(spacing: 12) {
+                    peopleCount
+                    HStack {
+                        peopleButton(systemImage: "minus", label: String(localized: "Decrease People"), isDisabled: viewModel.numberOfPeople <= 1) {
+                            viewModel.numberOfPeople = max(1, viewModel.numberOfPeople - 1)
+                        }
+                        Spacer()
+                        peopleButton(systemImage: "plus", label: String(localized: "Increase People"), isDisabled: viewModel.numberOfPeople >= 99) {
+                            viewModel.numberOfPeople = min(99, viewModel.numberOfPeople + 1)
+                        }
+                    }
+                }
+            }
+        }
+        .padding(18)
+        .glassPanel(cornerRadius: 22)
+        .accessibilityElement(children: .contain)
+    }
+
+    private var peopleCount: some View {
+        VStack(spacing: 2) {
+            Text(viewModel.numberOfPeople, format: .number)
+                .font(.system(.largeTitle, design: .rounded).weight(.bold))
+                .monospacedDigit()
+                .animatedTextChange(value: viewModel.numberOfPeople)
+            Text(String(localized: "People"))
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(String(localized: "Number of People"))
+        .accessibilityValue("\(viewModel.numberOfPeople)")
+        .accessibilityIdentifier("Number of People")
+    }
+
+    private func peopleButton(systemImage: String, label: String, isDisabled: Bool, action: @escaping () -> Void) -> some View {
+        Button {
+            performAnimated(.spring(response: 0.26, dampingFraction: 0.82)) {
+                action()
+            }
+        } label: {
+            Image(systemName: systemImage)
+                .font(.headline.weight(.bold))
+                .frame(width: 48, height: 48)
+                .contentShape(Circle())
+        }
+        .buttonStyle(.plain)
+        .background(.regularMaterial, in: Circle())
+        .overlay {
+            Circle()
+                .strokeBorder(.primary.opacity(colorSchemeContrast == .increased ? 0.45 : 0.18), lineWidth: colorSchemeContrast == .increased ? 1.5 : 1)
+        }
+        .disabled(isDisabled)
+        .opacity(isDisabled ? 0.45 : 1)
+        .accessibilityLabel(label)
+    }
+
+    private var tipCard: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Label(String(localized: "Tip Amount"), systemImage: "percent")
+                .font(.headline)
+                .foregroundStyle(.secondary)
+
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 68), spacing: 8)], spacing: 8) {
+                ForEach(tipPresets, id: \.self) { preset in
+                    tipPresetButton(for: preset)
+                }
+            }
+
+            VStack(alignment: .leading, spacing: 8) {
+                ViewThatFits(in: .horizontal) {
+                    HStack {
+                        Text(String(localized: "Custom Tip"))
+                            .font(.subheadline.weight(.medium))
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                        tipPercentageText
+                    }
+
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(String(localized: "Custom Tip"))
+                            .font(.subheadline.weight(.medium))
+                            .foregroundStyle(.secondary)
+                        tipPercentageText
+                    }
+                }
+                tipSlider
+            }
+        }
+        .padding(18)
+        .glassPanel(cornerRadius: 22)
+    }
+
+    private var tipPercentageText: some View {
+        Text("\(viewModel.tipPercentage, specifier: "%.0f")%")
+            .font(.headline.monospacedDigit())
+            .lineLimit(1)
+            .animatedTextChange(value: viewModel.tipPercentage)
     }
 
     @ViewBuilder
@@ -179,27 +250,30 @@ struct CalculationView: View {
     }
 
     private var totalsSummaryPanel: some View {
-        VStack(alignment: .leading, spacing: 14) {
+        VStack(alignment: .leading, spacing: 16) {
+            Text(String(localized: "Bill Totals"))
+                .font(.headline)
+                .foregroundStyle(.secondary)
+
             ViewThatFits(in: .horizontal) {
-                HStack(alignment: .firstTextBaseline) {
-                    totalsPrimaryColumn
-                    Spacer(minLength: 16)
-                    totalsSecondaryColumn
+                HStack(alignment: .top, spacing: 12) {
+                    MetricCard(title: String(localized: "Total Per Person"), value: viewModel.totalPerPerson.formatted(.currency(code: localCurrency)), prominence: .primary)
+                    MetricCard(title: String(localized: "Total With Tip"), value: viewModel.totalAmountWithTip.formatted(.currency(code: localCurrency)))
                 }
 
-                VStack(alignment: .leading, spacing: 12) {
-                    totalsPrimaryColumn
-                    totalsSecondaryColumn
+                VStack(spacing: 12) {
+                    MetricCard(title: String(localized: "Total Per Person"), value: viewModel.totalPerPerson.formatted(.currency(code: localCurrency)), prominence: .primary)
+                    MetricCard(title: String(localized: "Total With Tip"), value: viewModel.totalAmountWithTip.formatted(.currency(code: localCurrency)))
                 }
             }
 
             Divider()
 
-            totalDetailRow(title: String(localized: "Subtotal"), amount: viewModel.billAmount ?? 0)
-            totalDetailRow(title: String(localized: "Tip"), amount: viewModel.tipAmount)
+            InfoRow(title: String(localized: "Subtotal"), value: (viewModel.billAmount ?? 0).formatted(.currency(code: localCurrency)))
+            InfoRow(title: String(localized: "Tip"), value: viewModel.tipAmount.formatted(.currency(code: localCurrency)))
         }
-        .padding(16)
-        .glassPanel(highContrast: colorSchemeContrast == .increased)
+        .padding(18)
+        .glassPanel(cornerRadius: 24, highContrast: colorSchemeContrast == .increased)
         .contentTransition(reduceMotion ? .identity : .opacity)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(String(localized: "Bill Totals"))
@@ -207,49 +281,46 @@ struct CalculationView: View {
         .accessibilityIdentifier("Bill Totals Summary")
     }
 
-    private var totalsPrimaryColumn: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(String(localized: "Total Per Person"))
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-            Text(viewModel.totalPerPerson, format: .currency(code: localCurrency))
-                .font(.title2.weight(.bold))
-                .monospacedDigit()
-                .minimumScaleFactor(0.85)
-        }
-    }
-
-    private var totalsSecondaryColumn: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(String(localized: "Total With Tip"))
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-            Text(viewModel.totalAmountWithTip, format: .currency(code: localCurrency))
-                .fontWeight(.semibold)
-                .monospacedDigit()
-        }
-    }
-
-    private func totalDetailRow(title: String, amount: Double) -> some View {
+    private var actionButtons: some View {
         ViewThatFits(in: .horizontal) {
-            HStack {
-                Text(title)
-                    .foregroundStyle(.secondary)
-                Spacer()
-                Text(amount, format: .currency(code: localCurrency))
-                    .fontWeight(.medium)
-                    .monospacedDigit()
+            HStack(spacing: 12) {
+                saveButton
+                resetButton
             }
 
-            VStack(alignment: .leading, spacing: 2) {
-                Text(title)
-                    .foregroundStyle(.secondary)
-                Text(amount, format: .currency(code: localCurrency))
-                    .fontWeight(.medium)
-                    .monospacedDigit()
+            VStack(spacing: 12) {
+                saveButton
+                resetButton
             }
         }
-        .font(.subheadline)
+    }
+
+    private var saveButton: some View {
+        Button {
+            showingSavedAlert = true
+        } label: {
+            Label(String(localized: "Save Tip Calculation"), systemImage: "tray.and.arrow.down")
+                .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(.borderedProminent)
+        .controlSize(.large)
+        .disabled(!viewModel.hasValidCalculation)
+        .accessibilityLabel(String(localized: "Save Tip Calculation"))
+        .accessibilityHint(String(localized: "Saves the Tip Calculation"))
+    }
+
+    private var resetButton: some View {
+        Button(role: .destructive) {
+            performAnimated(.spring(response: 0.32, dampingFraction: 0.82)) {
+                viewModel.resetValues()
+            }
+        } label: {
+            Label(String(localized: "Reset"), systemImage: "arrow.counterclockwise")
+                .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(.bordered)
+        .controlSize(.large)
+        .accessibilityLabel(String(localized: "Reset"))
     }
 
     private func performAnimated(_ animation: Animation, _ updates: () -> Void) {
@@ -265,12 +336,10 @@ struct CalculationView: View {
         guard let billAmount = viewModel.billAmount, viewModel.canSaveTip else {
             return
         }
-        
-        // Haptic Feedback
+
         let generator = UINotificationFeedbackGenerator()
         generator.notificationOccurred(.success)
-        
-        // Save Tip in Data Manager
+
         dataManager.saveTip(name: viewModel.tipItemName.trimmingCharacters(in: .whitespacesAndNewlines),
                             billAmount: billAmount,
                             tipPercentage: viewModel.tipPercentage,
@@ -289,84 +358,5 @@ struct CalculationView: View {
 
 #Preview {
     CalculationView()
-        .environmentObject(DataManager(inMemory: true))
-}
-
-private struct GlassPanelModifier: ViewModifier {
-    @Environment(\.colorSchemeContrast) private var colorSchemeContrast
-
-    let cornerRadius: CGFloat
-    let interactive: Bool
-    let highContrast: Bool
-
-    @ViewBuilder
-    func body(content: Content) -> some View {
-        let useHighContrast = highContrast || colorSchemeContrast == .increased
-
-        if #available(iOS 26.0, *) {
-            content
-                .glassEffect(.regular.interactive(interactive), in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
-                .overlay {
-                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                        .strokeBorder(.primary.opacity(useHighContrast ? 0.45 : 0.18), lineWidth: useHighContrast ? 1.5 : 1)
-                }
-        } else {
-            content
-                .background(.regularMaterial, in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
-                .overlay {
-                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                        .strokeBorder(.primary.opacity(useHighContrast ? 0.5 : 0.18), lineWidth: useHighContrast ? 1.5 : 1)
-                }
-                .shadow(color: .primary.opacity(useHighContrast ? 0.05 : 0.08), radius: 12, y: 6)
-        }
-    }
-}
-
-private extension View {
-    func glassPanel(cornerRadius: CGFloat = 18, interactive: Bool = false, highContrast: Bool = false) -> some View {
-        modifier(GlassPanelModifier(cornerRadius: cornerRadius, interactive: interactive, highContrast: highContrast))
-    }
-}
-
-private struct TipPresetButtonStyle: ButtonStyle {
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @Environment(\.colorSchemeContrast) private var colorSchemeContrast
-
-    let isSelected: Bool
-
-    func makeBody(configuration: Configuration) -> some View {
-        let highContrast = colorSchemeContrast == .increased
-
-        configuration.label
-            .font(.subheadline.weight(.semibold))
-            .foregroundStyle(isSelected ? Color.accentColor : Color.primary)
-            .padding(.vertical, 9)
-            .background {
-                if isSelected {
-                    Capsule()
-                        .fill(Color.accentColor.opacity(highContrast ? 0.28 : 0.16))
-                }
-            }
-            .overlay {
-                Capsule()
-                    .strokeBorder(isSelected ? Color.accentColor : Color.primary.opacity(highContrast ? 0.35 : 0), lineWidth: isSelected || highContrast ? 1.5 : 0)
-            }
-            .glassPanel(cornerRadius: 16, interactive: true, highContrast: highContrast || isSelected)
-            .scaleEffect(!reduceMotion && configuration.isPressed ? 0.96 : 1)
-            .animation(reduceMotion ? nil : .easeInOut(duration: 0.18), value: configuration.isPressed)
-            .animation(reduceMotion ? nil : .easeInOut(duration: 0.18), value: isSelected)
-    }
-}
-
-private struct SelectedAccessibilityTraitModifier: ViewModifier {
-    let isSelected: Bool
-
-    @ViewBuilder
-    func body(content: Content) -> some View {
-        if isSelected {
-            content.accessibilityAddTraits(.isSelected)
-        } else {
-            content
-        }
-    }
+        .environmentObject(DataManager.preview)
 }

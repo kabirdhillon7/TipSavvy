@@ -54,7 +54,7 @@ final class TippyUITests: XCTestCase {
     func test_contentView_shouldCancelSaving() {
         let app = XCUIApplication()
         enterBillAmount("25", in: app)
-        app.collectionViews/*@START_MENU_TOKEN@*/.buttons["Save Tip Calculation"]/*[[".cells.buttons[\"Save Tip Calculation\"]",".buttons[\"Save Tip Calculation\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
+        app.buttons["Save Tip Calculation"].tap()
         app.alerts["Save Tip Calculation"].scrollViews.otherElements.buttons["Cancel"].tap()
     }
     
@@ -62,7 +62,7 @@ final class TippyUITests: XCTestCase {
         let app = XCUIApplication()
         app.launch()
         
-        let enterBillAmountTextField = app.collectionViews/*@START_MENU_TOKEN@*/.textFields["Enter Bill Amount"]/*[[".cells.textFields[\"Enter Bill Amount\"]",".textFields[\"Enter Bill Amount\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/
+        let enterBillAmountTextField = app.textFields["Enter Bill Amount"]
         enterBillAmountTextField.tap()
         
         app/*@START_MENU_TOKEN@*/.keys["2"]/*[[".keyboards.keys[\"2\"]",".keys[\"2\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
@@ -75,7 +75,7 @@ final class TippyUITests: XCTestCase {
         let app = XCUIApplication()
         app.launch()
         
-        let tipPercentageSelectionSlider = XCUIApplication().collectionViews/*@START_MENU_TOKEN@*/.sliders["Tip Percentage Selection"]/*[[".cells.sliders[\"Tip Percentage Selection\"]",".sliders[\"Tip Percentage Selection\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/
+        let tipPercentageSelectionSlider = app.sliders["Tip Percentage Selection"]
         tipPercentageSelectionSlider.tap()
         tipPercentageSelectionSlider.swipeRight()
         tipPercentageSelectionSlider.swipeRight()
@@ -85,17 +85,16 @@ final class TippyUITests: XCTestCase {
         let app = XCUIApplication()
         app.launch()
         
-        let peopleStepper = app.collectionViews.steppers["Number of People"]
-        peopleStepper.buttons["Increment"].tap()
-        peopleStepper.buttons["Decrement"].tap()
+        app.buttons["Increase People"].tap()
+        app.buttons["Decrease People"].tap()
     }
 
     func test_tipPreset_shouldSelectTwentyPercent() {
         let app = XCUIApplication()
         app.launch()
 
-        app.collectionViews.buttons["20%"].tap()
-        XCTAssertEqual(app.collectionViews.buttons["20%"].value as? String, "Selected")
+        app.buttons["20%"].tap()
+        XCTAssertEqual(app.buttons["20%"].value as? String, "Selected")
     }
 
     func test_calculatorAccessibilityElements_shouldBeDiscoverable() {
@@ -104,36 +103,35 @@ final class TippyUITests: XCTestCase {
         app.launchArguments += ["-UIAccessibilityReduceMotionEnabled", "YES"]
         app.launch()
 
-        XCTAssertTrue(app.collectionViews.textFields["Enter Bill Amount"].exists)
-        XCTAssertTrue(app.collectionViews.steppers["Number of People"].exists)
-        XCTAssertTrue(app.collectionViews.buttons["15%"].exists)
-        XCTAssertTrue(app.collectionViews.sliders["Tip Percentage Selection"].exists)
-        XCTAssertTrue(app.collectionViews.buttons["Save Tip Calculation"].exists)
-        XCTAssertTrue(app.collectionViews.buttons["Reset"].exists)
-        XCTAssertTrue(app.collectionViews.otherElements["Bill Totals Summary"].exists)
+        XCTAssertTrue(app.textFields["Enter Bill Amount"].exists)
+        XCTAssertTrue(app.staticTexts["Number of People"].exists)
+        XCTAssertTrue(app.buttons["15%"].exists)
+        XCTAssertTrue(app.sliders["Tip Percentage Selection"].exists)
+        XCTAssertTrue(app.buttons["Save Tip Calculation"].exists)
+        XCTAssertTrue(app.buttons["Reset"].exists)
+        XCTAssertTrue(app.otherElements["Bill Totals Summary"].exists)
     }
 
     func test_tipPreset_shouldPersistAfterRelaunch() {
         let app = XCUIApplication()
         app.launch()
 
-        app.collectionViews.buttons["20%"].tap()
+        app.buttons["20%"].tap()
         app.terminate()
         app.launch()
 
-        XCTAssertEqual(app.collectionViews.buttons["20%"].value as? String, "Selected")
+        XCTAssertEqual(app.buttons["20%"].value as? String, "Selected")
     }
 
     func test_stepper_shouldPersistPeopleCountAfterRelaunch() {
         let app = XCUIApplication()
         app.launch()
 
-        let peopleStepper = app.collectionViews.steppers["Number of People"]
-        peopleStepper.buttons["Increment"].tap()
+        app.buttons["Increase People"].tap()
         app.terminate()
         app.launch()
 
-        XCTAssertEqual(app.collectionViews.steppers["Number of People"].value as? String, "2")
+        XCTAssertTrue(app.staticTexts["2"].exists)
     }
     
     func test_tabBar_shouldSelectSavedTab() {
@@ -149,16 +147,14 @@ final class TippyUITests: XCTestCase {
         let app = XCUIApplication()
         app.launch()
         
-        let collectionViewsQuery = app.collectionViews
-        let resetButton = collectionViewsQuery/*@START_MENU_TOKEN@*/.buttons["Reset"]/*[[".cells.buttons[\"Reset\"]",".buttons[\"Reset\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/
-        resetButton.tap()
+        app.buttons["Reset"].tap()
     }
     
     func test_saveTipCalculationButton_shouldBeDisabledForInvalidCalculation() {
         let app = XCUIApplication()
         app.launch()
         
-        XCTAssertFalse(app.collectionViews/*@START_MENU_TOKEN@*/.buttons["Save Tip Calculation"]/*[[".cells.buttons[\"Save Tip Calculation\"]",".buttons[\"Save Tip Calculation\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.isEnabled)
+        XCTAssertFalse(app.buttons["Save Tip Calculation"].isEnabled)
     }
     
     func test_saveTipCalculationButton_shouldSave() {
@@ -167,7 +163,7 @@ final class TippyUITests: XCTestCase {
 
         enterBillAmount("25", in: app)
 
-        app.collectionViews/*@START_MENU_TOKEN@*/.buttons["Save Tip Calculation"]/*[[".cells.buttons[\"Save Tip Calculation\"]",".buttons[\"Save Tip Calculation\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
+        app.buttons["Save Tip Calculation"].tap()
         app.alerts["Save Tip Calculation"].scrollViews.otherElements.textFields["Enter Name"].typeText("Lunch")
         app.alerts["Save Tip Calculation"].scrollViews.otherElements.buttons["OK"].tap()
     }
@@ -177,7 +173,7 @@ final class TippyUITests: XCTestCase {
         app.launch()
 
         enterBillAmount("25", in: app)
-        app.collectionViews/*@START_MENU_TOKEN@*/.buttons["Save Tip Calculation"]/*[[".cells.buttons[\"Save Tip Calculation\"]",".buttons[\"Save Tip Calculation\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
+        app.buttons["Save Tip Calculation"].tap()
         app.alerts["Save Tip Calculation"].scrollViews.otherElements.buttons["Cancel"].tap()
     }
 
@@ -190,7 +186,7 @@ final class TippyUITests: XCTestCase {
         app.navigationBars["Saved Tips"].searchFields["Search Saved Tips"].tap()
         app.navigationBars["Saved Tips"].searchFields["Search Saved Tips"].typeText("Search Lunch")
 
-        XCTAssertTrue(app.collectionViews.staticTexts["Search Lunch"].exists)
+        XCTAssertTrue(app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Search Lunch")).firstMatch.exists)
     }
 
     func test_savedSearch_shouldShowNoMatchingTips() {
@@ -211,13 +207,13 @@ final class TippyUITests: XCTestCase {
 
         saveTip(named: "Rename Dinner", in: app)
         app.tabBars["Tab Bar"].buttons["Saved"].tap()
-        app.collectionViews.staticTexts["Rename Dinner"].press(forDuration: 1)
+        app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Rename Dinner")).firstMatch.press(forDuration: 1)
         app.buttons["Rename"].tap()
         app.alerts["Rename Saved Tip"].scrollViews.otherElements.textFields["Enter Name"].tap()
         app.alerts["Rename Saved Tip"].scrollViews.otherElements.textFields["Enter Name"].typeText(" Updated")
         app.alerts["Rename Saved Tip"].scrollViews.otherElements.buttons["OK"].tap()
 
-        XCTAssertTrue(app.collectionViews.staticTexts["Rename Dinner Updated"].exists)
+        XCTAssertTrue(app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Rename Dinner Updated")).firstMatch.exists)
     }
 
     func test_savedRowAccessibilitySummary_shouldBeDiscoverable() {
@@ -227,18 +223,31 @@ final class TippyUITests: XCTestCase {
         saveTip(named: "Accessible Dinner", in: app)
         app.tabBars["Tab Bar"].buttons["Saved"].tap()
 
-        XCTAssertTrue(app.collectionViews.staticTexts["Accessible Dinner"].exists)
-        XCTAssertTrue(app.collectionViews.staticTexts.containing(NSPredicate(format: "label CONTAINS %@", "Per Person")).element.exists)
+        XCTAssertTrue(app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Accessible Dinner")).firstMatch.exists)
+        XCTAssertTrue(app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Per Person")).firstMatch.exists)
+    }
+
+    func test_savedCard_shouldOpenDetailSheet() {
+        let app = XCUIApplication()
+        app.launch()
+
+        saveTip(named: "Sheet Dinner", in: app)
+        app.tabBars["Tab Bar"].buttons["Saved"].tap()
+        app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Sheet Dinner")).firstMatch.tap()
+
+        XCTAssertTrue(app.navigationBars["Saved Tip Details"].exists)
+        XCTAssertTrue(app.buttons["Rename"].exists)
+        XCTAssertTrue(app.buttons["Delete"].exists)
     }
     
     func test_keyboardDoneButton_shouldDimissKeyboard() {
         let app = XCUIApplication()
-        app.collectionViews/*@START_MENU_TOKEN@*/.textFields["Enter Bill Amount"]/*[[".cells.textFields[\"Enter Bill Amount\"]",".textFields[\"Enter Bill Amount\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
+        app.textFields["Enter Bill Amount"].tap()
         app.toolbars["Toolbar"]/*@START_MENU_TOKEN@*/.buttons["Done"]/*[[".otherElements[\"Done\"].buttons[\"Done\"]",".buttons[\"Done\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
     }
 
     private func enterBillAmount(_ amount: String, in app: XCUIApplication) {
-        let enterBillAmountTextField = app.collectionViews/*@START_MENU_TOKEN@*/.textFields["Enter Bill Amount"]/*[[".cells.textFields[\"Enter Bill Amount\"]",".textFields[\"Enter Bill Amount\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/
+        let enterBillAmountTextField = app.textFields["Enter Bill Amount"]
         enterBillAmountTextField.tap()
         enterBillAmountTextField.typeText(amount)
         app.toolbars["Toolbar"]/*@START_MENU_TOKEN@*/.buttons["Done"]/*[[".otherElements[\"Done\"].buttons[\"Done\"]",".buttons[\"Done\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
@@ -247,7 +256,7 @@ final class TippyUITests: XCTestCase {
     private func saveTip(named name: String, in app: XCUIApplication) {
         app.tabBars["Tab Bar"].buttons["Calculate"].tap()
         enterBillAmount("25", in: app)
-        app.collectionViews.buttons["Save Tip Calculation"].tap()
+        app.buttons["Save Tip Calculation"].tap()
         app.alerts["Save Tip Calculation"].scrollViews.otherElements.textFields["Enter Name"].typeText(name)
         app.alerts["Save Tip Calculation"].scrollViews.otherElements.buttons["OK"].tap()
     }

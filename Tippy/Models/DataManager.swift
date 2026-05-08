@@ -35,6 +35,28 @@ class DataManager: NSObject, ObservableObject {
         }
         fetchSavedTips()
     }
+
+    /// In-memory sample data for SwiftUI previews.
+    static var preview: DataManager {
+        let manager = DataManager(inMemory: true)
+        manager.saveTip(name: "Brunch",
+                        billAmount: 48,
+                        tipPercentage: 20,
+                        numberOfPeople: 2,
+                        tipAmount: 9.60,
+                        totalAmountWithTip: 57.60,
+                        totalPerPerson: 28.80,
+                        date: Date())
+        manager.saveTip(name: "Dinner",
+                        billAmount: 126,
+                        tipPercentage: 18,
+                        numberOfPeople: 3,
+                        tipAmount: 22.68,
+                        totalAmountWithTip: 148.68,
+                        totalPerPerson: 49.56,
+                        date: Date().addingTimeInterval(-86_400))
+        return manager
+    }
     
     /// Saves a new tip to Core Data.
     func saveTip(name: String, billAmount: Double, tipPercentage: Double, numberOfPeople: Int, tipAmount: Double, totalAmountWithTip: Double, totalPerPerson: Double, date: Date = Date()) {
@@ -78,6 +100,11 @@ class DataManager: NSObject, ObservableObject {
         } catch {
             fatalError("Failed to delete tips: \(error)")
         }
+    }
+
+    /// Deletes one saved tip calculation.
+    func deleteTip(_ tip: SavedTip) {
+        deleteTips([tip])
     }
 
     /// Renames an existing saved tip calculation.

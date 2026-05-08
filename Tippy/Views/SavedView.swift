@@ -15,6 +15,7 @@ struct SavedView: View {
     @State private var searchText = ""
     @State private var renameText = ""
     @State private var tipBeingRenamed: SavedTip?
+    @State private var selectedTip: SavedTip?
     @State private var showingRenameAlert = false
 
     private let dateFormatMMDDYYYY = Date.FormatStyle.dateTime.month().day().year()
@@ -30,47 +31,25 @@ struct SavedView: View {
             (tip.name ?? "").localizedCaseInsensitiveContains(trimmedSearch)
         }
     }
-    
+
     var body: some View {
         NavigationStack {
-            if dataManager.savedTips.isEmpty {
-                emptyState(title: String(localized: "No Saved Tips"), systemImage: "percent")
-                    .navigationTitle(String(localized: "Saved Tips"))
-                    .searchable(text: $searchText, prompt: String(localized: "Search Saved Tips"))
-            } else if filteredTips.isEmpty {
-                emptyState(title: String(localized: "No Matching Tips"), systemImage: "magnifyingglass")
-                    .navigationTitle(String(localized: "Saved Tips"))
-                    .searchable(text: $searchText, prompt: String(localized: "Search Saved Tips"))
-            } else {
-                List() {
-                    ForEach(filteredTips) { tip in
-                        DisclosureGroup() {
-                            SavedDetailView(tip: tip)
-                        } label: {
-                            savedTipRow(for: tip)
-                        }
-                        .contextMenu {
-                            Button {
-                                startRename(for: tip)
-                            } label: {
-                                Label(String(localized: "Rename"), systemImage: "pencil")
-                            }
-                        }
-                    }.onDelete { indexSet in
-                        performAnimated(.easeInOut(duration: 0.22)) {
-                            dataManager.deleteTips(indexSet.map { filteredTips[$0] })
-                        }
-                    }
+            Group {
+                if dataManager.savedTips.isEmpty {
+                    emptyState(title: String(localized: "No Saved Tips"), systemImage: "percent")
+                } else if filteredTips.isEmpty {
+                    emptyState(title: String(localized: "No Matching Tips"), systemImage: "magnifyingglass")
+                } else {
+                    savedCards
                 }
-                .searchable(text: $searchText, prompt: String(localized: "Search Saved Tips"))
-                .animation(reduceMotion ? nil : .easeInOut(duration: 0.22), value: filteredTips.map(\.objectID))
-                .animation(reduceMotion ? nil : .easeInOut(duration: 0.18), value: searchText)
-                .toolbar {
-                    EditButton()
-                        .accessibilityLabel(String(localized: "Edit"))
-                }
-                .navigationTitle(String(localized: "Saved Tips"))
             }
+            .navigationTitle(String(localized: "Saved Tips"))
+            .searchable(text: $searchText, prompt: String(localized: "Search Saved Tips"))
+        }
+        .sheet(item: $selectedTip) { tip in
+            SavedDetailView(tip: tip, onRename: renameTip, onDelete: deleteTip)
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
         }
         .alert(String(localized: "Rename Saved Tip"), isPresented: $showingRenameAlert, actions: {
             TextField(String(localized: "Enter Name"), text: $renameText)
@@ -91,8 +70,44 @@ struct SavedView: View {
         })
     }
 
-    private func savedTipRow(for tip: SavedTip) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
+    private var savedCards: some View {
+        ScrollView {
+            LazyVStack(spacing: 14) {
+                ForEach(filteredTips) { tip in
+                    Button {
+                        selectedTip = tip
+                    } label: {
+                        savedTipCard(for: tip)
+                    }
+                    .buttonStyle(.plain)
+                    .contextMenu {
+                        Button {
+                            startRename(for: tip)
+                        } label: {
+                            Label(String(localized: "Rename"), systemImage: "pencil")
+                        }
+
+                        Button(role: .destructive) {
+                            performAnimated(.easeInOut(duration: 0.22)) {
+                                dataManager.deleteTip(tip)
+                            }
+                        } label: {
+                            Label(String(localized: "Delete"), systemImage: "trash")
+                        }
+                    }
+                }
+            }
+            .padding(.horizontal, 18)
+            .padding(.top, 12)
+            .padding(.bottom, 28)
+        }
+        .background(Color(.systemGroupedBackground))
+        .animation(reduceMotion ? nil : .easeInOut(duration: 0.22), value: filteredTips.map(\.objectID))
+        .animation(reduceMotion ? nil : .easeInOut(duration: 0.18), value: searchText)
+    }
+
+    private func savedTipCard(for tip: SavedTip) -> some View {
+        VStack(alignment: .leading, spacing: 14) {
             ViewThatFits(in: .horizontal) {
                 HStack(alignment: .firstTextBaseline) {
                     savedTipName(for: tip)
@@ -100,7 +115,7 @@ struct SavedView: View {
                     savedTipTotal(for: tip)
                 }
 
-                VStack(alignment: .leading, spacing: 2) {
+                VStack(alignment: .leading, spacing: 4) {
                     savedTipName(for: tip)
                     savedTipTotal(for: tip)
                 }
@@ -113,17 +128,27 @@ struct SavedView: View {
                     savedTipPerPerson(for: tip)
                 }
 
-                VStack(alignment: .leading, spacing: 2) {
+                VStack(alignment: .leading, spacing: 4) {
                     savedTipDate(for: tip)
                     savedTipPerPerson(for: tip)
                 }
             }
             .font(.subheadline)
             .foregroundStyle(.secondary)
+
+            HStack(spacing: 8) {
+                Label("\(Int(tip.tipPercentage))%", systemImage: "percent")
+                Label("\(tip.numberOfPeople)", systemImage: "person.2")
+            }
+            .font(.caption.weight(.medium))
+            .foregroundStyle(.secondary)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(18)
+        .glassPanel(cornerRadius: 22, interactive: true)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(tip.accessibilitySummary(currencyCode: localCurrency, dateFormat: dateFormatMMDDYYYY))
-        .accessibilityHint(String(localized: "Double tap to expand saved tip details"))
+        .accessibilityHint(String(localized: "Opens saved tip details"))
     }
 
     private func emptyState(title: String, systemImage: String) -> some View {
@@ -143,6 +168,8 @@ struct SavedView: View {
                 }
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color(.systemGroupedBackground))
         .accessibilityLabel(title)
         .transition(reduceMotion ? .identity : .opacity.combined(with: .scale(scale: 0.98)))
     }
@@ -150,24 +177,29 @@ struct SavedView: View {
     private func savedTipName(for tip: SavedTip) -> some View {
         Text(tip.name ?? String(localized: "Untitled Tip"))
             .font(.headline)
+            .foregroundStyle(.primary)
+            .lineLimit(2)
     }
 
     private func savedTipTotal(for tip: SavedTip) -> some View {
         Text(tip.totalAmountWithTip, format: .currency(code: localCurrency))
-            .fontWeight(.semibold)
+            .font(.title3.weight(.bold))
+            .foregroundStyle(.primary)
             .monospacedDigit()
+            .animatedTextChange(value: tip.totalAmountWithTip)
     }
 
     @ViewBuilder
     private func savedTipDate(for tip: SavedTip) -> some View {
         if let date = tip.date {
-            Text(date, format: dateFormatMMDDYYYY)
+            Label(date.formatted(dateFormatMMDDYYYY), systemImage: "calendar")
         }
     }
 
     private func savedTipPerPerson(for tip: SavedTip) -> some View {
-        Text(String(localized: "Per Person") + " " + tip.totalPerPerson.formatted(.currency(code: localCurrency)))
+        Label(String(localized: "Per Person") + " " + tip.totalPerPerson.formatted(.currency(code: localCurrency)), systemImage: "person")
             .monospacedDigit()
+            .animatedTextChange(value: tip.totalPerPerson)
     }
 
     private func startRename(for tip: SavedTip) {
@@ -176,14 +208,24 @@ struct SavedView: View {
         showingRenameAlert = true
     }
 
+    private func renameTip(_ tip: SavedTip, _ name: String) {
+        performAnimated(.easeInOut(duration: 0.22)) {
+            dataManager.renameTip(tip, to: name)
+        }
+    }
+
+    private func deleteTip(_ tip: SavedTip) {
+        performAnimated(.easeInOut(duration: 0.22)) {
+            dataManager.deleteTip(tip)
+        }
+    }
+
     private func renameSavedTip() {
         guard let tipBeingRenamed else {
             return
         }
 
-        performAnimated(.easeInOut(duration: 0.22)) {
-            dataManager.renameTip(tipBeingRenamed, to: renameText)
-        }
+        renameTip(tipBeingRenamed, renameText)
         self.tipBeingRenamed = nil
         renameText = ""
     }
@@ -199,5 +241,5 @@ struct SavedView: View {
 
 #Preview {
     SavedView()
-        .environmentObject(DataManager(inMemory: true))
+        .environmentObject(DataManager.preview)
 }
