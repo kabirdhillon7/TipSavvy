@@ -8,6 +8,7 @@
 import XCTest
 @testable import Tippy
 
+@MainActor
 final class DataManagerTests: XCTestCase {
     
     private var dataManager: DataManager!
@@ -23,9 +24,18 @@ final class DataManagerTests: XCTestCase {
     }
     
     func test_saveTip_shouldBeTrue() {
-        dataManager.saveTip(name: "Test Tip", billAmount: 100.0, tipPercentage: 0.15, numberOfPeople: 2, tipAmount: 15.0, totalAmountWithTip: 115.0, totalPerPerson: 57.5)
+        let result = dataManager.saveTip(name: "Test Tip", billAmount: 100.0, tipPercentage: 15, numberOfPeople: 2, tipAmount: 15.0, totalAmountWithTip: 115.0, totalPerPerson: 57.5)
         
+        XCTAssertNotNil(try? result.get())
         XCTAssertEqual(dataManager.savedTips.last?.name, "Test Tip")
+    }
+
+    func test_saveTip_withBlankName_shouldReturnEmptyNameError() {
+        let result = dataManager.saveTip(name: "   ", billAmount: 100.0, tipPercentage: 15, numberOfPeople: 2, tipAmount: 15.0, totalAmountWithTip: 115.0, totalPerPerson: 57.5)
+
+        XCTAssertEqual(result.failureValue, .emptyName)
+        XCTAssertEqual(dataManager.lastError, .emptyName)
+        XCTAssertTrue(dataManager.savedTips.isEmpty)
     }
 
     func test_saveTip_shouldSortNewestFirst() {
@@ -110,5 +120,32 @@ final class DataManagerTests: XCTestCase {
         XCTAssertTrue(summary.contains("120.00"))
         XCTAssertTrue(summary.contains("Per Person"))
         XCTAssertTrue(summary.contains("60.00"))
+    }
+
+    func test_savedTipShareText_shouldIncludeCalculationDetails() {
+        dataManager.saveTip(name: "Share Dinner", billAmount: 80.0, tipPercentage: 20, numberOfPeople: 2, tipAmount: 16.0, totalAmountWithTip: 96.0, totalPerPerson: 48.0, date: Date(timeIntervalSince1970: 1_704_067_200))
+
+        guard let tip = dataManager.savedTips.first else {
+            XCTFail("Expected saved tip")
+            return
+        }
+
+        let shareText = tip.shareText(currencyCode: "USD")
+
+        XCTAssertTrue(shareText.contains("Share Dinner"))
+        XCTAssertTrue(shareText.contains("Bill Amount"))
+        XCTAssertTrue(shareText.contains("80.00"))
+        XCTAssertTrue(shareText.contains("20%"))
+        XCTAssertTrue(shareText.contains("Per Person"))
+    }
+}
+
+private extension Result {
+    var failureValue: Failure? {
+        guard case let .failure(error) = self else {
+            return nil
+        }
+
+        return error
     }
 }

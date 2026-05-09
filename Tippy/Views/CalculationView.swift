@@ -6,25 +6,41 @@
 //
 
 import SwiftUI
+import UIKit
 
 /// A view that calculates a tip calculation.
 struct CalculationView: View {
     @EnvironmentObject var dataManager: DataManager
+    @EnvironmentObject var settings: TipSavvySettings
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.colorSchemeContrast) private var colorSchemeContrast
 
-    @StateObject var viewModel = CalculationViewModel()
+    @StateObject private var viewModel: CalculationViewModel
 
     @State private var showingSavedAlert = false
+    @State private var showingSavedConfirmation = false
+    @State private var dataErrorMessage: String?
+    @State private var copiedValueLabel: String?
     @FocusState var keyboardFocusField: TipSavvyKeyboardField?
 
     private let tipPresets = [15.0, 18.0, 20.0, 25.0]
     private let localCurrency = Locale.current.currency?.identifier ?? "USD"
 
+    @MainActor
+    init(viewModel: CalculationViewModel? = nil) {
+        _viewModel = StateObject(wrappedValue: viewModel ?? CalculationViewModel())
+    }
+
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 18) {
+                    if let dataErrorMessage {
+                        TipSavvyErrorBanner(message: dataErrorMessage) {
+                            self.dataErrorMessage = nil
+                            dataManager.lastError = nil
+                        }
+                    }
                     totalsSummaryPanel
                     billAmountCard
                     splitCard
@@ -52,10 +68,22 @@ struct CalculationView: View {
                     viewModel.tipItemName = ""
                 }
                 .accessibilityLabel(String(localized: "Cancel"))
+            }, message: {
+                if !viewModel.hasValidCalculation {
+                    Text(viewModel.billValidationMessage ?? String(localized: "Enter a valid bill amount first."))
+                }
+            })
+            .alert(String(localized: "Saved"), isPresented: $showingSavedConfirmation, actions: {
+                Button(String(localized: "OK"), role: .cancel) { }
+            }, message: {
+                Text(String(localized: "Your tip calculation was saved."))
             })
             .onChange(of: viewModel.numberOfPeople, perform: { _ in
                 viewModel.persistSmartDefaults()
             })
+            .onChange(of: dataManager.lastError) { error in
+                dataErrorMessage = error?.localizedDescription
+            }
             .animation(reduceMotion ? nil : .easeInOut(duration: 0.2), value: viewModel.numberOfPeople)
             .animation(reduceMotion ? nil : .easeInOut(duration: 0.2), value: viewModel.totalAmountWithTip)
             .animation(reduceMotion ? nil : .easeInOut(duration: 0.2), value: viewModel.totalPerPerson)
@@ -91,6 +119,13 @@ struct CalculationView: View {
                 .focused($keyboardFocusField, equals: .billAmount)
                 .textFieldStyle(.plain)
                 .accessibilityLabel(String(localized: "Enter Bill Amount"))
+
+            if let message = viewModel.billValidationMessage, viewModel.billAmount != nil {
+                Label(message, systemImage: "exclamationmark.circle")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                    .accessibilityIdentifier("Bill Validation Message")
+            }
         }
         .padding(18)
         .glassPanel(cornerRadius: 22, interactive: true, highContrast: keyboardFocusField == .billAmount)
@@ -239,8 +274,10 @@ struct CalculationView: View {
     private var tipSlider: some View {
         Slider(value: $viewModel.tipPercentage, in: 0...30, step: 1)
             .onChange(of: viewModel.tipPercentage, perform: { _ in
-                let generator = UISelectionFeedbackGenerator()
-                generator.selectionChanged()
+                if settings.hapticsEnabled {
+                    let generator = UISelectionFeedbackGenerator()
+                    generator.selectionChanged()
+                }
                 viewModel.persistSmartDefaults()
             })
             .animation(reduceMotion ? nil : .easeInOut(duration: 0.2), value: viewModel.tipPercentage)
@@ -271,6 +308,50 @@ struct CalculationView: View {
 
             InfoRow(title: String(localized: "Subtotal"), value: (viewModel.billAmount ?? 0).formatted(.currency(code: localCurrency)))
             InfoRow(title: String(localized: "Tip"), value: viewModel.tipAmount.formatted(.currency(code: localCurrency)))
+
+            VStack(alignment: .leading, spacing: 8) {
+                Text(String(localized: "Rounding"))
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(.secondary)
+
+                Picker(String(localized: "Rounding"), selection: $viewModel.roundingMode) {
+                    ForEach(RoundingMode.allCases) { mode in
+                        Text(mode.title).tag(mode)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .onChange(of: viewModel.roundingMode) { _ in
+                    viewModel.persistSmartDefaults()
+                }
+                .accessibilityIdentifier("Rounding Mode")
+
+                if let roundingExplanation {
+                    Label(roundingExplanation, systemImage: "info.circle")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .accessibilityIdentifier("Rounding Explanation")
+                }
+            }
+
+            ViewThatFits(in: .horizontal) {
+                HStack(alignment: .top, spacing: 10) {
+                    copyButton(label: String(localized: "Copy Total"), value: viewModel.totalAmountWithTip.formatted(.currency(code: localCurrency)))
+                    copyButton(label: String(localized: "Copy Per Person"), value: viewModel.totalPerPerson.formatted(.currency(code: localCurrency)))
+                }
+
+                VStack(spacing: 10) {
+                    copyButton(label: String(localized: "Copy Total"), value: viewModel.totalAmountWithTip.formatted(.currency(code: localCurrency)))
+                    copyButton(label: String(localized: "Copy Per Person"), value: viewModel.totalPerPerson.formatted(.currency(code: localCurrency)))
+                }
+            }
+
+            if let copiedValueLabel {
+                Text(copiedValueLabel + " " + String(localized: "copied"))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .transition(reduceMotion ? .identity : .opacity)
+                    .accessibilityIdentifier("Copied Confirmation")
+            }
         }
         .padding(18)
         .glassPanel(cornerRadius: 24, highContrast: colorSchemeContrast == .increased)
@@ -295,24 +376,41 @@ struct CalculationView: View {
         }
     }
 
+    private var roundingExplanation: String? {
+        guard viewModel.hasValidCalculation else {
+            return nil
+        }
+
+        switch viewModel.roundingMode {
+        case .none:
+            return nil
+        case .roundTotalUp:
+            return String(localized: "Rounded total from \(viewModel.unroundedTotalForDisplay.formatted(.currency(code: localCurrency))) to \(viewModel.totalAmountWithTip.formatted(.currency(code: localCurrency))).")
+        case .roundPerPersonUp:
+            return String(localized: "Rounded each person from \(viewModel.unroundedPerPersonForDisplay.formatted(.currency(code: localCurrency))) to \(viewModel.totalPerPerson.formatted(.currency(code: localCurrency))).")
+        }
+    }
+
     private var saveButton: some View {
         Button {
             showingSavedAlert = true
         } label: {
-            Label(String(localized: "Save Tip Calculation"), systemImage: "tray.and.arrow.down")
+            Label(String(localized: "Save"), systemImage: "tray.and.arrow.down")
                 .frame(maxWidth: .infinity)
         }
         .buttonStyle(.borderedProminent)
         .controlSize(.large)
         .disabled(!viewModel.hasValidCalculation)
         .accessibilityLabel(String(localized: "Save Tip Calculation"))
-        .accessibilityHint(String(localized: "Saves the Tip Calculation"))
+        .accessibilityHint(viewModel.hasValidCalculation ? String(localized: "Saves the Tip Calculation") : String(localized: "Enter a bill amount greater than zero before saving"))
     }
 
     private var resetButton: some View {
         Button(role: .destructive) {
             performAnimated(.spring(response: 0.32, dampingFraction: 0.82)) {
                 viewModel.resetValues()
+                viewModel.applySettingsDefaults(defaultTipPercentage: settings.defaultTipPercentage,
+                                                defaultNumberOfPeople: settings.defaultNumberOfPeople)
             }
         } label: {
             Label(String(localized: "Reset"), systemImage: "arrow.counterclockwise")
@@ -331,27 +429,53 @@ struct CalculationView: View {
         }
     }
 
+    private func copyButton(label: String, value: String) -> some View {
+        Button {
+            UIPasteboard.general.string = value
+            copiedValueLabel = label
+            if settings.hapticsEnabled {
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+            }
+        } label: {
+            Label(label, systemImage: "doc.on.doc")
+                .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(.bordered)
+        .disabled(!viewModel.hasValidCalculation)
+        .accessibilityLabel(label)
+    }
+
     /// Saves the tip information to the data manager.
     func saveTipInfo() {
         guard let billAmount = viewModel.billAmount, viewModel.canSaveTip else {
             return
         }
 
-        let generator = UINotificationFeedbackGenerator()
-        generator.notificationOccurred(.success)
+        if settings.hapticsEnabled {
+            let generator = UINotificationFeedbackGenerator()
+            generator.notificationOccurred(.success)
+        }
 
-        dataManager.saveTip(name: viewModel.tipItemName.trimmingCharacters(in: .whitespacesAndNewlines),
-                            billAmount: billAmount,
-                            tipPercentage: viewModel.tipPercentage,
-                            numberOfPeople: viewModel.numberOfPeople,
-                            tipAmount: viewModel.tipAmount,
-                            totalAmountWithTip: viewModel.totalAmountWithTip,
-                            totalPerPerson: viewModel.totalPerPerson)
+        let result = dataManager.saveTip(name: viewModel.tipItemName.trimmingCharacters(in: .whitespacesAndNewlines),
+                                         billAmount: billAmount,
+                                         tipPercentage: viewModel.tipPercentage,
+                                         numberOfPeople: viewModel.numberOfPeople,
+                                         tipAmount: viewModel.tipAmount,
+                                         totalAmountWithTip: viewModel.totalAmountWithTip,
+                                         totalPerPerson: viewModel.totalPerPerson)
+
+        guard case .success = result else {
+            dataErrorMessage = dataManager.lastError?.localizedDescription ?? String(localized: "Please try again.")
+            return
+        }
 
         DispatchQueue.main.async {
             performAnimated(.spring(response: 0.32, dampingFraction: 0.82)) {
                 viewModel.resetValues()
+                viewModel.applySettingsDefaults(defaultTipPercentage: settings.defaultTipPercentage,
+                                                defaultNumberOfPeople: settings.defaultNumberOfPeople)
             }
+            showingSavedConfirmation = true
         }
     }
 }
@@ -359,4 +483,22 @@ struct CalculationView: View {
 #Preview {
     CalculationView()
         .environmentObject(DataManager.preview)
+        .environmentObject(TipSavvySettings(defaults: UserDefaults(suiteName: "CalculationPreview") ?? .standard))
+}
+
+#Preview("Calculator Demo") {
+    let viewModel = CalculationViewModel(defaults: UserDefaults(suiteName: "CalculationDemoPreview") ?? .standard)
+    viewModel.billAmount = 86.40
+    viewModel.tipPercentage = 20
+    viewModel.numberOfPeople = 3
+    viewModel.roundingMode = .roundPerPersonUp
+    return CalculationView(viewModel: viewModel)
+        .environmentObject(DataManager.manyItemsPreview)
+        .environmentObject(TipSavvySettings(defaults: UserDefaults(suiteName: "CalculationDemoSettingsPreview") ?? .standard))
+}
+
+#Preview("Calculator Error") {
+    CalculationView()
+        .environmentObject(DataManager.errorPreview)
+        .environmentObject(TipSavvySettings(defaults: UserDefaults(suiteName: "CalculationErrorPreview") ?? .standard))
 }

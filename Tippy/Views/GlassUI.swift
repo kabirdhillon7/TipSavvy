@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import UIKit
 
 struct GlassPanelModifier: ViewModifier {
     @Environment(\.colorSchemeContrast) private var colorSchemeContrast
@@ -175,6 +176,41 @@ struct SelectedAccessibilityTraitModifier: ViewModifier {
             content.accessibilityAddTraits(.isSelected)
         } else {
             content
+        }
+    }
+}
+
+struct TipSavvyErrorBanner: View {
+    let message: String
+    let onDismiss: () -> Void
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: "exclamationmark.triangle.fill")
+                .foregroundStyle(.orange)
+                .accessibilityHidden(true)
+
+            Text(message)
+                .font(.subheadline.weight(.medium))
+                .foregroundStyle(.primary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+            Button(action: onDismiss) {
+                Image(systemName: "xmark")
+                    .font(.caption.weight(.bold))
+                    .frame(width: 30, height: 30)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(String(localized: "Dismiss Error"))
+        }
+        .padding(14)
+        .glassPanel(cornerRadius: 16, highContrast: true)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(String(localized: "Error"))
+        .accessibilityValue(message)
+        .accessibilityIdentifier("Error Banner")
+        .onAppear {
+            UIAccessibility.post(notification: .announcement, argument: message)
         }
     }
 }

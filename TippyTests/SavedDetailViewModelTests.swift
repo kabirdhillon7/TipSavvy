@@ -10,6 +10,7 @@ import XCTest
 import CoreData
 import Foundation
 
+@MainActor
 final class SavedDetailViewModelTests: XCTestCase {
 
     private var savedDetailViewModel: SavedDetailViewModel!
@@ -23,7 +24,7 @@ final class SavedDetailViewModelTests: XCTestCase {
         
         container.loadPersistentStores(completionHandler: { _, error in
             if let error = error as NSError? {
-                fatalError("Failed to load stores: \(error), \(error.userInfo)")
+                XCTFail("Failed to load stores: \(error), \(error.userInfo)")
             }
         })
         
@@ -55,7 +56,7 @@ final class SavedDetailViewModelTests: XCTestCase {
         do {
             try persistentContainer.viewContext.save()
         } catch {
-            print("SavedDetailViewModelTests: test_tip_isNotNil error with saving persistentContainer")
+            XCTFail("Failed to save persistent container: \(error)")
         }
         
         savedDetailViewModel = SavedDetailViewModel(tip: savedTip)

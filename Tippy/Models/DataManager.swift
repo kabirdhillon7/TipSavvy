@@ -8,10 +8,60 @@
 import CoreData
 import Foundation
 
-/// Main data manager to handle the todo items
+enum DataManagerError: LocalizedError, Equatable {
+    case persistentStoreLoadFailed
+    case saveFailed
+    case deleteFailed
+    case renameFailed
+    case fetchFailed
+    case emptyName
+
+    var errorDescription: String? {
+        switch self {
+        case .persistentStoreLoadFailed:
+            return String(localized: "TipSavvy could not load saved tips.")
+        case .saveFailed:
+            return String(localized: "TipSavvy could not save this tip.")
+        case .deleteFailed:
+            return String(localized: "TipSavvy could not delete this tip.")
+        case .renameFailed:
+            return String(localized: "TipSavvy could not rename this tip.")
+        case .fetchFailed:
+            return String(localized: "TipSavvy could not refresh saved tips.")
+        case .emptyName:
+            return String(localized: "Saved tip names cannot be blank.")
+        }
+    }
+}
+
+@MainActor
+protocol SavedTipStore {
+    var savedTips: [SavedTip] { get }
+    var lastError: DataManagerError? { get }
+
+    @discardableResult
+    func saveTip(name: String,
+                 billAmount: Double,
+                 tipPercentage: Double,
+                 numberOfPeople: Int,
+                 tipAmount: Double,
+                 totalAmountWithTip: Double,
+                 totalPerPerson: Double,
+                 date: Date) -> Result<SavedTip, DataManagerError>
+
+    @discardableResult
+    func deleteTips(_ tips: [SavedTip]) -> Result<Void, DataManagerError>
+
+    @discardableResult
+    func renameTip(_ tip: SavedTip, to name: String) -> Result<Void, DataManagerError>
+}
+
+/// Main data manager to handle saved tip calculations.
+@MainActor
 class DataManager: NSObject, ObservableObject {
     /// Dynamic properties that the UI will react to
     @Published var savedTips: [SavedTip] = [SavedTip]()
+    @Published var lastError: DataManagerError?
     
     /// Add the Core Data container with the model name
     let container: NSPersistentContainer
@@ -28,9 +78,11 @@ class DataManager: NSObject, ObservableObject {
             container.persistentStoreDescriptions = [description]
         }
 
-        container.loadPersistentStores { _, error in
-            if let error = error {
-                fatalError("Failed to load Core Data stack: \(error)")
+        container.loadPersistentStores { [weak self] _, error in
+            if error != nil {
+                Task { @MainActor in
+                    self?.lastError = .persistentStoreLoadFailed
+                }
             }
         }
         fetchSavedTips()
@@ -39,31 +91,54 @@ class DataManager: NSObject, ObservableObject {
     /// In-memory sample data for SwiftUI previews.
     static var preview: DataManager {
         let manager = DataManager(inMemory: true)
-        manager.saveTip(name: "Brunch",
-                        billAmount: 48,
-                        tipPercentage: 20,
-                        numberOfPeople: 2,
-                        tipAmount: 9.60,
-                        totalAmountWithTip: 57.60,
-                        totalPerPerson: 28.80,
-                        date: Date())
-        manager.saveTip(name: "Dinner",
-                        billAmount: 126,
-                        tipPercentage: 18,
-                        numberOfPeople: 3,
-                        tipAmount: 22.68,
-                        totalAmountWithTip: 148.68,
-                        totalPerPerson: 49.56,
-                        date: Date().addingTimeInterval(-86_400))
+        _ = manager.saveTip(name: "Brunch",
+                            billAmount: 48,
+                            tipPercentage: 20,
+                            numberOfPeople: 2,
+                            tipAmount: 9.60,
+                            totalAmountWithTip: 57.60,
+                            totalPerPerson: 28.80,
+                            date: Date())
+        _ = manager.saveTip(name: "Dinner",
+                            billAmount: 126,
+                            tipPercentage: 18,
+                            numberOfPeople: 3,
+                            tipAmount: 22.68,
+                            totalAmountWithTip: 148.68,
+                            totalPerPerson: 49.56,
+                            date: Date().addingTimeInterval(-86_400))
+        return manager
+    }
+
+    static var emptyPreview: DataManager {
+        DataManager(inMemory: true)
+    }
+
+    static var errorPreview: DataManager {
+        let manager = DataManager.preview
+        manager.lastError = .fetchFailed
+        return manager
+    }
+
+    static var manyItemsPreview: DataManager {
+        let manager = DataManager(inMemory: true)
+        manager.seedDemoTips(count: 16)
         return manager
     }
     
     /// Saves a new tip to Core Data.
-    func saveTip(name: String, billAmount: Double, tipPercentage: Double, numberOfPeople: Int, tipAmount: Double, totalAmountWithTip: Double, totalPerPerson: Double, date: Date = Date()) {
+    @discardableResult
+    func saveTip(name: String, billAmount: Double, tipPercentage: Double, numberOfPeople: Int, tipAmount: Double, totalAmountWithTip: Double, totalPerPerson: Double, date: Date = Date()) -> Result<SavedTip, DataManagerError> {
+        let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedName.isEmpty else {
+            lastError = .emptyName
+            return .failure(.emptyName)
+        }
+
         let context = container.viewContext
         
         let savedTip = SavedTip(context: context)
-        savedTip.name = name
+        savedTip.name = trimmedName
         savedTip.date = date
         savedTip.billAmount = billAmount
         savedTip.tipPercentage = tipPercentage
@@ -75,19 +150,43 @@ class DataManager: NSObject, ObservableObject {
         do {
             try context.save()
             fetchSavedTips()
+            lastError = nil
+            return .success(savedTip)
         } catch {
-            fatalError("Failed to save tip: \(error)")
+            context.rollback()
+            lastError = .saveFailed
+            return .failure(.saveFailed)
+        }
+    }
+
+    func seedDemoTips(count: Int = 8) {
+        for index in 1...count {
+            let billAmount = Double(18 + index * 7)
+            let tipPercentage = [15.0, 18.0, 20.0, 22.0][index % 4]
+            let tipAmount = billAmount / 100 * tipPercentage
+            let people = (index % 5) + 1
+            let total = billAmount + tipAmount
+            _ = saveTip(name: "Table \(index)",
+                        billAmount: billAmount,
+                        tipPercentage: tipPercentage,
+                        numberOfPeople: people,
+                        tipAmount: tipAmount,
+                        totalAmountWithTip: total,
+                        totalPerPerson: total / Double(people),
+                        date: Date().addingTimeInterval(Double(-index) * 43_200))
         }
     }
 
     /// Deletes saved tip calculations at the supplied offsets.
-    func deleteTips(at offsets: IndexSet) {
+    @discardableResult
+    func deleteTips(at offsets: IndexSet) -> Result<Void, DataManagerError> {
         let tips = offsets.map { savedTips[$0] }
-        deleteTips(tips)
+        return deleteTips(tips)
     }
 
     /// Deletes the supplied saved tip calculations.
-    func deleteTips(_ tips: [SavedTip]) {
+    @discardableResult
+    func deleteTips(_ tips: [SavedTip]) -> Result<Void, DataManagerError> {
         let context = container.viewContext
 
         for tip in tips {
@@ -97,21 +196,28 @@ class DataManager: NSObject, ObservableObject {
         do {
             try context.save()
             fetchSavedTips()
+            lastError = nil
+            return .success(())
         } catch {
-            fatalError("Failed to delete tips: \(error)")
+            context.rollback()
+            lastError = .deleteFailed
+            return .failure(.deleteFailed)
         }
     }
 
     /// Deletes one saved tip calculation.
-    func deleteTip(_ tip: SavedTip) {
+    @discardableResult
+    func deleteTip(_ tip: SavedTip) -> Result<Void, DataManagerError> {
         deleteTips([tip])
     }
 
     /// Renames an existing saved tip calculation.
-    func renameTip(_ tip: SavedTip, to name: String) {
+    @discardableResult
+    func renameTip(_ tip: SavedTip, to name: String) -> Result<Void, DataManagerError> {
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedName.isEmpty else {
-            return
+            lastError = .emptyName
+            return .failure(.emptyName)
         }
 
         let context = container.viewContext
@@ -120,13 +226,18 @@ class DataManager: NSObject, ObservableObject {
         do {
             try context.save()
             fetchSavedTips()
+            lastError = nil
+            return .success(())
         } catch {
-            fatalError("Failed to rename tip: \(error)")
+            context.rollback()
+            lastError = .renameFailed
+            return .failure(.renameFailed)
         }
     }
     
     /// Fetches all saved tips from Core Data.
-    private func fetchSavedTips() {
+    @discardableResult
+    private func fetchSavedTips() -> Result<[SavedTip], DataManagerError> {
         let context = container.viewContext
         
         let fetchRequest: NSFetchRequest<SavedTip> = SavedTip.fetchRequest()
@@ -136,11 +247,17 @@ class DataManager: NSObject, ObservableObject {
         
         do {
             savedTips = try context.fetch(fetchRequest)
+            lastError = nil
+            return .success(savedTips)
         } catch {
-            fatalError("Failed to fetch saved tips: \(error)")
+            savedTips = []
+            lastError = .fetchFailed
+            return .failure(.fetchFailed)
         }
     }
 }
+
+extension DataManager: SavedTipStore { }
 
 extension SavedTip {
     func accessibilitySummary(currencyCode: String, dateFormat: Date.FormatStyle = .dateTime.month().day().year()) -> String {
@@ -155,5 +272,18 @@ extension SavedTip {
         parts.append(String(localized: "Per Person") + ": " + totalPerPerson.formatted(.currency(code: currencyCode)))
 
         return parts.joined(separator: ", ")
+    }
+
+    func shareText(currencyCode: String, dateFormat: Date.FormatStyle = .dateTime.month().day().year()) -> String {
+        let savedName = name ?? String(localized: "Untitled Tip")
+        let dateText = date.map { "\n" + String(localized: "Date") + ": " + $0.formatted(dateFormat) } ?? ""
+
+        return """
+        \(savedName)\(dateText)
+        \(String(localized: "Bill Amount")): \(billAmount.formatted(.currency(code: currencyCode)))
+        \(String(localized: "Tip")): \(tipAmount.formatted(.currency(code: currencyCode))) (\(Int(tipPercentage))%)
+        \(String(localized: "Total With Tip")): \(totalAmountWithTip.formatted(.currency(code: currencyCode)))
+        \(String(localized: "Per Person")): \(totalPerPerson.formatted(.currency(code: currencyCode)))
+        """
     }
 }

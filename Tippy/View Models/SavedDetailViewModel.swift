@@ -8,6 +8,7 @@
 import Foundation
 
 /// A view model responsible for the tip for a given Saved Detail View
+@MainActor
 final class SavedDetailViewModel: ObservableObject {
     var tip: SavedTip
     

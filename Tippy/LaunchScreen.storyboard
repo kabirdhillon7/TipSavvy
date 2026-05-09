@@ -5,7 +5,6 @@
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24743"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
-        <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -18,15 +17,15 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" image="Icon" translatesAutoresizingMaskIntoConstraints="NO" id="Cqi-Q4-6iJ">
-                                <rect key="frame" x="146.66666666666663" y="376" width="100" height="100"/>
+                                <rect key="frame" x="96.666666666666686" y="326" width="200" height="200"/>
                                 <constraints>
-                                    <constraint firstAttribute="width" constant="100" id="CtQ-29-7IL"/>
-                                    <constraint firstAttribute="height" constant="100" id="GFJ-oV-mpm"/>
+                                    <constraint firstAttribute="width" constant="200" id="CtQ-29-7IL"/>
+                                    <constraint firstAttribute="height" constant="200" id="GFJ-oV-mpm"/>
                                 </constraints>
                             </imageView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="Bcu-3y-fUS"/>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <color key="backgroundColor" red="0.23316797610000001" green="0.52895569799999997" blue="0.29170423750000002" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                         <constraints>
                             <constraint firstItem="Cqi-Q4-6iJ" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="centerY" id="f6V-KU-bYk"/>
                             <constraint firstItem="Cqi-Q4-6iJ" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="mHW-JE-xj4"/>
@@ -40,8 +39,5 @@
     </scenes>
     <resources>
         <image name="Icon" width="692" height="718"/>
-        <systemColor name="systemBackgroundColor">
-            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-        </systemColor>
     </resources>
 </document>

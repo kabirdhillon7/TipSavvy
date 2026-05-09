@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import UIKit
 
 /// A view that displays the details of a saved tip calculation.
 struct SavedDetailView: View {
@@ -18,6 +19,7 @@ struct SavedDetailView: View {
     @State private var renameText = ""
     @State private var showingRenameAlert = false
     @State private var showingDeleteConfirmation = false
+    @State private var showingCopiedConfirmation = false
 
     init(tip: SavedTip, onRename: @escaping (SavedTip, String) -> Void = { _, _ in }, onDelete: @escaping (SavedTip) -> Void = { _ in }) {
         self._viewModel = StateObject(wrappedValue: SavedDetailViewModel(tip: tip))
@@ -27,6 +29,9 @@ struct SavedDetailView: View {
 
     private let dateFormatMMDDYYYY = Date.FormatStyle.dateTime.month().day().year()
     private let localCurrency = Locale.current.currency?.identifier ?? "USD"
+    private var shareText: String {
+        viewModel.tip.shareText(currencyCode: localCurrency, dateFormat: dateFormatMMDDYYYY)
+    }
 
     var body: some View {
         NavigationStack {
@@ -35,6 +40,7 @@ struct SavedDetailView: View {
                     header
                     totalsGrid
                     detailsCard
+                    shareCard
                     actionButtons
                 }
                 .padding(18)
@@ -75,6 +81,11 @@ struct SavedDetailView: View {
         } message: {
             Text(String(localized: "This saved tip will be permanently deleted."))
         }
+        .alert(String(localized: "Copied"), isPresented: $showingCopiedConfirmation, actions: {
+            Button(String(localized: "OK"), role: .cancel) { }
+        }, message: {
+            Text(String(localized: "Saved tip details were copied."))
+        })
     }
 
     private var header: some View {
@@ -123,6 +134,43 @@ struct SavedDetailView: View {
         }
         .padding(18)
         .glassPanel(cornerRadius: 22)
+    }
+
+    private var shareCard: some View {
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 12) {
+                copyDetailsButton
+                ShareLink(item: shareText) {
+                    Label(String(localized: "Share"), systemImage: "square.and.arrow.up")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.large)
+            }
+
+            VStack(spacing: 12) {
+                copyDetailsButton
+                ShareLink(item: shareText) {
+                    Label(String(localized: "Share"), systemImage: "square.and.arrow.up")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.large)
+            }
+        }
+    }
+
+    private var copyDetailsButton: some View {
+        Button {
+            UIPasteboard.general.string = shareText
+            showingCopiedConfirmation = true
+        } label: {
+            Label(String(localized: "Copy Details"), systemImage: "doc.on.doc")
+                .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(.bordered)
+        .controlSize(.large)
+        .accessibilityLabel(String(localized: "Copy Details"))
     }
 
     private var actionButtons: some View {

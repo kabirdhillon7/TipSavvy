@@ -1,0 +1,31 @@
+name: iOS Build and Test
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: macos-15
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_16.4.app
+
+      - name: Resolve Packages
+        run: xcodebuild -resolvePackageDependencies -project Tippy.xcodeproj -scheme Tippy
+
+      - name: Build and Test
+        run: |
+          xcodebuild test \
+            -project Tippy.xcodeproj \
+            -scheme Tippy \
+            -testPlan Tippy \
+            -destination 'platform=iOS Simulator,name=iPhone 17,OS=latest' \
+            CODE_SIGNING_ALLOWED=NO

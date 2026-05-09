@@ -8,26 +8,121 @@
 import Foundation
 import Combine
 
-/// A view model responsible for managing bill information and calculating tip information.
-final class CalculationViewModel: ObservableObject  {
-    @Published var billAmount: Double?
-    @Published var tipPercentage: Double
-    @Published var numberOfPeople: Int
-    @Published var tipItemName = ""
+@MainActor
+enum RoundingMode: String, CaseIterable, Identifiable {
+    case none
+    case roundTotalUp
+    case roundPerPersonUp
 
-    private let defaults: UserDefaults
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .none:
+            return String(localized: "Exact")
+        case .roundTotalUp:
+            return String(localized: "Total Up")
+        case .roundPerPersonUp:
+            return String(localized: "Person Up")
+        }
+    }
+}
+
+@MainActor
+final class TipSavvySettings: ObservableObject {
+    @Published var defaultTipPercentage: Double {
+        didSet {
+            let clampedValue = Self.clampedTipPercentage(defaultTipPercentage)
+            if defaultTipPercentage != clampedValue {
+                defaultTipPercentage = clampedValue
+                return
+            }
+            defaults.set(clampedValue, forKey: DefaultsKey.defaultTipPercentage)
+        }
+    }
+
+    @Published var defaultNumberOfPeople: Int {
+        didSet {
+            let clampedValue = Self.clampedNumberOfPeople(defaultNumberOfPeople)
+            if defaultNumberOfPeople != clampedValue {
+                defaultNumberOfPeople = clampedValue
+                return
+            }
+            defaults.set(clampedValue, forKey: DefaultsKey.defaultNumberOfPeople)
+        }
+    }
+
+    @Published var hapticsEnabled: Bool {
+        didSet {
+            defaults.set(hapticsEnabled, forKey: DefaultsKey.hapticsEnabled)
+        }
+    }
+
+    let defaults: UserDefaults
 
     private enum DefaultsKey {
-        static let tipPercentage = "tipPercentage"
-        static let numberOfPeople = "numberOfPeople"
+        static let defaultTipPercentage = "defaultTipPercentage"
+        static let defaultNumberOfPeople = "defaultNumberOfPeople"
+        static let hapticsEnabled = "hapticsEnabled"
     }
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
-        tipPercentage = Self.clampedTipPercentage(defaults.double(forKey: DefaultsKey.tipPercentage))
 
-        let savedPeople = defaults.object(forKey: DefaultsKey.numberOfPeople) as? Int ?? 1
+        let savedTip = defaults.object(forKey: DefaultsKey.defaultTipPercentage) as? Double ?? 18
+        defaultTipPercentage = Self.clampedTipPercentage(savedTip)
+
+        let savedPeople = defaults.object(forKey: DefaultsKey.defaultNumberOfPeople) as? Int ?? 1
+        defaultNumberOfPeople = Self.clampedNumberOfPeople(savedPeople)
+
+        hapticsEnabled = defaults.object(forKey: DefaultsKey.hapticsEnabled) as? Bool ?? true
+    }
+
+    static func clampedTipPercentage(_ percentage: Double) -> Double {
+        min(max(percentage, 0), 30)
+    }
+
+    static func clampedNumberOfPeople(_ people: Int) -> Int {
+        min(max(people, 1), 99)
+    }
+
+    func resetPreferences() {
+        defaultTipPercentage = 18
+        defaultNumberOfPeople = 1
+        hapticsEnabled = true
+    }
+}
+
+/// A view model responsible for managing bill information and calculating tip information.
+@MainActor
+final class CalculationViewModel: ObservableObject  {
+    @Published var billAmount: Double?
+    @Published var tipPercentage: Double
+    @Published var numberOfPeople: Int
+    @Published var roundingMode: RoundingMode
+    @Published var tipItemName = ""
+
+    private let defaults: UserDefaults
+    private let settings: TipSavvySettings?
+
+    private enum DefaultsKey {
+        static let tipPercentage = "tipPercentage"
+        static let numberOfPeople = "numberOfPeople"
+        static let roundingMode = "roundingMode"
+    }
+
+    init(defaults: UserDefaults = .standard, settings: TipSavvySettings? = nil) {
+        self.defaults = defaults
+        self.settings = settings
+
+        let savedTip = defaults.object(forKey: DefaultsKey.tipPercentage) as? Double
+        tipPercentage = Self.clampedTipPercentage(savedTip ?? settings?.defaultTipPercentage ?? 18)
+
+        let savedPeople = defaults.object(forKey: DefaultsKey.numberOfPeople) as? Int ?? settings?.defaultNumberOfPeople ?? 1
         numberOfPeople = Self.clampedNumberOfPeople(savedPeople)
+
+        let savedRoundingMode = defaults.string(forKey: DefaultsKey.roundingMode)
+        roundingMode = savedRoundingMode.flatMap(RoundingMode.init(rawValue:)) ?? .none
     }
 
     var hasValidCalculation: Bool {
@@ -40,6 +135,22 @@ final class CalculationViewModel: ObservableObject  {
 
     var canSaveTip: Bool {
         hasValidCalculation && !tipItemName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
+    var billValidationMessage: String? {
+        guard let billAmount else {
+            return String(localized: "Enter a bill amount to calculate totals.")
+        }
+
+        guard billAmount > 0 else {
+            return String(localized: "Bill amount must be greater than zero.")
+        }
+
+        guard billAmount.isFinite else {
+            return String(localized: "Bill amount must be a valid number.")
+        }
+
+        return nil
     }
 
     static func clampedTipPercentage(_ percentage: Double) -> Double {
@@ -55,6 +166,7 @@ final class CalculationViewModel: ObservableObject  {
         numberOfPeople = Self.clampedNumberOfPeople(numberOfPeople)
         defaults.set(tipPercentage, forKey: DefaultsKey.tipPercentage)
         defaults.set(numberOfPeople, forKey: DefaultsKey.numberOfPeople)
+        defaults.set(roundingMode.rawValue, forKey: DefaultsKey.roundingMode)
     }
     
     var tipAmount: Double {
@@ -65,27 +177,69 @@ final class CalculationViewModel: ObservableObject  {
     }
     
     var totalAmountWithTip: Double {
-        if let billAmount = billAmount {
-            let tipValue = billAmount / 100 * tipPercentage
-            return billAmount + tipValue
+        switch roundingMode {
+        case .none:
+            return unroundedTotalAmountWithTip
+        case .roundTotalUp:
+            return unroundedTotalAmountWithTip.rounded(.up)
+        case .roundPerPersonUp:
+            guard numberOfPeople > 0 else {
+                return 0
+            }
+            return totalPerPerson * Double(numberOfPeople)
         }
-        return 0
     }
     
     var totalPerPerson: Double {
-        if let billAmount = billAmount, numberOfPeople != 0 {
-            let numOfPeople = Double(numberOfPeople)
-            let tipValue = billAmount / 100 * tipPercentage
-            let totalBillPlusTip = billAmount + tipValue
-            var total = totalBillPlusTip / numOfPeople
-            
-            if total.isNaN || total.isInfinite {
-                total = 0
-            }
-            
-            return total
+        guard numberOfPeople > 0 else {
+            return 0
         }
-        return 0
+
+        let total = unroundedTotalAmountWithTip / Double(numberOfPeople)
+        let roundedTotal: Double
+        switch roundingMode {
+        case .none, .roundTotalUp:
+            roundedTotal = totalAmountForPeople / Double(numberOfPeople)
+        case .roundPerPersonUp:
+            roundedTotal = total.rounded(.up)
+        }
+
+        return Self.sanitizedAmount(roundedTotal)
+    }
+
+    var unroundedTotalForDisplay: Double {
+        unroundedTotalAmountWithTip
+    }
+
+    var unroundedPerPersonForDisplay: Double {
+        guard numberOfPeople > 0 else {
+            return 0
+        }
+
+        return Self.sanitizedAmount(unroundedTotalAmountWithTip / Double(numberOfPeople))
+    }
+
+    private var unroundedTotalAmountWithTip: Double {
+        guard let billAmount else {
+            return 0
+        }
+
+        return Self.sanitizedAmount(billAmount + tipAmount)
+    }
+
+    private var totalAmountForPeople: Double {
+        switch roundingMode {
+        case .none:
+            return unroundedTotalAmountWithTip
+        case .roundTotalUp:
+            return unroundedTotalAmountWithTip.rounded(.up)
+        case .roundPerPersonUp:
+            return unroundedTotalAmountWithTip
+        }
+    }
+
+    private static func sanitizedAmount(_ amount: Double) -> Double {
+        amount.isNaN || amount.isInfinite ? 0 : amount
     }
 
     func accessibilityTotalsSummary(currencyCode: String) -> String {
@@ -104,9 +258,16 @@ final class CalculationViewModel: ObservableObject  {
     /// Resets the tip calculation values.
     func resetValues() {
         billAmount = nil
-        tipPercentage = 0
-        numberOfPeople = 1
+        tipPercentage = settings?.defaultTipPercentage ?? 18
+        numberOfPeople = settings?.defaultNumberOfPeople ?? 1
+        roundingMode = .none
         tipItemName = ""
+        persistSmartDefaults()
+    }
+
+    func applySettingsDefaults(defaultTipPercentage: Double? = nil, defaultNumberOfPeople: Int? = nil) {
+        tipPercentage = defaultTipPercentage ?? settings?.defaultTipPercentage ?? tipPercentage
+        numberOfPeople = defaultNumberOfPeople ?? settings?.defaultNumberOfPeople ?? numberOfPeople
         persistSmartDefaults()
     }
 }

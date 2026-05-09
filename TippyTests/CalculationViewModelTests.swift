@@ -8,6 +8,7 @@
 import XCTest
 @testable import Tippy
 
+@MainActor
 final class CalculationViewModelTests: XCTestCase {
     
     private var calculationViewModel: CalculationViewModel!
@@ -190,13 +191,15 @@ final class CalculationViewModelTests: XCTestCase {
         calculationViewModel.billAmount = 15.99
         calculationViewModel.tipPercentage = 15
         calculationViewModel.numberOfPeople = 2
+        calculationViewModel.roundingMode = .roundTotalUp
         calculationViewModel.tipItemName = "Sandwiches"
                 
         calculationViewModel.resetValues()
         
         XCTAssertNil(calculationViewModel.billAmount)
-        XCTAssertEqual(calculationViewModel.tipPercentage, 0.0)
+        XCTAssertEqual(calculationViewModel.tipPercentage, 18.0)
         XCTAssertEqual(calculationViewModel.numberOfPeople, 1)
+        XCTAssertEqual(calculationViewModel.roundingMode, .none)
         XCTAssertEqual(calculationViewModel.tipItemName, "")
     }
     
@@ -204,8 +207,9 @@ final class CalculationViewModelTests: XCTestCase {
         calculationViewModel.resetValues()
         
         XCTAssertTrue(calculationViewModel.billAmount == nil)
-        XCTAssertTrue(calculationViewModel.tipPercentage == 0)
+        XCTAssertTrue(calculationViewModel.tipPercentage == 18)
         XCTAssertTrue(calculationViewModel.numberOfPeople == 1)
+        XCTAssertTrue(calculationViewModel.roundingMode == .none)
         XCTAssertTrue(calculationViewModel.tipItemName == "")
     }
 
@@ -247,7 +251,7 @@ final class CalculationViewModelTests: XCTestCase {
 
         calculationViewModel.resetValues()
 
-        XCTAssertEqual(defaults.double(forKey: "tipPercentage"), 0)
+        XCTAssertEqual(defaults.double(forKey: "tipPercentage"), 18)
         XCTAssertEqual(defaults.integer(forKey: "numberOfPeople"), 1)
     }
 
@@ -256,6 +260,36 @@ final class CalculationViewModelTests: XCTestCase {
         calculationViewModel.numberOfPeople = 1
 
         XCTAssertFalse(calculationViewModel.hasValidCalculation)
+    }
+
+    func test_billValidationMessage_withZeroBill_shouldExplainRequirement() {
+        calculationViewModel.billAmount = 0
+
+        XCTAssertEqual(calculationViewModel.billValidationMessage, "Bill amount must be greater than zero.")
+    }
+
+    func test_settings_shouldPersistDefaultTipPeopleAndHaptics() {
+        let settings = TipSavvySettings(defaults: defaults)
+
+        settings.defaultTipPercentage = 22
+        settings.defaultNumberOfPeople = 3
+        settings.hapticsEnabled = false
+
+        let restoredSettings = TipSavvySettings(defaults: defaults)
+
+        XCTAssertEqual(restoredSettings.defaultTipPercentage, 22)
+        XCTAssertEqual(restoredSettings.defaultNumberOfPeople, 3)
+        XCTAssertFalse(restoredSettings.hapticsEnabled)
+    }
+
+    func test_applySettingsDefaults_shouldUpdateCalculationDefaults() {
+        calculationViewModel.tipPercentage = 12
+        calculationViewModel.numberOfPeople = 4
+
+        calculationViewModel.applySettingsDefaults(defaultTipPercentage: 20, defaultNumberOfPeople: 2)
+
+        XCTAssertEqual(calculationViewModel.tipPercentage, 20)
+        XCTAssertEqual(calculationViewModel.numberOfPeople, 2)
     }
 
     func test_hasValidCalculation_withZeroBill_shouldBeFalse() {
@@ -296,6 +330,45 @@ final class CalculationViewModelTests: XCTestCase {
         XCTAssertTrue(summary.contains("120.00"))
         XCTAssertTrue(summary.contains("Total Per Person"))
         XCTAssertTrue(summary.contains("30.00"))
+    }
+
+    func test_roundingMode_none_shouldKeepExactTotalAndPerPerson() {
+        calculationViewModel.billAmount = 10
+        calculationViewModel.tipPercentage = 18
+        calculationViewModel.numberOfPeople = 3
+        calculationViewModel.roundingMode = .none
+
+        XCTAssertEqual(calculationViewModel.totalAmountWithTip, 11.8, accuracy: 0.001)
+        XCTAssertEqual(calculationViewModel.totalPerPerson, 3.933, accuracy: 0.001)
+    }
+
+    func test_roundingMode_roundTotalUp_shouldRoundTotalBeforeSplitting() {
+        calculationViewModel.billAmount = 10
+        calculationViewModel.tipPercentage = 18
+        calculationViewModel.numberOfPeople = 3
+        calculationViewModel.roundingMode = .roundTotalUp
+
+        XCTAssertEqual(calculationViewModel.totalAmountWithTip, 12)
+        XCTAssertEqual(calculationViewModel.totalPerPerson, 4)
+    }
+
+    func test_roundingMode_roundPerPersonUp_shouldRoundEachPersonAndReflectCollectedTotal() {
+        calculationViewModel.billAmount = 10
+        calculationViewModel.tipPercentage = 18
+        calculationViewModel.numberOfPeople = 3
+        calculationViewModel.roundingMode = .roundPerPersonUp
+
+        XCTAssertEqual(calculationViewModel.totalPerPerson, 4)
+        XCTAssertEqual(calculationViewModel.totalAmountWithTip, 12)
+    }
+
+    func test_roundingMode_shouldPersist() {
+        calculationViewModel.roundingMode = .roundPerPersonUp
+
+        calculationViewModel.persistSmartDefaults()
+        calculationViewModel = CalculationViewModel(defaults: defaults)
+
+        XCTAssertEqual(calculationViewModel.roundingMode, .roundPerPersonUp)
     }
 
 }
