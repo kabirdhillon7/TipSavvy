@@ -98,6 +98,18 @@ final class TippyUITests: XCTestCase {
         XCTAssertEqual(app.buttons["20%"].value as? String, "Selected")
     }
 
+    func test_tipComparison_shouldAppearAndApplyPreset() {
+        let app = XCUIApplication()
+        app.launch()
+
+        enterBillAmount("42", in: app)
+
+        XCTAssertTrue(app.otherElements["Tip Comparison"].waitForExistence(timeout: 2))
+        app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "25% tip comparison")).firstMatch.tap()
+
+        XCTAssertEqual(app.buttons["25%"].value as? String, "Selected")
+    }
+
     func test_calculatorAccessibilityElements_shouldBeDiscoverable() {
         let app = XCUIApplication()
         app.launchArguments += ["-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryXXXL"]
@@ -111,6 +123,7 @@ final class TippyUITests: XCTestCase {
         XCTAssertTrue(app.buttons["Save Tip Calculation"].exists)
         XCTAssertTrue(app.buttons["Reset"].exists)
         XCTAssertTrue(app.otherElements["Bill Totals Summary"].exists)
+        XCTAssertTrue(app.otherElements["Tip Comparison"].exists)
     }
 
     func test_settings_shouldExposeDefaultsAndQualitySignals() {

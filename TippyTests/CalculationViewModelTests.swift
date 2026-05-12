@@ -371,4 +371,45 @@ final class CalculationViewModelTests: XCTestCase {
         XCTAssertEqual(calculationViewModel.roundingMode, .roundPerPersonUp)
     }
 
+    func test_tipComparisons_withValidBill_shouldReturnRowsForPresets() {
+        calculationViewModel.billAmount = 100
+        calculationViewModel.numberOfPeople = 2
+
+        let comparisons = calculationViewModel.tipComparisons(for: [15, 18, 20, 25])
+
+        XCTAssertEqual(comparisons.map(\.percentage), [15, 18, 20, 25])
+        XCTAssertEqual(comparisons.count, 4)
+    }
+
+    func test_tipComparisons_withInvalidBill_shouldReturnNoRows() {
+        calculationViewModel.billAmount = nil
+
+        let comparisons = calculationViewModel.tipComparisons(for: [15, 18, 20, 25])
+
+        XCTAssertTrue(comparisons.isEmpty)
+    }
+
+    func test_tipComparisons_roundTotalUp_shouldReflectRoundedTotal() {
+        calculationViewModel.billAmount = 10
+        calculationViewModel.numberOfPeople = 3
+        calculationViewModel.roundingMode = .roundTotalUp
+
+        let comparison = calculationViewModel.tipComparisons(for: [18]).first
+
+        XCTAssertEqual(comparison?.tipAmount, 1.8, accuracy: 0.001)
+        XCTAssertEqual(comparison?.totalAmountWithTip, 12)
+        XCTAssertEqual(comparison?.totalPerPerson, 4)
+    }
+
+    func test_tipComparisons_roundPerPersonUp_shouldReflectCollectedTotal() {
+        calculationViewModel.billAmount = 10
+        calculationViewModel.numberOfPeople = 3
+        calculationViewModel.roundingMode = .roundPerPersonUp
+
+        let comparison = calculationViewModel.tipComparisons(for: [18]).first
+
+        XCTAssertEqual(comparison?.totalPerPerson, 4)
+        XCTAssertEqual(comparison?.totalAmountWithTip, 12)
+    }
+
 }

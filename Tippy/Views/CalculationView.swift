@@ -225,6 +225,8 @@ struct CalculationView: View {
                 }
             }
 
+            tipComparisonSection
+
             VStack(alignment: .leading, spacing: 8) {
                 ViewThatFits(in: .horizontal) {
                     HStack {
@@ -247,6 +249,101 @@ struct CalculationView: View {
         }
         .padding(18)
         .glassPanel(cornerRadius: 22)
+    }
+
+    private var tipComparisonSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(String(localized: "Tip Comparison"))
+                .font(.subheadline.weight(.medium))
+                .foregroundStyle(.secondary)
+
+            let comparisons = viewModel.tipComparisons(for: tipPresets)
+            if comparisons.isEmpty {
+                Label(String(localized: "Enter a bill amount to compare common tips."), systemImage: "chart.bar")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            } else {
+                VStack(spacing: 8) {
+                    ForEach(comparisons) { comparison in
+                        tipComparisonRow(comparison)
+                    }
+                }
+            }
+        }
+        .padding(12)
+        .background(Color.primary.opacity(colorSchemeContrast == .increased ? 0.08 : 0.04), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .strokeBorder(Color.primary.opacity(colorSchemeContrast == .increased ? 0.28 : 0.08), lineWidth: colorSchemeContrast == .increased ? 1.5 : 1)
+        }
+        .accessibilityIdentifier("Tip Comparison")
+    }
+
+    private func tipComparisonRow(_ comparison: TipComparison) -> some View {
+        let isSelected = viewModel.tipPercentage == comparison.percentage
+
+        return Button {
+            performAnimated(.spring(response: 0.28, dampingFraction: 0.78)) {
+                viewModel.tipPercentage = comparison.percentage
+                viewModel.persistSmartDefaults()
+            }
+            HapticFeedbackPerformer.selection(isEnabled: settings.hapticsEnabled)
+        } label: {
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: 10) {
+                    tipComparisonPercent(comparison, isSelected: isSelected)
+                    Spacer(minLength: 8)
+                    tipComparisonAmounts(comparison)
+                }
+
+                VStack(alignment: .leading, spacing: 6) {
+                    tipComparisonPercent(comparison, isSelected: isSelected)
+                    tipComparisonAmounts(comparison)
+                }
+            }
+            .padding(10)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background {
+                if isSelected {
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .fill(Color.accentColor.opacity(colorSchemeContrast == .increased ? 0.24 : 0.13))
+                }
+            }
+            .overlay {
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .strokeBorder(isSelected ? Color.accentColor : Color.primary.opacity(colorSchemeContrast == .increased ? 0.2 : 0.08), lineWidth: isSelected || colorSchemeContrast == .increased ? 1.5 : 1)
+            }
+        }
+        .buttonStyle(.plain)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(String(format: String(localized: "%.0f%% tip comparison"), comparison.percentage))
+        .accessibilityValue(String(localized: "Total \(comparison.totalAmountWithTip.formatted(.currency(code: localCurrency))), per person \(comparison.totalPerPerson.formatted(.currency(code: localCurrency)))"))
+        .accessibilityHint(String(localized: "Applies this tip percentage"))
+        .modifier(SelectedAccessibilityTraitModifier(isSelected: isSelected))
+    }
+
+    private func tipComparisonPercent(_ comparison: TipComparison, isSelected: Bool) -> some View {
+        Label {
+            Text("\(comparison.percentage, specifier: "%.0f")%")
+                .font(.subheadline.weight(.semibold).monospacedDigit())
+        } icon: {
+            Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                .foregroundStyle(isSelected ? Color.accentColor : Color.secondary)
+        }
+        .foregroundStyle(.primary)
+    }
+
+    private func tipComparisonAmounts(_ comparison: TipComparison) -> some View {
+        VStack(alignment: .trailing, spacing: 2) {
+            Text(comparison.totalAmountWithTip, format: .currency(code: localCurrency))
+                .font(.subheadline.weight(.semibold))
+                .monospacedDigit()
+            Text(String(localized: "Per Person") + " " + comparison.totalPerPerson.formatted(.currency(code: localCurrency)))
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .monospacedDigit()
+        }
     }
 
     private var tipPercentageText: some View {

@@ -29,6 +29,15 @@ extension RoundingMode: Identifiable {
     nonisolated var id: String { rawValue }
 }
 
+struct TipComparison: Identifiable, Equatable {
+    let percentage: Double
+    let tipAmount: Double
+    let totalAmountWithTip: Double
+    let totalPerPerson: Double
+
+    var id: Double { percentage }
+}
+
 @MainActor
 final class TipSavvySettings: ObservableObject {
     @Published var defaultTipPercentage: Double {
@@ -218,6 +227,36 @@ final class CalculationViewModel: ObservableObject  {
         }
 
         return Self.sanitizedAmount(unroundedTotalAmountWithTip / Double(numberOfPeople))
+    }
+
+    func tipComparisons(for presets: [Double]) -> [TipComparison] {
+        guard hasValidCalculation, let billAmount else {
+            return []
+        }
+
+        return presets.map { preset in
+            let tipAmount = billAmount / 100 * preset
+            let unroundedTotal = Self.sanitizedAmount(billAmount + tipAmount)
+            let totalPerPerson: Double
+            let totalAmountWithTip: Double
+
+            switch roundingMode {
+            case .none:
+                totalAmountWithTip = unroundedTotal
+                totalPerPerson = Self.sanitizedAmount(unroundedTotal / Double(numberOfPeople))
+            case .roundTotalUp:
+                totalAmountWithTip = unroundedTotal.rounded(.up)
+                totalPerPerson = Self.sanitizedAmount(totalAmountWithTip / Double(numberOfPeople))
+            case .roundPerPersonUp:
+                totalPerPerson = Self.sanitizedAmount((unroundedTotal / Double(numberOfPeople)).rounded(.up))
+                totalAmountWithTip = totalPerPerson * Double(numberOfPeople)
+            }
+
+            return TipComparison(percentage: preset,
+                                 tipAmount: Self.sanitizedAmount(tipAmount),
+                                 totalAmountWithTip: Self.sanitizedAmount(totalAmountWithTip),
+                                 totalPerPerson: totalPerPerson)
+        }
     }
 
     private var unroundedTotalAmountWithTip: Double {
