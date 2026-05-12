@@ -293,8 +293,34 @@ final class TippyUITests: XCTestCase {
         app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Sheet Dinner")).firstMatch.tap()
 
         XCTAssertTrue(app.navigationBars["Saved Tip Details"].exists)
+        XCTAssertTrue(app.buttons["Use Saved Tip Again"].exists)
         XCTAssertTrue(app.buttons["Rename"].exists)
         XCTAssertTrue(app.buttons["Delete"].exists)
+    }
+
+    func test_savedDetailUseAgain_shouldReturnToCalculatorWithSavedInputs() {
+        let app = XCUIApplication()
+        app.launch()
+
+        enterBillAmount("25", in: app)
+        app.buttons["20%"].tap()
+        app.buttons["Increase People"].tap()
+        app.buttons["Save Tip Calculation"].tap()
+        app.alerts["Save Tip Calculation"].scrollViews.otherElements.textFields["Enter Name"].typeText("Reuse Dinner")
+        app.alerts["Save Tip Calculation"].scrollViews.otherElements.buttons["OK"].tap()
+
+        let savedAlert = app.alerts["Saved"]
+        if savedAlert.waitForExistence(timeout: 2) {
+            savedAlert.buttons["OK"].tap()
+        }
+
+        app.tabBars["Tab Bar"].buttons["Saved"].tap()
+        app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Reuse Dinner")).firstMatch.tap()
+        app.buttons["Use Saved Tip Again"].tap()
+
+        XCTAssertTrue(app.navigationBars["TipSavvy"].waitForExistence(timeout: 2))
+        XCTAssertEqual(app.buttons["20%"].value as? String, "Selected")
+        XCTAssertEqual(app.otherElements["Number of People"].value as? String, "2")
     }
 
     func test_calculateRoundCopySaveAndOpenDetail_shouldCompletePrimaryFlow() {

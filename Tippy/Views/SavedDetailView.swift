@@ -15,16 +15,21 @@ struct SavedDetailView: View {
 
     let onRename: (SavedTip, String) -> Void
     let onDelete: (SavedTip) -> Void
+    let onUseAgain: (SavedTip) -> Void
 
     @State private var renameText = ""
     @State private var showingRenameAlert = false
     @State private var showingDeleteConfirmation = false
     @State private var showingCopiedConfirmation = false
 
-    init(tip: SavedTip, onRename: @escaping (SavedTip, String) -> Void = { _, _ in }, onDelete: @escaping (SavedTip) -> Void = { _ in }) {
+    init(tip: SavedTip,
+         onRename: @escaping (SavedTip, String) -> Void = { _, _ in },
+         onDelete: @escaping (SavedTip) -> Void = { _ in },
+         onUseAgain: @escaping (SavedTip) -> Void = { _ in }) {
         self._viewModel = StateObject(wrappedValue: SavedDetailViewModel(tip: tip))
         self.onRename = onRename
         self.onDelete = onDelete
+        self.onUseAgain = onUseAgain
     }
 
     private let dateFormatMMDDYYYY = Date.FormatStyle.dateTime.month().day().year()
@@ -40,6 +45,7 @@ struct SavedDetailView: View {
                     header
                     totalsGrid
                     detailsCard
+                    useAgainButton
                     shareCard
                     actionButtons
                 }
@@ -171,6 +177,20 @@ struct SavedDetailView: View {
         .buttonStyle(.bordered)
         .controlSize(.large)
         .accessibilityLabel(String(localized: "Copy Details"))
+    }
+
+    private var useAgainButton: some View {
+        Button {
+            onUseAgain(viewModel.tip)
+            dismiss()
+        } label: {
+            Label(String(localized: "Use Again"), systemImage: "arrow.counterclockwise")
+                .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(.borderedProminent)
+        .controlSize(.large)
+        .accessibilityLabel(String(localized: "Use Again"))
+        .accessibilityIdentifier("Use Saved Tip Again")
     }
 
     private var actionButtons: some View {

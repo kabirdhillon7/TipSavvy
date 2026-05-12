@@ -11,6 +11,7 @@ import SwiftUI
 struct SavedView: View {
     @EnvironmentObject var dataManager: DataManager
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    let onUseAgain: (SavedTip) -> Void
 
     @State private var searchText = ""
     @State private var renameText = ""
@@ -25,6 +26,10 @@ struct SavedView: View {
 
     private let dateFormatMMDDYYYY = Date.FormatStyle.dateTime.month().day().year()
     private let localCurrency = Locale.current.currency?.identifier ?? "USD"
+
+    init(onUseAgain: @escaping (SavedTip) -> Void = { _ in }) {
+        self.onUseAgain = onUseAgain
+    }
 
     private var sortMode: SavedTipSortMode {
         get { SavedTipSortMode(rawValue: sortModeRawValue) ?? .newest }
@@ -95,7 +100,7 @@ struct SavedView: View {
             }
         }
         .sheet(item: $selectedTip) { tip in
-            SavedDetailView(tip: tip, onRename: renameTip, onDelete: deleteTip)
+            SavedDetailView(tip: tip, onRename: renameTip, onDelete: deleteTip, onUseAgain: onUseAgain)
                 .presentationDetents([.medium, .large])
                 .presentationDragIndicator(.visible)
         }

@@ -6,6 +6,7 @@
 //
 
 import XCTest
+import CoreData
 @testable import Tippy
 
 @MainActor
@@ -389,27 +390,82 @@ final class CalculationViewModelTests: XCTestCase {
         XCTAssertTrue(comparisons.isEmpty)
     }
 
-    func test_tipComparisons_roundTotalUp_shouldReflectRoundedTotal() {
+    func test_tipComparisons_roundTotalUp_shouldReflectRoundedTotal() throws {
         calculationViewModel.billAmount = 10
         calculationViewModel.numberOfPeople = 3
         calculationViewModel.roundingMode = .roundTotalUp
 
-        let comparison = calculationViewModel.tipComparisons(for: [18]).first
+        let comparison = try XCTUnwrap(calculationViewModel.tipComparisons(for: [18]).first)
 
-        XCTAssertEqual(comparison?.tipAmount, 1.8, accuracy: 0.001)
-        XCTAssertEqual(comparison?.totalAmountWithTip, 12)
-        XCTAssertEqual(comparison?.totalPerPerson, 4)
+        XCTAssertEqual(comparison.tipAmount, 1.8, accuracy: 0.001)
+        XCTAssertEqual(comparison.totalAmountWithTip, 12)
+        XCTAssertEqual(comparison.totalPerPerson, 4)
     }
 
-    func test_tipComparisons_roundPerPersonUp_shouldReflectCollectedTotal() {
+    func test_tipComparisons_roundPerPersonUp_shouldReflectCollectedTotal() throws {
         calculationViewModel.billAmount = 10
         calculationViewModel.numberOfPeople = 3
         calculationViewModel.roundingMode = .roundPerPersonUp
 
-        let comparison = calculationViewModel.tipComparisons(for: [18]).first
+        let comparison = try XCTUnwrap(calculationViewModel.tipComparisons(for: [18]).first)
 
-        XCTAssertEqual(comparison?.totalPerPerson, 4)
-        XCTAssertEqual(comparison?.totalAmountWithTip, 12)
+        XCTAssertEqual(comparison.totalPerPerson, 4)
+        XCTAssertEqual(comparison.totalAmountWithTip, 12)
+    }
+
+    func test_applySavedTip_shouldRestoreSavedInputsAndResetRounding() throws {
+        calculationViewModel.billAmount = 12
+        calculationViewModel.tipPercentage = 25
+        calculationViewModel.numberOfPeople = 4
+        calculationViewModel.roundingMode = .roundPerPersonUp
+        calculationViewModel.tipItemName = "Current"
+
+        let savedTip = try makeSavedTip(billAmount: 84.50, tipPercentage: 20, numberOfPeople: 3)
+
+        calculationViewModel.applySavedTip(savedTip)
+
+        XCTAssertEqual(calculationViewModel.billAmount, 84.50)
+        XCTAssertEqual(calculationViewModel.tipPercentage, 20)
+        XCTAssertEqual(calculationViewModel.numberOfPeople, 3)
+        XCTAssertEqual(calculationViewModel.roundingMode, .none)
+        XCTAssertEqual(calculationViewModel.tipItemName, "")
+    }
+
+    func test_applySavedTip_withOutOfRangeValues_shouldClampDefensively() throws {
+        let savedTip = try makeSavedTip(billAmount: 40, tipPercentage: 45, numberOfPeople: 0)
+
+        calculationViewModel.applySavedTip(savedTip)
+
+        XCTAssertEqual(calculationViewModel.billAmount, 40)
+        XCTAssertEqual(calculationViewModel.tipPercentage, 30)
+        XCTAssertEqual(calculationViewModel.numberOfPeople, 1)
+    }
+
+    private func makeSavedTip(billAmount: Double, tipPercentage: Double, numberOfPeople: Int64) throws -> SavedTip {
+        let container = NSPersistentContainer(name: "SavedTip")
+        let description = NSPersistentStoreDescription()
+        description.url = URL(fileURLWithPath: "/dev/null")
+        container.persistentStoreDescriptions = [description]
+
+        var loadError: Error?
+        container.loadPersistentStores { _, error in
+            loadError = error
+        }
+
+        if let loadError {
+            throw loadError
+        }
+
+        let savedTip = SavedTip(context: container.viewContext)
+        savedTip.billAmount = billAmount
+        savedTip.tipPercentage = tipPercentage
+        savedTip.numberOfPeople = numberOfPeople
+        savedTip.tipAmount = billAmount / 100 * tipPercentage
+        savedTip.totalAmountWithTip = billAmount + savedTip.tipAmount
+        savedTip.totalPerPerson = savedTip.totalAmountWithTip / Double(max(numberOfPeople, 1))
+        savedTip.name = "Reusable Tip"
+        savedTip.date = Date()
+        return savedTip
     }
 
 }

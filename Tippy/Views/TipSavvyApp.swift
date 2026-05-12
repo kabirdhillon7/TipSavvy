@@ -25,6 +25,8 @@ struct TipSavvyApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @StateObject private var manager: DataManager
     @StateObject private var settings: TipSavvySettings
+    @StateObject private var calculationViewModel: CalculationViewModel
+    @State private var selectedTab: TipSavvyTab = .calculate
 
     init() {
         let arguments = ProcessInfo.processInfo.arguments
@@ -41,28 +43,35 @@ struct TipSavvyApp: App {
             defaults.removePersistentDomain(forName: "TipSavvyUITests")
         }
 
+        let appSettings = TipSavvySettings(defaults: defaults)
         _manager = StateObject(wrappedValue: dataManager)
-        _settings = StateObject(wrappedValue: TipSavvySettings(defaults: defaults))
+        _settings = StateObject(wrappedValue: appSettings)
+        _calculationViewModel = StateObject(wrappedValue: CalculationViewModel(defaults: defaults, settings: appSettings))
     }
     
     var body: some Scene {
         WindowGroup {
-            TabView {
-                CalculationView()
+            TabView(selection: $selectedTab) {
+                CalculationView(viewModel: calculationViewModel)
                     .tabItem {
                         Label(String(localized: "Calculate"), systemImage: "percent")
                             .accessibilityLabel(String(localized: "Calculate"))
                             .accessibilityHint(String(localized: "Calculate tip amounts"))
                     }
+                    .tag(TipSavvyTab.calculate)
                     .environmentObject(manager)
                     .environmentObject(settings)
                 
-                SavedView()
+                SavedView { tip in
+                    calculationViewModel.applySavedTip(tip)
+                    selectedTab = .calculate
+                }
                     .tabItem {
                         Label(String(localized: "Saved"), systemImage: "bookmark")
                             .accessibilityLabel(String(localized: "Saved"))
                             .accessibilityHint(String(localized: "View and manage saved tip calculations"))
                     }
+                    .tag(TipSavvyTab.saved)
                     .environmentObject(manager)
 
                 SettingsView()
@@ -71,8 +80,15 @@ struct TipSavvyApp: App {
                             .accessibilityLabel(String(localized: "Settings"))
                             .accessibilityHint(String(localized: "Manage TipSavvy preferences"))
                     }
+                    .tag(TipSavvyTab.settings)
                     .environmentObject(settings)
             }
         }
     }
+}
+
+private enum TipSavvyTab {
+    case calculate
+    case saved
+    case settings
 }

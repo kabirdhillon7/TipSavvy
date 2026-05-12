@@ -310,6 +310,15 @@ final class CalculationViewModel: ObservableObject  {
         numberOfPeople = defaultNumberOfPeople ?? settings?.defaultNumberOfPeople ?? numberOfPeople
         persistSmartDefaults()
     }
+
+    func applySavedTip(_ savedTip: SavedTip) {
+        billAmount = Self.sanitizedAmount(savedTip.billAmount)
+        tipPercentage = Self.clampedTipPercentage(savedTip.tipPercentage)
+        numberOfPeople = Self.clampedNumberOfPeople(Int(savedTip.numberOfPeople))
+        roundingMode = .none
+        tipItemName = ""
+        persistSmartDefaults()
+    }
 }
 
 enum TipSavvyKeyboardField: Int, Hashable {
