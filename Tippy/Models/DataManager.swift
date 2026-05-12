@@ -160,13 +160,26 @@ class DataManager: NSObject, ObservableObject {
     }
 
     func seedDemoTips(count: Int = 8) {
+        let demoTipNames = [
+            "Friday Dinner",
+            "Brunch Split",
+            "Coffee Run",
+            "Team Lunch",
+            "Date Night",
+            "Family Dinner",
+            "Birthday Drinks",
+            "Patio Brunch"
+        ]
+
         for index in 1...count {
             let billAmount = Double(18 + index * 7)
             let tipPercentage = [15.0, 18.0, 20.0, 22.0][index % 4]
             let tipAmount = billAmount / 100 * tipPercentage
             let people = (index % 5) + 1
             let total = billAmount + tipAmount
-            _ = saveTip(name: "Table \(index)",
+            let name = demoTipNames[(index - 1) % demoTipNames.count]
+
+            _ = saveTip(name: name,
                         billAmount: billAmount,
                         tipPercentage: tipPercentage,
                         numberOfPeople: people,

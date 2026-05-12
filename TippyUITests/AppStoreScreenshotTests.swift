@@ -40,14 +40,14 @@ final class AppStoreScreenshotTests: XCTestCase {
         selectTab("Saved")
 
         XCTAssertTrue(app.navigationBars["Saved Tips"].waitForExistence(timeout: 2))
-        XCTAssertTrue(app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Table")).firstMatch.waitForExistence(timeout: 2))
+        XCTAssertTrue(app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Dinner")).firstMatch.waitForExistence(timeout: 2))
         capture("02-saved-tips-library")
     }
 
     func test03SavedTipDetails() throws {
         selectTab("Saved")
 
-        let firstSavedTipName = app.staticTexts["Table 1"]
+        let firstSavedTipName = app.staticTexts["Friday Dinner"]
         XCTAssertTrue(firstSavedTipName.waitForExistence(timeout: 2))
         firstSavedTipName.tap()
 
