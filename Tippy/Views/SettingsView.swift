@@ -5,14 +5,22 @@
 //  Created by Kabir Dhillon on 5/8/26.
 //
 
+import StoreKit
+import SafariServices
 import SwiftUI
+import UIKit
 
 struct SettingsView: View {
     @EnvironmentObject var settings: TipSavvySettings
     @Environment(\.colorSchemeContrast) private var colorSchemeContrast
 
+    @State private var showingPrivacyPolicy = false
+
     private let localCurrency = Locale.current.currency?.identifier ?? "USD"
     private let appStoreReviewURL = URL(string: "itms-apps://itunes.apple.com/app/id6449447909?action=write-review")
+    private let contactURL = URL(string: "mailto:kabirdhillon.dev@gmail.com?subject=TipSavvy%20Support")
+    private let privacyPolicyURL = URL(string: "https://docs.google.com/document/d/e/2PACX-1vT5uoP653Dd3_hKw-ozR0c0YxUhKPlGNglEByGnuWDC4M7rzMwI4gIdw-mFvU94Ma3gxW5JV-XNj_KW/pub")
+    private let appReadinessInfo = AppReadinessInfo()
 
     var body: some View {
         NavigationStack {
@@ -22,6 +30,7 @@ struct SettingsView: View {
                     experienceCard
                     privacyReliabilityCard
                     appStoreCard
+                    aboutCard
                     resetButton
                 }
                 .padding(18)
@@ -29,6 +38,9 @@ struct SettingsView: View {
             }
             .background(Color(.systemGroupedBackground))
             .navigationTitle(String(localized: "Settings"))
+            .sheet(isPresented: $showingPrivacyPolicy) {
+                privacyPolicySheet
+            }
         }
     }
 
@@ -79,6 +91,9 @@ struct SettingsView: View {
             Toggle(isOn: $settings.hapticsEnabled) {
                 Text(String(localized: "Haptic Feedback"))
             }
+            .onChange(of: settings.hapticsEnabled) { isEnabled in
+                HapticFeedbackPerformer.softImpact(isEnabled: isEnabled)
+            }
 
             InfoRow(title: String(localized: "Currency"), value: localCurrency)
             Text(String(localized: "TipSavvy formats totals with your device locale and currency settings."))
@@ -113,23 +128,84 @@ struct SettingsView: View {
                 .font(.headline)
                 .foregroundStyle(.secondary)
 
-            Text(String(localized: "Enjoying the app? A quick rating helps other people find it."))
+            Text(String(localized: "Enjoying the app? Ratings are optional, private, and help other people find TipSavvy."))
                 .font(.footnote)
                 .foregroundStyle(.secondary)
 
+            Button {
+                requestNativeReview()
+            } label: {
+                Label(String(localized: "Rate TipSavvy"), systemImage: "star")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.borderedProminent)
+            .controlSize(.large)
+            .frame(maxWidth: .infinity)
+            .accessibilityIdentifier("Request App Review")
+
             if let appStoreReviewURL {
                 Link(destination: appStoreReviewURL) {
-                    Label(String(localized: "Rate on the App Store"), systemImage: "star.bubble")
+                    Label(String(localized: "Open App Store Review"), systemImage: "star.bubble")
                         .frame(maxWidth: .infinity)
                 }
-                .buttonStyle(.borderedProminent)
+                .buttonStyle(.bordered)
                 .controlSize(.large)
+                .frame(maxWidth: .infinity)
                 .accessibilityIdentifier("Rate on the App Store")
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(18)
         .glassPanel(cornerRadius: 22)
+    }
+
+    private var aboutCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Label(String(localized: "About TipSavvy"), systemImage: "info.circle")
+                .font(.headline)
+                .foregroundStyle(.secondary)
+
+            InfoRow(title: String(localized: "Version"), value: appReadinessInfo.displayVersion)
+
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: 10) {
+                    privacyPolicyButton
+                    contactButton
+                }
+
+                VStack(spacing: 10) {
+                    privacyPolicyButton
+                    contactButton
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(18)
+        .glassPanel(cornerRadius: 22)
+        .accessibilityIdentifier("About TipSavvy")
+    }
+
+    private var privacyPolicyButton: some View {
+        Button {
+            showingPrivacyPolicy = true
+        } label: {
+            Label(String(localized: "Privacy Policy"), systemImage: "hand.raised")
+                .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(.bordered)
+        .accessibilityIdentifier("Privacy Policy")
+    }
+
+    @ViewBuilder
+    private var contactButton: some View {
+        if let contactURL {
+            Link(destination: contactURL) {
+                Label(String(localized: "Contact"), systemImage: "envelope")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.bordered)
+            .accessibilityIdentifier("Contact Support")
+        }
     }
 
     private var resetButton: some View {
@@ -143,6 +219,62 @@ struct SettingsView: View {
         .controlSize(.large)
         .accessibilityLabel(String(localized: "Reset Preferences"))
     }
+
+    @ViewBuilder
+    private var privacyPolicySheet: some View {
+        if let privacyPolicyURL {
+            SafariView(url: privacyPolicyURL)
+                .ignoresSafeArea()
+        } else {
+            fallbackPrivacyPolicyView
+        }
+    }
+
+    private var fallbackPrivacyPolicyView: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 18) {
+                    Text(String(localized: "TipSavvy does not require an account and does not ask for your name, email address, phone number, payment information, contacts, or location."))
+                    Text(String(localized: "Saved bill amounts, tip percentages, split counts, and app settings stay on your device unless you delete them or uninstall the app."))
+                    Text(String(localized: "TipSavvy uses Firebase Crashlytics for crash reporting and diagnostics. Crash reports help improve reliability and are not used to personally identify users."))
+                    Text(String(localized: "TipSavvy is suitable for a general audience and does not knowingly collect personal information from children."))
+                }
+                .font(.body)
+                .foregroundStyle(.primary)
+                .padding(18)
+            }
+            .background(Color(.systemGroupedBackground))
+            .navigationTitle(String(localized: "Privacy Policy"))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(String(localized: "Done")) {
+                        showingPrivacyPolicy = false
+                    }
+                }
+            }
+        }
+    }
+
+    private func requestNativeReview() {
+        guard let scene = UIApplication.shared.connectedScenes
+            .compactMap({ $0 as? UIWindowScene })
+            .first(where: { $0.activationState == .foregroundActive }) else {
+            return
+        }
+
+        SKStoreReviewController.requestReview(in: scene)
+    }
+}
+
+private struct SafariView: UIViewControllerRepresentable {
+    let url: URL
+
+    func makeUIViewController(context: Context) -> SFSafariViewController {
+        SFSafariViewController(url: url)
+    }
+
+    func updateUIViewController(_ uiViewController: SFSafariViewController, context: Context) { }
 }
 
 #Preview("Settings") {

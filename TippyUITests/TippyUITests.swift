@@ -123,7 +123,24 @@ final class TippyUITests: XCTestCase {
         XCTAssertTrue(app.sliders["Default Tip"].exists)
         XCTAssertTrue(app.switches["Haptic Feedback"].exists)
         XCTAssertTrue(app.staticTexts["Currency"].exists)
+        XCTAssertTrue(app.buttons["Request App Review"].exists)
+        XCTAssertTrue(app.buttons["Rate on the App Store"].exists)
+        XCTAssertTrue(app.otherElements["About TipSavvy"].exists)
+        XCTAssertTrue(app.buttons["Privacy Policy"].exists)
+        XCTAssertTrue(app.buttons["Contact Support"].exists)
         XCTAssertTrue(app.buttons["Reset Preferences"].exists)
+    }
+
+    func test_settingsPrivacyPolicy_shouldOpenAndDismiss() {
+        let app = XCUIApplication()
+        app.launch()
+
+        app.tabBars["Tab Bar"].buttons["Settings"].tap()
+        app.buttons["Privacy Policy"].tap()
+
+        XCTAssertTrue(app.webViews.firstMatch.waitForExistence(timeout: 5))
+        app.buttons["Done"].tap()
+        XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 2))
     }
 
     func test_tipPreset_shouldPersistAfterRelaunch() {

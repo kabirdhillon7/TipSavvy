@@ -33,7 +33,7 @@ flowchart LR
 - Testability: settings, rounding, saved-tip filtering, sort behavior, and persistence edge cases are covered with isolated XCTest fixtures.
 - Accessibility: VoiceOver labels, grouped accessibility summaries, Reduce Motion-aware animations, high-contrast-aware panels, and UI tests for discoverability.
 - Localization and formatting: copy, share, and accessibility strings use localized labels, while currency values respect the user's current locale.
-- App quality: Crashlytics is configured at launch, privacy-sensitive copy is explicit, and glass UI falls back to system material on older iOS versions.
+- App quality: Crashlytics is configured at launch, App Shortcuts open the calculator, privacy-sensitive copy is explicit, and glass UI falls back to system material on older iOS versions.
 
 ## Demo
 
@@ -90,6 +90,27 @@ xcodebuild test \
   CODE_SIGNING_ALLOWED=NO
 ```
 
+Build-for-testing without running UI tests:
+
+```bash
+xcodebuild build-for-testing \
+  -project Tippy.xcodeproj \
+  -scheme Tippy \
+  -testPlan Tippy \
+  -destination 'platform=iOS Simulator,name=iPhone 17,OS=latest' \
+  CODE_SIGNING_ALLOWED=NO
+```
+
+## Release Verification
+
+Run the release preflight before archiving:
+
+```bash
+Scripts/release_preflight.sh
+```
+
+The preflight checks App Store icon dimensions/alpha, export compliance metadata, release documentation, and local build tooling. Use [Release checklist](docs/ReleaseChecklist.md) for App Store metadata, privacy nutrition, accessibility claims, manual QA, and upload checks.
+
 Manual QA matrix:
 
 - iOS 16, iOS 17, iOS 18, and current beta/latest simulator
@@ -98,6 +119,12 @@ Manual QA matrix:
 - Large Dynamic Type sizes
 - Empty saved list, many saved tips, renamed tips, deleted tips
 - USD and non-USD device locale/currency settings
+
+Supporting checklists:
+
+- [Accessibility verification](docs/AccessibilityChecklist.md)
+- [App Store screenshot plan](docs/AppStoreScreenshotPlan.md)
+- [Release checklist](docs/ReleaseChecklist.md)
 
 ## Privacy
 

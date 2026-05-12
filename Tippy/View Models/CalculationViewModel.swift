@@ -8,13 +8,10 @@
 import Foundation
 import Combine
 
-@MainActor
-enum RoundingMode: String, CaseIterable, Identifiable {
+enum RoundingMode: String, CaseIterable {
     case none
     case roundTotalUp
     case roundPerPersonUp
-
-    var id: String { rawValue }
 
     var title: String {
         switch self {
@@ -26,6 +23,10 @@ enum RoundingMode: String, CaseIterable, Identifiable {
             return String(localized: "Person Up")
         }
     }
+}
+
+extension RoundingMode: Identifiable {
+    nonisolated var id: String { rawValue }
 }
 
 @MainActor

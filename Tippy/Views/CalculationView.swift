@@ -141,6 +141,7 @@ struct CalculationView: View {
                 HStack {
                     peopleButton(systemImage: "minus", label: String(localized: "Decrease People"), isDisabled: viewModel.numberOfPeople <= 1) {
                         viewModel.numberOfPeople = max(1, viewModel.numberOfPeople - 1)
+                        HapticFeedbackPerformer.selection(isEnabled: settings.hapticsEnabled)
                     }
 
                     Spacer(minLength: 16)
@@ -149,6 +150,7 @@ struct CalculationView: View {
 
                     peopleButton(systemImage: "plus", label: String(localized: "Increase People"), isDisabled: viewModel.numberOfPeople >= 99) {
                         viewModel.numberOfPeople = min(99, viewModel.numberOfPeople + 1)
+                        HapticFeedbackPerformer.selection(isEnabled: settings.hapticsEnabled)
                     }
                 }
 
@@ -157,10 +159,12 @@ struct CalculationView: View {
                     HStack {
                         peopleButton(systemImage: "minus", label: String(localized: "Decrease People"), isDisabled: viewModel.numberOfPeople <= 1) {
                             viewModel.numberOfPeople = max(1, viewModel.numberOfPeople - 1)
+                            HapticFeedbackPerformer.selection(isEnabled: settings.hapticsEnabled)
                         }
                         Spacer()
                         peopleButton(systemImage: "plus", label: String(localized: "Increase People"), isDisabled: viewModel.numberOfPeople >= 99) {
                             viewModel.numberOfPeople = min(99, viewModel.numberOfPeople + 1)
+                            HapticFeedbackPerformer.selection(isEnabled: settings.hapticsEnabled)
                         }
                     }
                 }
@@ -261,6 +265,7 @@ struct CalculationView: View {
                 viewModel.tipPercentage = preset
                 viewModel.persistSmartDefaults()
             }
+            HapticFeedbackPerformer.selection(isEnabled: settings.hapticsEnabled)
         } label: {
             Text("\(preset, specifier: "%.0f")%")
                 .frame(maxWidth: .infinity)
@@ -274,10 +279,7 @@ struct CalculationView: View {
     private var tipSlider: some View {
         Slider(value: $viewModel.tipPercentage, in: 0...30, step: 1)
             .onChange(of: viewModel.tipPercentage, perform: { _ in
-                if settings.hapticsEnabled {
-                    let generator = UISelectionFeedbackGenerator()
-                    generator.selectionChanged()
-                }
+                HapticFeedbackPerformer.selection(isEnabled: settings.hapticsEnabled)
                 viewModel.persistSmartDefaults()
             })
             .animation(reduceMotion ? nil : .easeInOut(duration: 0.2), value: viewModel.tipPercentage)
@@ -321,6 +323,7 @@ struct CalculationView: View {
                 }
                 .pickerStyle(.segmented)
                 .onChange(of: viewModel.roundingMode) { _ in
+                    HapticFeedbackPerformer.selection(isEnabled: settings.hapticsEnabled)
                     viewModel.persistSmartDefaults()
                 }
                 .accessibilityIdentifier("Rounding Mode")
@@ -412,6 +415,7 @@ struct CalculationView: View {
                 viewModel.applySettingsDefaults(defaultTipPercentage: settings.defaultTipPercentage,
                                                 defaultNumberOfPeople: settings.defaultNumberOfPeople)
             }
+            HapticFeedbackPerformer.warning(isEnabled: settings.hapticsEnabled)
         } label: {
             Label(String(localized: "Reset"), systemImage: "arrow.counterclockwise")
                 .frame(maxWidth: .infinity)
@@ -433,9 +437,7 @@ struct CalculationView: View {
         Button {
             UIPasteboard.general.string = value
             copiedValueLabel = label
-            if settings.hapticsEnabled {
-                UIImpactFeedbackGenerator(style: .light).impactOccurred()
-            }
+            HapticFeedbackPerformer.lightImpact(isEnabled: settings.hapticsEnabled)
         } label: {
             Label(label, systemImage: "doc.on.doc")
                 .frame(maxWidth: .infinity)
@@ -451,11 +453,6 @@ struct CalculationView: View {
             return
         }
 
-        if settings.hapticsEnabled {
-            let generator = UINotificationFeedbackGenerator()
-            generator.notificationOccurred(.success)
-        }
-
         let result = dataManager.saveTip(name: viewModel.tipItemName.trimmingCharacters(in: .whitespacesAndNewlines),
                                          billAmount: billAmount,
                                          tipPercentage: viewModel.tipPercentage,
@@ -465,9 +462,12 @@ struct CalculationView: View {
                                          totalPerPerson: viewModel.totalPerPerson)
 
         guard case .success = result else {
+            HapticFeedbackPerformer.warning(isEnabled: settings.hapticsEnabled)
             dataErrorMessage = dataManager.lastError?.localizedDescription ?? String(localized: "Please try again.")
             return
         }
+
+        HapticFeedbackPerformer.success(isEnabled: settings.hapticsEnabled)
 
         DispatchQueue.main.async {
             performAnimated(.spring(response: 0.32, dampingFraction: 0.82)) {

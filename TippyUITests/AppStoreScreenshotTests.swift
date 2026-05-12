@@ -63,6 +63,17 @@ final class AppStoreScreenshotTests: XCTestCase {
         capture("04-settings-and-privacy")
     }
 
+    func test05SettingsSupportAndReadiness() throws {
+        selectTab("Settings")
+
+        XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 2))
+        app.swipeUp()
+        XCTAssertTrue(app.otherElements["About TipSavvy"].waitForExistence(timeout: 2))
+        XCTAssertTrue(app.buttons["Request App Review"].exists)
+        XCTAssertTrue(app.buttons["Privacy Policy"].exists)
+        capture("05-settings-support-and-readiness")
+    }
+
     private func enterBillAmount(_ amount: String) {
         let billAmountField = app.textFields["Enter Bill Amount"]
         XCTAssertTrue(billAmountField.waitForExistence(timeout: 2))
