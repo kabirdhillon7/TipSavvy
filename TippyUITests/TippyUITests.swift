@@ -118,12 +118,49 @@ final class TippyUITests: XCTestCase {
 
         XCTAssertTrue(app.textFields["Enter Bill Amount"].exists)
         XCTAssertTrue(app.staticTexts["Number of People"].exists)
+        XCTAssertTrue(app.buttons["Tip Service Context"].exists)
+        XCTAssertTrue(app.staticTexts["Tip Context Helper"].exists)
         XCTAssertTrue(app.buttons["15%"].exists)
         XCTAssertTrue(app.sliders["Tip Percentage Selection"].exists)
         XCTAssertTrue(app.buttons["Save Tip Calculation"].exists)
         XCTAssertTrue(app.buttons["Reset"].exists)
         XCTAssertTrue(app.otherElements["Bill Totals Summary"].exists)
         XCTAssertTrue(app.otherElements["Tip Comparison"].exists)
+    }
+
+    func test_tipContext_shouldUpdateVisiblePresets() {
+        let app = XCUIApplication()
+        app.launch()
+
+        selectTipContext("Delivery", in: app)
+
+        XCTAssertTrue(app.buttons["15%"].exists)
+        XCTAssertTrue(app.buttons["18%"].exists)
+        XCTAssertTrue(app.buttons["20%"].exists)
+        XCTAssertFalse(app.buttons["25%"].exists)
+    }
+
+    func test_tipContextCoffee_shouldUpdateComparisonRows() {
+        let app = XCUIApplication()
+        app.launch()
+
+        enterBillAmount("42", in: app)
+        selectTipContext("Coffee", in: app)
+
+        XCTAssertTrue(app.otherElements["Tip Comparison"].waitForExistence(timeout: 2))
+        XCTAssertTrue(app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "10% tip comparison")).firstMatch.exists)
+        XCTAssertTrue(app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "15% tip comparison")).firstMatch.exists)
+        XCTAssertTrue(app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "20% tip comparison")).firstMatch.exists)
+    }
+
+    func test_tipContextPreset_shouldApplySelectedPercentage() {
+        let app = XCUIApplication()
+        app.launch()
+
+        selectTipContext("Movers", in: app)
+        app.buttons["5%"].tap()
+
+        XCTAssertEqual(app.buttons["5%"].value as? String, "Selected")
     }
 
     func test_settings_shouldExposeDefaultsAndQualitySignals() {
@@ -381,5 +418,14 @@ final class TippyUITests: XCTestCase {
         if savedAlert.waitForExistence(timeout: 2) {
             savedAlert.buttons["OK"].tap()
         }
+    }
+
+    private func selectTipContext(_ context: String, in app: XCUIApplication) {
+        let contextButton = app.buttons["Tip Service Context"]
+        if !contextButton.isHittable {
+            app.scrollViews.firstMatch.swipeUp()
+        }
+        contextButton.tap()
+        app.buttons[context].tap()
     }
 }

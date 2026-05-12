@@ -372,6 +372,31 @@ final class CalculationViewModelTests: XCTestCase {
         XCTAssertEqual(calculationViewModel.roundingMode, .roundPerPersonUp)
     }
 
+    func test_init_withInvalidSavedServiceContext_shouldFallbackToRestaurant() {
+        defaults.set("not-a-context", forKey: "serviceContext")
+
+        calculationViewModel = CalculationViewModel(defaults: defaults)
+
+        XCTAssertEqual(calculationViewModel.serviceContext, .restaurant)
+    }
+
+    func test_serviceContext_shouldPersist() {
+        calculationViewModel.serviceContext = .coffee
+
+        calculationViewModel.persistSmartDefaults()
+        calculationViewModel = CalculationViewModel(defaults: defaults)
+
+        XCTAssertEqual(calculationViewModel.serviceContext, .coffee)
+    }
+
+    func test_serviceContextChange_shouldNotResetSelectedTipPercentage() {
+        calculationViewModel.tipPercentage = 22
+
+        calculationViewModel.serviceContext = .delivery
+
+        XCTAssertEqual(calculationViewModel.tipPercentage, 22)
+    }
+
     func test_tipComparisons_withValidBill_shouldReturnRowsForPresets() {
         calculationViewModel.billAmount = 100
         calculationViewModel.numberOfPeople = 2
@@ -380,6 +405,16 @@ final class CalculationViewModelTests: XCTestCase {
 
         XCTAssertEqual(comparisons.map(\.percentage), [15, 18, 20, 25])
         XCTAssertEqual(comparisons.count, 4)
+    }
+
+    func test_tipComparisons_withServiceContextPresets_shouldUseActiveContext() {
+        calculationViewModel.billAmount = 100
+        calculationViewModel.numberOfPeople = 2
+        calculationViewModel.serviceContext = .coffee
+
+        let comparisons = calculationViewModel.tipComparisons(for: calculationViewModel.serviceContext.suggestedPresets)
+
+        XCTAssertEqual(comparisons.map(\.percentage), [10, 15, 20])
     }
 
     func test_tipComparisons_withInvalidBill_shouldReturnNoRows() {

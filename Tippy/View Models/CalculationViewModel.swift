@@ -38,6 +38,115 @@ struct TipComparison: Identifiable, Equatable {
     var id: Double { percentage }
 }
 
+enum TipServiceContext: String, CaseIterable, Identifiable {
+    case restaurant
+    case bar
+    case delivery
+    case takeout
+    case coffee
+    case salon
+    case barber
+    case spa
+    case nailSalon
+    case petGroomer
+    case rideshare
+    case foodTruck
+    case tourGuide
+    case movers
+    case custom
+
+    var id: String { rawValue }
+
+    var label: String {
+        switch self {
+        case .restaurant:
+            return String(localized: "Restaurant")
+        case .bar:
+            return String(localized: "Bar")
+        case .delivery:
+            return String(localized: "Delivery")
+        case .takeout:
+            return String(localized: "Takeout")
+        case .coffee:
+            return String(localized: "Coffee")
+        case .salon:
+            return String(localized: "Salon")
+        case .barber:
+            return String(localized: "Barber")
+        case .spa:
+            return String(localized: "Spa")
+        case .nailSalon:
+            return String(localized: "Nail Salon")
+        case .petGroomer:
+            return String(localized: "Pet Groomer")
+        case .rideshare:
+            return String(localized: "Rideshare")
+        case .foodTruck:
+            return String(localized: "Food Truck")
+        case .tourGuide:
+            return String(localized: "Tour Guide")
+        case .movers:
+            return String(localized: "Movers")
+        case .custom:
+            return String(localized: "Custom")
+        }
+    }
+
+    var suggestedPresets: [Double] {
+        switch self {
+        case .restaurant, .custom:
+            return [15, 18, 20, 25]
+        case .bar, .delivery, .barber, .spa, .nailSalon, .petGroomer, .tourGuide:
+            return [15, 18, 20]
+        case .takeout:
+            return [0, 10, 15]
+        case .coffee:
+            return [10, 15, 20]
+        case .salon:
+            return [15, 20, 25]
+        case .rideshare, .foodTruck:
+            return [10, 15, 18]
+        case .movers:
+            return [5, 10, 15]
+        }
+    }
+
+    var helperText: String {
+        switch self {
+        case .restaurant:
+            return String(localized: "Common restaurant ranges are shown for full-service dining.")
+        case .bar:
+            return String(localized: "Bar presets work well for drinks and counter service.")
+        case .delivery:
+            return String(localized: "Delivery presets account for convenience and trip effort.")
+        case .takeout:
+            return String(localized: "Takeout often uses smaller optional tips.")
+        case .coffee:
+            return String(localized: "Coffee presets fit quick counter-service orders.")
+        case .salon:
+            return String(localized: "Salon presets reflect common personal-service ranges.")
+        case .barber:
+            return String(localized: "Barber presets fit haircut and grooming visits.")
+        case .spa:
+            return String(localized: "Spa presets fit personal care and wellness services.")
+        case .nailSalon:
+            return String(localized: "Nail salon presets fit common personal-service ranges.")
+        case .petGroomer:
+            return String(localized: "Pet grooming presets fit appointment-based care.")
+        case .rideshare:
+            return String(localized: "Rideshare presets are lighter than full-service dining.")
+        case .foodTruck:
+            return String(localized: "Food truck presets fit casual counter service.")
+        case .tourGuide:
+            return String(localized: "Tour guide presets fit guided experiences.")
+        case .movers:
+            return String(localized: "Movers presets stay modest for percentage-based estimates.")
+        case .custom:
+            return String(localized: "Use the standard presets or the slider for your own amount.")
+        }
+    }
+}
+
 @MainActor
 final class TipSavvySettings: ObservableObject {
     @Published var defaultTipPercentage: Double {
@@ -110,6 +219,7 @@ final class CalculationViewModel: ObservableObject  {
     @Published var tipPercentage: Double
     @Published var numberOfPeople: Int
     @Published var roundingMode: RoundingMode
+    @Published var serviceContext: TipServiceContext
     @Published var tipItemName = ""
 
     private let defaults: UserDefaults
@@ -119,6 +229,7 @@ final class CalculationViewModel: ObservableObject  {
         static let tipPercentage = "tipPercentage"
         static let numberOfPeople = "numberOfPeople"
         static let roundingMode = "roundingMode"
+        static let serviceContext = "serviceContext"
     }
 
     init(defaults: UserDefaults = .standard, settings: TipSavvySettings? = nil) {
@@ -133,6 +244,9 @@ final class CalculationViewModel: ObservableObject  {
 
         let savedRoundingMode = defaults.string(forKey: DefaultsKey.roundingMode)
         roundingMode = savedRoundingMode.flatMap(RoundingMode.init(rawValue:)) ?? .none
+
+        let savedServiceContext = defaults.string(forKey: DefaultsKey.serviceContext)
+        serviceContext = savedServiceContext.flatMap(TipServiceContext.init(rawValue:)) ?? .restaurant
     }
 
     var hasValidCalculation: Bool {
@@ -177,6 +291,7 @@ final class CalculationViewModel: ObservableObject  {
         defaults.set(tipPercentage, forKey: DefaultsKey.tipPercentage)
         defaults.set(numberOfPeople, forKey: DefaultsKey.numberOfPeople)
         defaults.set(roundingMode.rawValue, forKey: DefaultsKey.roundingMode)
+        defaults.set(serviceContext.rawValue, forKey: DefaultsKey.serviceContext)
     }
     
     var tipAmount: Double {
@@ -301,6 +416,7 @@ final class CalculationViewModel: ObservableObject  {
         tipPercentage = settings?.defaultTipPercentage ?? 18
         numberOfPeople = settings?.defaultNumberOfPeople ?? 1
         roundingMode = .none
+        serviceContext = .restaurant
         tipItemName = ""
         persistSmartDefaults()
     }

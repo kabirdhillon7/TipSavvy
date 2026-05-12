@@ -23,7 +23,6 @@ struct CalculationView: View {
     @State private var copiedValueLabel: String?
     @FocusState var keyboardFocusField: TipSavvyKeyboardField?
 
-    private let tipPresets = [15.0, 18.0, 20.0, 25.0]
     private let localCurrency = Locale.current.currency?.identifier ?? "USD"
 
     @MainActor
@@ -219,8 +218,10 @@ struct CalculationView: View {
                 .font(.headline)
                 .foregroundStyle(.secondary)
 
+            serviceContextSection
+
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 68), spacing: 8)], spacing: 8) {
-                ForEach(tipPresets, id: \.self) { preset in
+                ForEach(viewModel.serviceContext.suggestedPresets, id: \.self) { preset in
                     tipPresetButton(for: preset)
                 }
             }
@@ -251,13 +252,90 @@ struct CalculationView: View {
         .glassPanel(cornerRadius: 22)
     }
 
+    private var serviceContextSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            serviceContextMenu
+            .accessibilityLabel(String(localized: "Tip Service Context"))
+            .accessibilityValue(viewModel.serviceContext.label)
+            .accessibilityIdentifier("Tip Service Context")
+
+            Text(serviceContextHelperText)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+                .accessibilityIdentifier("Tip Context Helper")
+        }
+    }
+
+    private var serviceContextMenu: some View {
+        Menu {
+            ForEach(TipServiceContext.allCases) { context in
+                serviceContextButton(for: context)
+            }
+        } label: {
+            serviceContextMenuLabel
+        }
+    }
+
+    private func serviceContextButton(for context: TipServiceContext) -> some View {
+        Button {
+            selectServiceContext(context)
+        } label: {
+            Label(context.label, systemImage: serviceContextSystemImage(for: context))
+        }
+    }
+
+    private var serviceContextMenuLabel: some View {
+        HStack(spacing: 10) {
+            Label(String(localized: "Context"), systemImage: "sparkles")
+                .font(.subheadline.weight(.medium))
+            Spacer(minLength: 10)
+            Text(viewModel.serviceContext.label)
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(.primary)
+                .lineLimit(1)
+            Image(systemName: "chevron.down")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.secondary)
+        }
+        .padding(12)
+        .frame(maxWidth: .infinity)
+        .background(serviceContextBackground)
+        .overlay {
+            serviceContextBorder
+        }
+    }
+
+    private var serviceContextBackground: some ShapeStyle {
+        Color.primary.opacity(colorSchemeContrast == .increased ? 0.08 : 0.04)
+    }
+
+    private var serviceContextBorder: some View {
+        RoundedRectangle(cornerRadius: 14, style: .continuous)
+            .strokeBorder(Color.primary.opacity(colorSchemeContrast == .increased ? 0.28 : 0.08), lineWidth: colorSchemeContrast == .increased ? 1.5 : 1)
+    }
+
+    private var serviceContextHelperText: String {
+        viewModel.serviceContext.helperText + " " + String(localized: "Suggestions are general. Choose what feels right.")
+    }
+
+    private func serviceContextSystemImage(for context: TipServiceContext) -> String {
+        context == viewModel.serviceContext ? "checkmark" : "circle"
+    }
+
+    private func selectServiceContext(_ context: TipServiceContext) {
+        viewModel.serviceContext = context
+        viewModel.persistSmartDefaults()
+        HapticFeedbackPerformer.selection(isEnabled: settings.hapticsEnabled)
+    }
+
     private var tipComparisonSection: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text(String(localized: "Tip Comparison"))
                 .font(.subheadline.weight(.medium))
                 .foregroundStyle(.secondary)
 
-            let comparisons = viewModel.tipComparisons(for: tipPresets)
+            let comparisons = viewModel.tipComparisons(for: viewModel.serviceContext.suggestedPresets)
             if comparisons.isEmpty {
                 Label(String(localized: "Enter a bill amount to compare common tips."), systemImage: "chart.bar")
                     .font(.footnote)

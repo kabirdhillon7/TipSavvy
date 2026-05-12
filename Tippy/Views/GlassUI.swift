@@ -19,6 +19,7 @@ struct GlassPanelModifier: ViewModifier {
     func body(content: Content) -> some View {
         let useHighContrast = highContrast || colorSchemeContrast == .increased
 
+#if compiler(>=6.2)
         if #available(iOS 26.0, *) {
             content
                 .glassEffect(.regular.interactive(interactive), in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
@@ -35,6 +36,15 @@ struct GlassPanelModifier: ViewModifier {
                 }
                 .shadow(color: .primary.opacity(useHighContrast ? 0.05 : 0.08), radius: 12, y: 6)
         }
+#else
+        content
+            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    .strokeBorder(.primary.opacity(useHighContrast ? 0.5 : 0.18), lineWidth: useHighContrast ? 1.5 : 1)
+            }
+            .shadow(color: .primary.opacity(useHighContrast ? 0.05 : 0.08), radius: 12, y: 6)
+#endif
     }
 }
 
