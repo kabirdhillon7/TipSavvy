@@ -6,6 +6,9 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ICON_DIR="$ROOT_DIR/Tippy/Assets.xcassets/AppIcon.appiconset"
 INFO_PLIST="$ROOT_DIR/Tippy/Info.plist"
 README="$ROOT_DIR/README.md"
+GOOGLE_SERVICE_PLIST="$ROOT_DIR/GoogleService-Info.plist"
+GOOGLE_SERVICE_EXAMPLE="$ROOT_DIR/GoogleService-Info.plist.example"
+COMPROMISED_GOOGLE_API_KEY="AIzaSyCcHuamnEEhy3jd6f7-zA7xlPc8SWfv""VGo"
 
 failures=0
 
@@ -58,6 +61,25 @@ printf "==========================\n\n"
 check_icon "TipSavvy-iOS-Default-1024x1024@1x.png"
 check_icon "TipSavvy-iOS-Dark-1024x1024@1x.png"
 check_icon "TipSavvy-iOS-TintedDark-1024x1024@1x.png"
+
+check_file "$GOOGLE_SERVICE_EXAMPLE" "Firebase plist example"
+if [[ -f "$GOOGLE_SERVICE_PLIST" ]]; then
+  if grep -q "REPLACE_WITH_" "$GOOGLE_SERVICE_PLIST"; then
+    fail "GoogleService-Info.plist still contains placeholder values; download the rotated Firebase config"
+  elif grep -q "$COMPROMISED_GOOGLE_API_KEY" "$GOOGLE_SERVICE_PLIST"; then
+    fail "GoogleService-Info.plist contains the revoked Google API key; replace it with the rotated Firebase config"
+  else
+    pass "GoogleService-Info.plist is present and does not contain known placeholders or the revoked key"
+  fi
+else
+  fail "GoogleService-Info.plist is missing; download the rotated Firebase config to the repo root before release"
+fi
+
+if grep -R --exclude-dir=".git" --exclude="release_preflight.sh" -q "$COMPROMISED_GOOGLE_API_KEY" "$ROOT_DIR"; then
+  fail "Working tree still contains the revoked Google API key"
+else
+  pass "Working tree does not contain the revoked Google API key"
+fi
 
 encryption_value="$(plutil -extract ITSAppUsesNonExemptEncryption raw "$INFO_PLIST" 2>/dev/null || true)"
 if [[ "$encryption_value" == "0" || "$encryption_value" == "false" ]]; then

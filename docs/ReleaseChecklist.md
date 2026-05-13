@@ -21,6 +21,14 @@ Use this before archiving a new App Store build.
 - Tracking: no tracking.
 - Location, contacts, payment info: not collected.
 
+## Firebase Secret Remediation
+
+- Rotate or create the replacement Firebase iOS app configuration before building a release.
+- Revoke the Google API key flagged by the secret scanning alert in Google Cloud/Firebase.
+- Download the rotated `GoogleService-Info.plist` to the repository root; this file is intentionally ignored and must not be committed.
+- Check Google Cloud API usage, Firebase auth activity, and Crashlytics logs for suspicious access before closing the alert.
+- Close the secret scanning alert only after the compromised key is revoked and the new local plist has been verified by `Scripts/release_preflight.sh`.
+
 ## Manual QA
 
 - Calculator: enter a bill, change tip, change split count, choose each rounding mode, copy total/per-person, reset.
@@ -41,6 +49,7 @@ Use this before archiving a new App Store build.
 ## Upload Checks
 
 - Run `Scripts/release_preflight.sh`.
+- Confirm the local `GoogleService-Info.plist` is present, rotated, and not committed.
 - Confirm all app icons are `1024x1024` and `hasAlpha: no`.
 - Confirm archive validation passes in Xcode Organizer.
 - Confirm Crashlytics configuration is present.

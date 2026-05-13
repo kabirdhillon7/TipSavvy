@@ -55,6 +55,13 @@ flowchart LR
 
 ## Local Verification
 
+TipSavvy uses Firebase Crashlytics. The real `GoogleService-Info.plist` is intentionally ignored and must not be committed. To set up a local or release machine:
+
+1. Rotate or create a replacement Firebase iOS app configuration in Firebase/Google Cloud.
+2. Download the new `GoogleService-Info.plist` and place it at the repository root.
+3. Use `GoogleService-Info.plist.example` only as a field reference; do not build or release with placeholder values.
+4. Revoke any Google API key that has appeared in git history or a secret scanning alert before closing the alert.
+
 ```bash
 xcodebuild test \
   -project Tippy.xcodeproj \
@@ -84,6 +91,8 @@ Scripts/release_preflight.sh
 ```
 
 The preflight checks App Store icon dimensions/alpha, export compliance metadata, release documentation, and local build tooling. Use [Release checklist](docs/ReleaseChecklist.md) for App Store metadata, privacy nutrition, accessibility claims, manual QA, and upload checks.
+
+The preflight also verifies that the local Firebase plist exists, is not the example template, and does not contain the known revoked Google API key from the secret scanning alert.
 
 Manual QA matrix:
 
