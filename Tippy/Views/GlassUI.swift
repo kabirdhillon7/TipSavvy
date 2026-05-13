@@ -84,26 +84,27 @@ struct TipPresetButtonStyle: ButtonStyle {
     @Environment(\.colorSchemeContrast) private var colorSchemeContrast
 
     let isSelected: Bool
+    let accentColor: Color
 
     func makeBody(configuration: Configuration) -> some View {
         let highContrast = colorSchemeContrast == .increased
+        let shape = Capsule(style: .continuous)
 
         configuration.label
             .font(.subheadline.weight(.semibold))
-            .foregroundStyle(isSelected ? Color.accentColor : Color.primary)
+            .foregroundStyle(isSelected ? accentColor : Color.primary)
             .padding(.vertical, 9)
             .background {
-                if isSelected {
-                    Capsule()
-                        .fill(Color.accentColor.opacity(highContrast ? 0.28 : 0.16))
-                }
+                shape
+                    .fill(isSelected ? accentColor.opacity(highContrast ? 0.24 : 0.14) : Color.primary.opacity(highContrast ? 0.08 : 0.04))
             }
             .overlay {
-                Capsule()
-                    .strokeBorder(isSelected ? Color.accentColor : Color.primary.opacity(highContrast ? 0.35 : 0), lineWidth: isSelected || highContrast ? 1.5 : 0)
+                shape
+                    .strokeBorder(isSelected ? accentColor : Color.primary.opacity(highContrast ? 0.35 : 0.14), lineWidth: isSelected || highContrast ? 1.5 : 1)
             }
-            .glassPanel(cornerRadius: 16, interactive: true, highContrast: highContrast || isSelected)
+            .contentShape(shape)
             .scaleEffect(!reduceMotion && configuration.isPressed ? 0.96 : 1)
+            .opacity(configuration.isPressed ? 0.9 : 1)
             .animation(reduceMotion ? nil : .easeInOut(duration: 0.18), value: configuration.isPressed)
             .animation(reduceMotion ? nil : .easeInOut(duration: 0.18), value: isSelected)
     }

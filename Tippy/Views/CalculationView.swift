@@ -368,6 +368,7 @@ struct CalculationView: View {
 
     private func tipComparisonRow(_ comparison: TipComparison) -> some View {
         let isSelected = viewModel.tipPercentage == comparison.percentage
+        let themeColor = settings.selectedTheme.accentColor
 
         return Button {
             performAnimated(.spring(response: 0.28, dampingFraction: 0.78)) {
@@ -393,12 +394,12 @@ struct CalculationView: View {
             .background {
                 if isSelected {
                     RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .fill(Color.accentColor.opacity(colorSchemeContrast == .increased ? 0.24 : 0.13))
+                        .fill(themeColor.opacity(colorSchemeContrast == .increased ? 0.24 : 0.13))
                 }
             }
             .overlay {
                 RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .strokeBorder(isSelected ? Color.accentColor : Color.primary.opacity(colorSchemeContrast == .increased ? 0.2 : 0.08), lineWidth: isSelected || colorSchemeContrast == .increased ? 1.5 : 1)
+                    .strokeBorder(isSelected ? themeColor : Color.primary.opacity(colorSchemeContrast == .increased ? 0.2 : 0.08), lineWidth: isSelected || colorSchemeContrast == .increased ? 1.5 : 1)
             }
         }
         .buttonStyle(.plain)
@@ -415,7 +416,7 @@ struct CalculationView: View {
                 .font(.subheadline.weight(.semibold).monospacedDigit())
         } icon: {
             Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                .foregroundStyle(isSelected ? Color.accentColor : Color.secondary)
+                .foregroundStyle(isSelected ? settings.selectedTheme.accentColor : Color.secondary)
         }
         .foregroundStyle(.primary)
     }
@@ -453,7 +454,7 @@ struct CalculationView: View {
             Text("\(preset, specifier: "%.0f")%")
                 .frame(maxWidth: .infinity)
         }
-        .buttonStyle(TipPresetButtonStyle(isSelected: isSelected))
+        .buttonStyle(TipPresetButtonStyle(isSelected: isSelected, accentColor: settings.selectedTheme.accentColor))
         .accessibilityLabel("\(preset, specifier: "%.0f")%")
         .accessibilityValue(isSelected ? String(localized: "Selected") : "")
         .modifier(SelectedAccessibilityTraitModifier(isSelected: isSelected))
@@ -461,6 +462,7 @@ struct CalculationView: View {
 
     private var tipSlider: some View {
         Slider(value: $viewModel.tipPercentage, in: 0...30, step: 1)
+            .tint(settings.selectedTheme.accentColor)
             .onChange(of: viewModel.tipPercentage, perform: { _ in
                 HapticFeedbackPerformer.selection(isEnabled: settings.hapticsEnabled)
                 viewModel.persistSmartDefaults()
