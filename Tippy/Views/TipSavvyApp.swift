@@ -12,11 +12,26 @@ import FirebaseCrashlytics
 class AppDelegate: NSObject, UIApplicationDelegate {
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
-        if FirebaseApp.app() == nil {
-            FirebaseApp.configure()
+        if canConfigureFirebase {
+            if FirebaseApp.app() == nil {
+                FirebaseApp.configure()
+            }
+            Crashlytics.crashlytics().setCrashlyticsCollectionEnabled(true)
         }
-        Crashlytics.crashlytics().setCrashlyticsCollectionEnabled(true)
         return true
+    }
+
+    private var canConfigureFirebase: Bool {
+        guard
+            let url = Bundle.main.url(forResource: "GoogleService-Info", withExtension: "plist"),
+            let config = NSDictionary(contentsOf: url) as? [String: Any],
+            let apiKey = config["API_KEY"] as? String,
+            let googleAppID = config["GOOGLE_APP_ID"] as? String
+        else {
+            return false
+        }
+
+        return !apiKey.hasPrefix("REPLACE_WITH") && !googleAppID.hasPrefix("REPLACE_WITH")
     }
 }
 
