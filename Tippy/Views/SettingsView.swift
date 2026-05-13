@@ -95,6 +95,8 @@ struct SettingsView: View {
                 HapticFeedbackPerformer.softImpact(isEnabled: isEnabled)
             }
 
+            themePicker
+
             InfoRow(title: String(localized: "Currency"), value: localCurrency)
             Text(String(localized: "TipSavvy formats totals with your device locale and currency settings."))
                 .font(.footnote)
@@ -103,6 +105,25 @@ struct SettingsView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(18)
         .glassPanel(cornerRadius: 22)
+    }
+
+    private var themePicker: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(String(localized: "Theme"))
+                .font(.subheadline.weight(.medium))
+
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 88), spacing: 10)], spacing: 10) {
+                ForEach(AppTheme.allCases) { theme in
+                    ThemeOptionButton(
+                        theme: theme,
+                        isSelected: settings.selectedTheme == theme
+                    ) {
+                        settings.selectedTheme = theme
+                        HapticFeedbackPerformer.softImpact(isEnabled: settings.hapticsEnabled)
+                    }
+                }
+            }
+        }
     }
 
     private var privacyReliabilityCard: some View {
@@ -275,6 +296,58 @@ private struct SafariView: UIViewControllerRepresentable {
     }
 
     func updateUIViewController(_ uiViewController: SFSafariViewController, context: Context) { }
+}
+
+private struct ThemeOptionButton: View {
+    @Environment(\.colorSchemeContrast) private var colorSchemeContrast
+
+    let theme: AppTheme
+    let isSelected: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 8) {
+                ZStack {
+                    Circle()
+                        .fill(theme.accentColor)
+                        .frame(width: 22, height: 22)
+                        .overlay {
+                            Circle()
+                                .strokeBorder(.primary.opacity(colorSchemeContrast == .increased ? 0.6 : 0.2), lineWidth: colorSchemeContrast == .increased ? 1.5 : 1)
+                        }
+
+                    if isSelected {
+                        Image(systemName: "checkmark")
+                            .font(.caption2.weight(.bold))
+                            .foregroundStyle(.white)
+                    }
+                }
+                .accessibilityHidden(true)
+
+                Text(theme.displayName)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.primary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.85)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 9)
+            .background {
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .fill(isSelected ? theme.accentColor.opacity(colorSchemeContrast == .increased ? 0.22 : 0.12) : Color.primary.opacity(colorSchemeContrast == .increased ? 0.08 : 0.04))
+            }
+            .overlay {
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .strokeBorder(isSelected ? theme.accentColor : Color.primary.opacity(colorSchemeContrast == .increased ? 0.28 : 0.08), lineWidth: isSelected || colorSchemeContrast == .increased ? 1.5 : 1)
+            }
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(theme.displayName)
+        .accessibilityHint(String(localized: "Sets the app theme"))
+        .modifier(SelectedAccessibilityTraitModifier(isSelected: isSelected))
+    }
 }
 
 #Preview("Settings") {

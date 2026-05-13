@@ -30,6 +30,7 @@ final class TipSavvySettingsTests: XCTestCase {
         XCTAssertEqual(settings.defaultTipPercentage, 18)
         XCTAssertEqual(settings.defaultNumberOfPeople, 1)
         XCTAssertTrue(settings.hapticsEnabled)
+        XCTAssertEqual(settings.selectedTheme, .green)
     }
 
     func test_savedValues_shouldRestoreOnNextLaunch() {
@@ -37,12 +38,22 @@ final class TipSavvySettingsTests: XCTestCase {
         settings.defaultTipPercentage = 22
         settings.defaultNumberOfPeople = 4
         settings.hapticsEnabled = false
+        settings.selectedTheme = .purple
 
         let restoredSettings = TipSavvySettings(defaults: defaults)
 
         XCTAssertEqual(restoredSettings.defaultTipPercentage, 22)
         XCTAssertEqual(restoredSettings.defaultNumberOfPeople, 4)
         XCTAssertFalse(restoredSettings.hapticsEnabled)
+        XCTAssertEqual(restoredSettings.selectedTheme, .purple)
+    }
+
+    func test_invalidSavedTheme_shouldFallBackToGreen() {
+        defaults.set("purplse", forKey: "selectedTheme")
+
+        let settings = TipSavvySettings(defaults: defaults)
+
+        XCTAssertEqual(settings.selectedTheme, .green)
     }
 
     func test_outOfRangeDefaults_shouldClampToSupportedValues() {
@@ -70,16 +81,19 @@ final class TipSavvySettingsTests: XCTestCase {
         settings.defaultTipPercentage = 25
         settings.defaultNumberOfPeople = 6
         settings.hapticsEnabled = false
+        settings.selectedTheme = .orange
 
         settings.resetPreferences()
 
         XCTAssertEqual(settings.defaultTipPercentage, 18)
         XCTAssertEqual(settings.defaultNumberOfPeople, 1)
         XCTAssertTrue(settings.hapticsEnabled)
+        XCTAssertEqual(settings.selectedTheme, .green)
 
         let restoredSettings = TipSavvySettings(defaults: defaults)
         XCTAssertEqual(restoredSettings.defaultTipPercentage, 18)
         XCTAssertEqual(restoredSettings.defaultNumberOfPeople, 1)
         XCTAssertTrue(restoredSettings.hapticsEnabled)
+        XCTAssertEqual(restoredSettings.selectedTheme, .green)
     }
 }

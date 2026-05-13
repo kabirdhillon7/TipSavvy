@@ -7,6 +7,7 @@
 
 import Foundation
 import Combine
+import SwiftUI
 
 enum RoundingMode: String, CaseIterable {
     case none
@@ -27,6 +28,46 @@ enum RoundingMode: String, CaseIterable {
 
 extension RoundingMode: Identifiable {
     nonisolated var id: String { rawValue }
+}
+
+enum AppTheme: String, CaseIterable, Identifiable {
+    case green
+    case blue
+    case pink
+    case orange
+    case purple
+
+    var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .green:
+            return String(localized: "Green")
+        case .blue:
+            return String(localized: "Blue")
+        case .pink:
+            return String(localized: "Pink")
+        case .orange:
+            return String(localized: "Orange")
+        case .purple:
+            return String(localized: "Purple")
+        }
+    }
+
+    var accentColor: Color {
+        switch self {
+        case .green:
+            return Color(red: 0.0, green: 0.537, blue: 0.263)
+        case .blue:
+            return Color(red: 0.0, green: 0.431, blue: 0.820)
+        case .pink:
+            return Color(red: 0.745, green: 0.118, blue: 0.384)
+        case .orange:
+            return Color(red: 0.741, green: 0.294, blue: 0.0)
+        case .purple:
+            return Color(red: 0.455, green: 0.220, blue: 0.753)
+        }
+    }
 }
 
 struct TipComparison: Identifiable, Equatable {
@@ -177,12 +218,19 @@ final class TipSavvySettings: ObservableObject {
         }
     }
 
+    @Published var selectedTheme: AppTheme {
+        didSet {
+            defaults.set(selectedTheme.rawValue, forKey: DefaultsKey.selectedTheme)
+        }
+    }
+
     let defaults: UserDefaults
 
     private enum DefaultsKey {
         static let defaultTipPercentage = "defaultTipPercentage"
         static let defaultNumberOfPeople = "defaultNumberOfPeople"
         static let hapticsEnabled = "hapticsEnabled"
+        static let selectedTheme = "selectedTheme"
     }
 
     init(defaults: UserDefaults = .standard) {
@@ -195,6 +243,9 @@ final class TipSavvySettings: ObservableObject {
         defaultNumberOfPeople = Self.clampedNumberOfPeople(savedPeople)
 
         hapticsEnabled = defaults.object(forKey: DefaultsKey.hapticsEnabled) as? Bool ?? true
+
+        let savedTheme = defaults.string(forKey: DefaultsKey.selectedTheme)
+        selectedTheme = savedTheme.flatMap(AppTheme.init(rawValue:)) ?? .green
     }
 
     static func clampedTipPercentage(_ percentage: Double) -> Double {
@@ -209,6 +260,7 @@ final class TipSavvySettings: ObservableObject {
         defaultTipPercentage = 18
         defaultNumberOfPeople = 1
         hapticsEnabled = true
+        selectedTheme = .green
     }
 }
 

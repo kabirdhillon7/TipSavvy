@@ -83,6 +83,7 @@ struct TipSavvyApp: App {
                     .tag(TipSavvyTab.settings)
                     .environmentObject(settings)
             }
+            .tint(settings.selectedTheme.accentColor)
         }
     }
 }
