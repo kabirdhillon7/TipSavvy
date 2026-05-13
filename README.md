@@ -2,15 +2,14 @@
 
 TipSavvy is a production-minded SwiftUI tip calculator for iPhone. It calculates bill totals, splits checks, saves named calculations, and gives users quick copy/share actions for settling up.
 
-[![iOS Build and Test](https://github.com/kabirdhillon7/TipSavvy/actions/workflows/ios.yml/badge.svg)](https://github.com/kabirdhillon7/TipSavvy/actions/workflows/ios.yml)
 [![Available on the App Store](http://cl.ly/WouG/Download_on_the_App_Store_Badge_US-UK_135x40.svg)](https://apps.apple.com/app/tipsavvy/id6449447909)
 
 ## What I Built
 
 - SwiftUI calculator with Dynamic Type-friendly layouts, haptics, validation, rounding modes, copy actions, and persisted defaults.
 - Saved tips experience backed by Core Data with persisted search-adjacent sort/filter choices, rename/delete flows, and shareable summaries.
-- Settings surface for default tip percentage, default split count, haptics, locale/currency clarity, and privacy posture.
-- Production guardrails: recoverable persistence errors, non-blocking error banners, Crashlytics initialization, UI tests, unit tests, previews, and CI.
+- Settings surface for default tip percentage, default split count, app themes, haptics, locale/currency clarity, and privacy posture.
+- Production guardrails: recoverable persistence errors, non-blocking error banners, Crashlytics initialization, UI tests, unit tests, and previews.
 
 ## Engineering Highlights
 
@@ -39,12 +38,12 @@ flowchart LR
 
 | Calculator | Saved Tips | Saved Detail | Settings |
 | --- | --- | --- | --- |
-| Validation, copy actions, and rounding modes | Persisted sort/filter choices, search, and clear-filter empty state | Copy/share summary with rename and delete actions | Default tip, default split, haptics, locale, and privacy posture |
+| Validation, copy actions, and rounding modes | Persisted sort/filter choices, search, and clear-filter empty state | Copy/share summary with rename and delete actions | Default tip, default split, app themes, haptics, locale, and privacy posture |
 
 ## Requirements
 
 - iOS 16 or later
-- Xcode 16.4 or later for the included CI target
+- Xcode 16.4 or later
 - iPhone 8, iPhone SE (2nd generation), or newer
 
 ## Tech Stack
@@ -53,7 +52,6 @@ flowchart LR
 - Core Data
 - Firebase Crashlytics
 - XCTest and XCUITest
-- GitHub Actions
 
 ## Local Verification
 

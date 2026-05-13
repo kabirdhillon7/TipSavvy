@@ -15,6 +15,7 @@ struct SettingsView: View {
     @Environment(\.colorSchemeContrast) private var colorSchemeContrast
 
     @State private var showingPrivacyPolicy = false
+    @State private var showingResetConfirmation = false
 
     private let localCurrency = Locale.current.currency?.identifier ?? "USD"
     private let appStoreReviewURL = URL(string: "itms-apps://itunes.apple.com/app/id6449447909?action=write-review")
@@ -40,6 +41,15 @@ struct SettingsView: View {
             .navigationTitle(String(localized: "Settings"))
             .sheet(isPresented: $showingPrivacyPolicy) {
                 privacyPolicySheet
+            }
+            .confirmationDialog(String(localized: "Reset Preferences"), isPresented: $showingResetConfirmation, titleVisibility: .visible) {
+                Button(String(localized: "Reset Preferences"), role: .destructive) {
+                    settings.resetPreferences()
+                }
+
+                Button(String(localized: "Cancel"), role: .cancel) { }
+            } message: {
+                Text(String(localized: "This restores your default tip, split count, haptics, and app theme."))
             }
         }
     }
@@ -112,7 +122,9 @@ struct SettingsView: View {
             Text(String(localized: "Theme"))
                 .font(.subheadline.weight(.medium))
 
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 88), spacing: 10)], spacing: 10) {
+            currentThemePreview
+
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 48), spacing: 12)], spacing: 12) {
                 ForEach(AppTheme.allCases) { theme in
                     ThemeOptionButton(
                         theme: theme,
@@ -124,6 +136,53 @@ struct SettingsView: View {
                 }
             }
         }
+        .accessibilityIdentifier("Theme Picker")
+    }
+
+    private var currentThemePreview: some View {
+        HStack(spacing: 12) {
+            Circle()
+                .fill(settings.selectedTheme.accentColor)
+                .frame(width: 34, height: 34)
+                .overlay {
+                    Image(systemName: "checkmark")
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(.white)
+                }
+                .accessibilityHidden(true)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(String(localized: "Current Theme"))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Text(settings.selectedTheme.displayName)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.primary)
+            }
+
+            Spacer(minLength: 10)
+
+            Text(String(localized: "Accent"))
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.white)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(settings.selectedTheme.accentColor, in: Capsule())
+            .accessibilityHidden(true)
+        }
+        .padding(12)
+        .background {
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .fill(settings.selectedTheme.accentColor.opacity(colorSchemeContrast == .increased ? 0.16 : 0.08))
+        }
+        .overlay {
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .strokeBorder(settings.selectedTheme.accentColor.opacity(colorSchemeContrast == .increased ? 0.8 : 0.35), lineWidth: colorSchemeContrast == .increased ? 1.5 : 1)
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(String(localized: "Current Theme"))
+        .accessibilityValue(settings.selectedTheme.displayName)
+        .accessibilityIdentifier("Current Theme Preview")
     }
 
     private var privacyReliabilityCard: some View {
@@ -231,7 +290,7 @@ struct SettingsView: View {
 
     private var resetButton: some View {
         Button(role: .destructive) {
-            settings.resetPreferences()
+            showingResetConfirmation = true
         } label: {
             Label(String(localized: "Reset Preferences"), systemImage: "arrow.counterclockwise")
                 .frame(maxWidth: .infinity)
@@ -307,45 +366,27 @@ private struct ThemeOptionButton: View {
 
     var body: some View {
         Button(action: action) {
-            HStack(spacing: 8) {
-                ZStack {
-                    Circle()
-                        .fill(theme.accentColor)
-                        .frame(width: 22, height: 22)
-                        .overlay {
-                            Circle()
-                                .strokeBorder(.primary.opacity(colorSchemeContrast == .increased ? 0.6 : 0.2), lineWidth: colorSchemeContrast == .increased ? 1.5 : 1)
-                        }
-
-                    if isSelected {
-                        Image(systemName: "checkmark")
-                            .font(.caption2.weight(.bold))
-                            .foregroundStyle(.white)
+            ZStack {
+                Circle()
+                    .fill(theme.accentColor)
+                    .frame(width: 34, height: 34)
+                    .overlay {
+                        Circle()
+                            .strokeBorder(.primary.opacity(colorSchemeContrast == .increased ? 0.6 : 0.2), lineWidth: colorSchemeContrast == .increased ? 1.5 : 1)
                     }
-                }
-                .accessibilityHidden(true)
 
-                Text(theme.displayName)
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(.primary)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.85)
+                if isSelected {
+                    Image(systemName: "checkmark")
+                        .font(.callout.weight(.bold))
+                        .foregroundStyle(.white)
+                }
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, 10)
-            .padding(.vertical, 9)
-            .background {
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .fill(isSelected ? theme.accentColor.opacity(colorSchemeContrast == .increased ? 0.22 : 0.12) : Color.primary.opacity(colorSchemeContrast == .increased ? 0.08 : 0.04))
-            }
-            .overlay {
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .strokeBorder(isSelected ? theme.accentColor : Color.primary.opacity(colorSchemeContrast == .increased ? 0.28 : 0.08), lineWidth: isSelected || colorSchemeContrast == .increased ? 1.5 : 1)
-            }
+            .frame(width: 48, height: 48)
         }
         .buttonStyle(.plain)
         .accessibilityLabel(theme.displayName)
         .accessibilityHint(String(localized: "Sets the app theme"))
+        .accessibilityIdentifier("Theme Option \(theme.displayName)")
         .modifier(SelectedAccessibilityTraitModifier(isSelected: isSelected))
     }
 }

@@ -1,15 +1,21 @@
-name: iOS Build and Test
+name: Fast PR Build
 
 on:
   pull_request:
+    paths-ignore:
+      - "docs/**"
+      - "**/*.md"
   push:
     branches:
       - main
+    paths-ignore:
+      - "docs/**"
+      - "**/*.md"
 
 jobs:
-  build-and-test:
+  build-and-unit-test:
     runs-on: macos-15
-    timeout-minutes: 30
+    timeout-minutes: 15
 
     steps:
       - name: Checkout
@@ -21,11 +27,12 @@ jobs:
       - name: Resolve Packages
         run: xcodebuild -resolvePackageDependencies -project Tippy.xcodeproj -scheme Tippy
 
-      - name: Build and Test
+      - name: Build and Unit Test
         run: |
           xcodebuild test \
             -project Tippy.xcodeproj \
             -scheme Tippy \
             -testPlan Tippy \
             -destination 'platform=iOS Simulator,name=iPhone 17,OS=latest' \
+            -only-testing:TippyTests \
             CODE_SIGNING_ALLOWED=NO

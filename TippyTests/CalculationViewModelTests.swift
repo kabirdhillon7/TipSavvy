@@ -14,6 +14,7 @@ final class CalculationViewModelTests: XCTestCase {
     
     private var calculationViewModel: CalculationViewModel!
     private var defaults: UserDefaults!
+    private var savedTipContainers: [NSPersistentContainer] = []
     
     override func setUp() {
         super.setUp()
@@ -24,6 +25,7 @@ final class CalculationViewModelTests: XCTestCase {
     
     override func tearDown() {
         calculationViewModel = nil
+        savedTipContainers.removeAll()
         defaults.removePersistentDomain(forName: "CalculationViewModelTests")
         defaults = nil
         super.tearDown()
@@ -479,7 +481,7 @@ final class CalculationViewModelTests: XCTestCase {
     private func makeSavedTip(billAmount: Double, tipPercentage: Double, numberOfPeople: Int64) throws -> SavedTip {
         let container = NSPersistentContainer(name: "SavedTip")
         let description = NSPersistentStoreDescription()
-        description.url = URL(fileURLWithPath: "/dev/null")
+        description.type = NSInMemoryStoreType
         container.persistentStoreDescriptions = [description]
 
         var loadError: Error?
@@ -500,6 +502,7 @@ final class CalculationViewModelTests: XCTestCase {
         savedTip.totalPerPerson = savedTip.totalAmountWithTip / Double(max(numberOfPeople, 1))
         savedTip.name = "Reusable Tip"
         savedTip.date = Date()
+        savedTipContainers.append(container)
         return savedTip
     }
 

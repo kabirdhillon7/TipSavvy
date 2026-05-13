@@ -26,7 +26,7 @@ Use this before archiving a new App Store build.
 - Calculator: enter a bill, change tip, change split count, choose each rounding mode, copy total/per-person, reset.
 - Save flow: save a named calculation, confirm success, verify invalid bill/name behavior.
 - Saved tips: search, sort, filter, clear filters, open detail, copy/share, rename, delete.
-- Settings: change defaults, toggle haptics, open Privacy Policy, Contact, Rate TipSavvy, App Store review fallback, reset preferences.
+- Settings: change defaults, switch app themes, toggle haptics, open Privacy Policy, Contact, Rate TipSavvy, App Store review fallback, reset preferences with confirmation.
 - App Shortcuts: confirm TipSavvy calculator shortcut appears after install and opens the app.
 
 ## Accessibility QA

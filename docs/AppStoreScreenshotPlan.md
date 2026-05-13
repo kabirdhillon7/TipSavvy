@@ -10,8 +10,8 @@ Use realistic values and the current app UI. Avoid empty states unless a screens
    - Caption: "Save the checks you want to remember"
 3. Saved Detail: show copy/share, rename, delete, and per-person total.
    - Caption: "Copy or share the final amount"
-4. Settings: show default tip, default split, haptics, privacy, support, and about sections.
-   - Caption: "Set your defaults and privacy preferences"
+4. Settings: show default tip, default split, app theme, haptics, privacy, support, and about sections.
+   - Caption: "Set your defaults, theme, and privacy preferences"
 
 ## Capture Notes
 
