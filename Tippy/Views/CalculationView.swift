@@ -300,10 +300,14 @@ struct CalculationView: View {
         }
         .padding(12)
         .frame(maxWidth: .infinity)
-        .background(serviceContextBackground)
+        .background {
+            serviceContextShape
+                .fill(serviceContextBackground)
+        }
         .overlay {
             serviceContextBorder
         }
+        .contentShape(serviceContextShape)
     }
 
     private var serviceContextBackground: some ShapeStyle {
@@ -311,8 +315,12 @@ struct CalculationView: View {
     }
 
     private var serviceContextBorder: some View {
-        RoundedRectangle(cornerRadius: 14, style: .continuous)
+        serviceContextShape
             .strokeBorder(Color.primary.opacity(colorSchemeContrast == .increased ? 0.28 : 0.08), lineWidth: colorSchemeContrast == .increased ? 1.5 : 1)
+    }
+
+    private var serviceContextShape: RoundedRectangle {
+        RoundedRectangle(cornerRadius: 14, style: .continuous)
     }
 
     private var serviceContextHelperText: String {
