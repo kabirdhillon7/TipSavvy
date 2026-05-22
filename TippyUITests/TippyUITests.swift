@@ -283,6 +283,61 @@ final class TippyUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["All"].exists)
     }
 
+    func test_savedInsights_shouldAppearWhenTipsExist() {
+        let app = launchIsolatedUITestApp()
+
+        saveTip(named: "Insight Dinner", in: app)
+        app.tabBars["Tab Bar"].buttons["Saved"].tap()
+
+        XCTAssertTrue(app.buttons["Saved Insights"].waitForExistence(timeout: 2))
+        XCTAssertTrue(app.staticTexts["Spent This Month"].exists)
+        XCTAssertTrue(app.staticTexts["Tips This Month"].exists)
+        XCTAssertTrue(app.staticTexts["Saved Tips"].exists)
+        XCTAssertFalse(app.staticTexts["Total Saved"].exists)
+        XCTAssertFalse(app.staticTexts["Average Tip"].exists)
+        XCTAssertFalse(app.staticTexts["Most Common Split"].exists)
+        XCTAssertFalse(app.staticTexts["Largest Saved Bill"].exists)
+    }
+
+    func test_savedInsights_shouldHideWhenNoTipsExist() {
+        let app = launchIsolatedUITestApp()
+
+        app.tabBars["Tab Bar"].buttons["Saved"].tap()
+
+        XCTAssertTrue(app.staticTexts["No Saved Tips"].waitForExistence(timeout: 2))
+        XCTAssertFalse(app.buttons["Saved Insights"].exists)
+    }
+
+    func test_savedInsights_shouldRemainVisibleWhenSearchHasNoMatches() {
+        let app = launchIsolatedUITestApp()
+
+        saveTip(named: "Visible Insight Dinner", in: app)
+        app.tabBars["Tab Bar"].buttons["Saved"].tap()
+        app.navigationBars["Saved Tips"].searchFields["Search Saved Tips"].tap()
+        app.navigationBars["Saved Tips"].searchFields["Search Saved Tips"].typeText("No Results Expected")
+
+        XCTAssertTrue(app.buttons["Saved Insights"].waitForExistence(timeout: 2))
+        XCTAssertTrue(app.staticTexts["No Matching Tips"].waitForExistence(timeout: 2))
+    }
+
+    func test_savedInsights_shouldOpenDetailSheetAndDismiss() {
+        let app = launchIsolatedUITestApp()
+
+        saveTip(named: "Insight Detail Dinner", in: app)
+        app.tabBars["Tab Bar"].buttons["Saved"].tap()
+        app.buttons["Saved Insights"].tap()
+
+        XCTAssertTrue(app.navigationBars["Saved Insights"].waitForExistence(timeout: 2))
+        XCTAssertTrue(app.otherElements["Saved Insights This Month"].exists)
+        XCTAssertTrue(app.otherElements["Saved Insights All Time"].exists)
+        XCTAssertTrue(app.otherElements["Saved Insights Highlights"].exists)
+        XCTAssertTrue(app.otherElements["Saved Insights Patterns"].exists)
+
+        app.buttons["Done"].tap()
+
+        XCTAssertTrue(app.navigationBars["Saved Tips"].waitForExistence(timeout: 2))
+    }
+
     func test_savedSearch_shouldShowNoMatchingTips() {
         let app = XCUIApplication()
         app.launch()
@@ -418,6 +473,15 @@ final class TippyUITests: XCTestCase {
         if savedAlert.waitForExistence(timeout: 2) {
             savedAlert.buttons["OK"].tap()
         }
+    }
+
+    private func launchIsolatedUITestApp() -> XCUIApplication {
+        let app = XCUIApplication()
+        app.launchArguments += ["-ui-testing"]
+        app.launchArguments += ["-AppleLanguages", "(en-US)"]
+        app.launchArguments += ["-AppleLocale", "\"en-US\""]
+        app.launch()
+        return app
     }
 
     private func selectTipContext(_ context: String, in app: XCUIApplication) {

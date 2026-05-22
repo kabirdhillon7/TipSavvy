@@ -18,6 +18,7 @@ struct SavedView: View {
     @State private var tipBeingRenamed: SavedTip?
     @State private var tipPendingDelete: SavedTip?
     @State private var selectedTip: SavedTip?
+    @State private var showingSavedInsightsDetails = false
     @State private var showingRenameAlert = false
     @State private var showingDeleteConfirmation = false
     @State private var dataErrorMessage: String?
@@ -55,6 +56,10 @@ struct SavedView: View {
         )
     }
 
+    private var savedInsights: SavedTipInsights {
+        SavedTipInsights(tips: dataManager.savedTips)
+    }
+
     private var filteredTips: [SavedTip] {
         let trimmedSearch = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
         let filtered = dataManager.savedTips.filter { tip in
@@ -82,11 +87,7 @@ struct SavedView: View {
                         }
 
                         activeControlsSummary
-                        if filteredTips.isEmpty {
-                            emptyState(title: String(localized: "No Matching Tips"), systemImage: "magnifyingglass")
-                        } else {
-                            savedCards
-                        }
+                        savedCards
                     }
                 }
             }
@@ -101,6 +102,11 @@ struct SavedView: View {
         }
         .sheet(item: $selectedTip) { tip in
             SavedDetailView(tip: tip, onRename: renameTip, onDelete: deleteTip, onUseAgain: onUseAgain)
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
+        }
+        .sheet(isPresented: $showingSavedInsightsDetails) {
+            SavedInsightsDetailView(insights: savedInsights, currencyCode: localCurrency)
                 .presentationDetents([.medium, .large])
                 .presentationDragIndicator(.visible)
         }
@@ -168,6 +174,61 @@ struct SavedView: View {
         .accessibilityIdentifier("Saved Tips Filter")
     }
 
+    private var savedInsightsButton: some View {
+        Button {
+            showingSavedInsightsDetails = true
+        } label: {
+            savedInsightsPanel
+        }
+        .buttonStyle(.plain)
+        .accessibilityHint(String(localized: "Shows detailed saved insights."))
+        .accessibilityIdentifier("Saved Insights")
+    }
+
+    private var savedInsightsPanel: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            ViewThatFits(in: .horizontal) {
+                HStack(alignment: .firstTextBaseline) {
+                    Label(String(localized: "Saved Insights"), systemImage: "chart.bar.xaxis")
+                        .font(.headline)
+                        .foregroundStyle(.secondary)
+                    Spacer(minLength: 12)
+                    Text(String(localized: "This Month"))
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                }
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Label(String(localized: "Saved Insights"), systemImage: "chart.bar.xaxis")
+                        .font(.headline)
+                        .foregroundStyle(.secondary)
+                    Text(String(localized: "This Month"))
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                }
+            }
+
+            ViewThatFits(in: .horizontal) {
+                HStack(alignment: .top, spacing: 12) {
+                    MetricCard(title: String(localized: "Spent This Month"), value: savedInsights.currentMonthTotalWithTip.formatted(.currency(code: localCurrency)), prominence: .primary)
+                    MetricCard(title: String(localized: "Tips This Month"), value: savedInsights.currentMonthTipTotal.formatted(.currency(code: localCurrency)))
+                }
+
+                VStack(spacing: 12) {
+                    MetricCard(title: String(localized: "Spent This Month"), value: savedInsights.currentMonthTotalWithTip.formatted(.currency(code: localCurrency)), prominence: .primary)
+                    MetricCard(title: String(localized: "Tips This Month"), value: savedInsights.currentMonthTipTotal.formatted(.currency(code: localCurrency)))
+                }
+            }
+
+            Divider()
+
+            InfoRow(title: String(localized: "Saved Tips"), value: "\(savedInsights.allTimeSavedTipCount)")
+        }
+        .padding(18)
+        .glassPanel(cornerRadius: 22, interactive: true)
+        .accessibilityElement(children: .contain)
+    }
+
     private var activeControlsSummary: some View {
         HStack(spacing: 8) {
             Label(sortMode.title, systemImage: sortMode.systemImage)
@@ -191,41 +252,14 @@ struct SavedView: View {
 
     private var savedCards: some View {
         ScrollView {
-            LazyVStack(spacing: 14) {
-                ForEach(filteredTips) { tip in
-                    Button {
-                        selectedTip = tip
-                    } label: {
-                        savedTipCard(for: tip)
-                    }
-                    .buttonStyle(.plain)
-                    .contextMenu {
-                        Button {
-                            startRename(for: tip)
-                        } label: {
-                            Label(String(localized: "Rename"), systemImage: "pencil")
-                        }
+            VStack(spacing: 14) {
+                savedInsightsButton
 
-                        Button(role: .destructive) {
-                            requestDelete(tip)
-                        } label: {
-                            Label(String(localized: "Delete"), systemImage: "trash")
-                        }
-                    }
-                    .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                        Button(role: .destructive) {
-                            requestDelete(tip)
-                        } label: {
-                            Label(String(localized: "Delete"), systemImage: "trash")
-                        }
-
-                        Button {
-                            startRename(for: tip)
-                        } label: {
-                            Label(String(localized: "Rename"), systemImage: "pencil")
-                        }
-                        .tint(.blue)
-                    }
+                if filteredTips.isEmpty {
+                    emptyState(title: String(localized: "No Matching Tips"), systemImage: "magnifyingglass")
+                        .frame(minHeight: 320)
+                } else {
+                    savedTipList
                 }
             }
             .padding(.horizontal, 18)
@@ -235,6 +269,46 @@ struct SavedView: View {
         .background(Color(.systemGroupedBackground))
         .animation(reduceMotion ? nil : .easeInOut(duration: 0.22), value: filteredTips.map(\.objectID))
         .animation(reduceMotion ? nil : .easeInOut(duration: 0.18), value: searchText)
+    }
+
+    private var savedTipList: some View {
+        LazyVStack(spacing: 14) {
+            ForEach(filteredTips) { tip in
+                Button {
+                    selectedTip = tip
+                } label: {
+                    savedTipCard(for: tip)
+                }
+                .buttonStyle(.plain)
+                .contextMenu {
+                    Button {
+                        startRename(for: tip)
+                    } label: {
+                        Label(String(localized: "Rename"), systemImage: "pencil")
+                    }
+
+                    Button(role: .destructive) {
+                        requestDelete(tip)
+                    } label: {
+                        Label(String(localized: "Delete"), systemImage: "trash")
+                    }
+                }
+                .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                    Button(role: .destructive) {
+                        requestDelete(tip)
+                    } label: {
+                        Label(String(localized: "Delete"), systemImage: "trash")
+                    }
+
+                    Button {
+                        startRename(for: tip)
+                    } label: {
+                        Label(String(localized: "Rename"), systemImage: "pencil")
+                    }
+                    .tint(.blue)
+                }
+            }
+        }
     }
 
     private func savedTipCard(for tip: SavedTip) -> some View {
@@ -407,6 +481,234 @@ struct SavedView: View {
         } else {
             withAnimation(animation, updates)
         }
+    }
+}
+
+struct SavedInsightsDetailView: View {
+    @Environment(\.dismiss) private var dismiss
+
+    let insights: SavedTipInsights
+    let currencyCode: String
+
+    private let dateFormatMMDDYYYY = Date.FormatStyle.dateTime.month().day().year()
+    private var noneYetText: String { String(localized: "None Yet") }
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 18) {
+                    thisMonthSection
+                    allTimeSection
+                    highlightsSection
+                    patternsSection
+                }
+                .padding(18)
+                .padding(.bottom, 18)
+            }
+            .background(Color(.systemGroupedBackground))
+            .navigationTitle(String(localized: "Saved Insights"))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(String(localized: "Done")) {
+                        dismiss()
+                    }
+                }
+            }
+        }
+        .accessibilityIdentifier("Saved Insights Detail")
+    }
+
+    private var thisMonthSection: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            sectionHeader(String(localized: "This Month"), systemImage: "calendar")
+
+            ViewThatFits(in: .horizontal) {
+                HStack(alignment: .top, spacing: 12) {
+                    MetricCard(title: String(localized: "Spent This Month"), value: insights.currentMonthTotalWithTip.formatted(.currency(code: currencyCode)), prominence: .primary)
+                    MetricCard(title: String(localized: "Tips This Month"), value: insights.currentMonthTipTotal.formatted(.currency(code: currencyCode)))
+                }
+
+                VStack(spacing: 12) {
+                    MetricCard(title: String(localized: "Spent This Month"), value: insights.currentMonthTotalWithTip.formatted(.currency(code: currencyCode)), prominence: .primary)
+                    MetricCard(title: String(localized: "Tips This Month"), value: insights.currentMonthTipTotal.formatted(.currency(code: currencyCode)))
+                }
+            }
+
+            InfoRow(title: String(localized: "Saved Tips"), value: "\(insights.currentMonthSavedTipCount)")
+
+            if !insights.hasCurrentMonthTips {
+                Label(String(localized: "No saved tips from this month yet."), systemImage: "calendar.badge.clock")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .padding(18)
+        .glassPanel(cornerRadius: 22)
+        .accessibilityIdentifier("Saved Insights This Month")
+    }
+
+    private var allTimeSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            sectionHeader(String(localized: "All Time"), systemImage: "sum")
+            InfoRow(title: String(localized: "Total Spent"), value: insights.allTimeTotalWithTip.formatted(.currency(code: currencyCode)))
+            Divider()
+            InfoRow(title: String(localized: "Total Tips"), value: insights.allTimeTipTotal.formatted(.currency(code: currencyCode)))
+            Divider()
+            InfoRow(title: String(localized: "Average Bill"), value: insights.averageBillAmount.formatted(.currency(code: currencyCode)))
+            Divider()
+            InfoRow(title: String(localized: "Average Tip"), value: percentageText(insights.averageTipPercentage))
+        }
+        .padding(18)
+        .glassPanel(cornerRadius: 22)
+        .accessibilityIdentifier("Saved Insights All Time")
+    }
+
+    private var highlightsSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            sectionHeader(String(localized: "Highlights"), systemImage: "sparkles")
+            InfoRow(title: String(localized: "Largest Bill"), value: insights.largestSavedBill.formatted(.currency(code: currencyCode)))
+            detailCaption(insights.largestSavedBillName)
+            Divider()
+            InfoRow(title: String(localized: "Highest Tip"), value: percentageText(insights.highestTipPercentage))
+            detailCaption(insights.highestTipName)
+            Divider()
+            InfoRow(title: String(localized: "Most Recent"), value: insights.mostRecentSavedTipName ?? noneYetText)
+            if let date = insights.mostRecentSavedTipDate {
+                detailCaption(date.formatted(dateFormatMMDDYYYY))
+            } else {
+                detailCaption(nil)
+            }
+        }
+        .padding(18)
+        .glassPanel(cornerRadius: 22)
+        .accessibilityIdentifier("Saved Insights Highlights")
+    }
+
+    private var patternsSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            sectionHeader(String(localized: "Patterns"), systemImage: "chart.bar")
+            InfoRow(title: String(localized: "Common Split"), value: "\(insights.mostCommonSplitCount)")
+            Divider()
+            InfoRow(title: String(localized: "Common Tip"), value: percentageText(insights.mostCommonTipPercentage))
+        }
+        .padding(18)
+        .glassPanel(cornerRadius: 22)
+        .accessibilityIdentifier("Saved Insights Patterns")
+    }
+
+    private func sectionHeader(_ title: String, systemImage: String) -> some View {
+        Label(title, systemImage: systemImage)
+            .font(.headline)
+            .foregroundStyle(.secondary)
+    }
+
+    private func detailCaption(_ text: String?) -> some View {
+        Text((text?.isEmpty == false ? text : nil) ?? noneYetText)
+            .font(.caption)
+            .foregroundStyle(.secondary)
+            .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private func percentageText(_ percentage: Double) -> String {
+        String(format: "%.0f%%", percentage)
+    }
+}
+
+struct SavedTipInsights: Equatable {
+    let currentMonthTotalWithTip: Double
+    let currentMonthTipTotal: Double
+    let currentMonthSavedTipCount: Int
+    let allTimeSavedTipCount: Int
+    let allTimeTotalWithTip: Double
+    let allTimeTipTotal: Double
+    let averageBillAmount: Double
+    let averageTipPercentage: Double
+    let mostCommonSplitCount: Int
+    let mostCommonTipPercentage: Double
+    let largestSavedBill: Double
+    let largestSavedBillName: String?
+    let highestTipPercentage: Double
+    let highestTipName: String?
+    let mostRecentSavedTipName: String?
+    let mostRecentSavedTipDate: Date?
+    let hasCurrentMonthTips: Bool
+
+    init(tips: [SavedTip], now: Date = Date(), calendar: Calendar = .current) {
+        let monthInterval = calendar.dateInterval(of: .month, for: now)
+        let currentMonthTips = tips.filter { tip in
+            guard let date = tip.date, let monthInterval else {
+                return false
+            }
+
+            return monthInterval.contains(date)
+        }
+
+        currentMonthTotalWithTip = currentMonthTips.reduce(0) { $0 + $1.totalAmountWithTip }
+        currentMonthTipTotal = currentMonthTips.reduce(0) { $0 + $1.tipAmount }
+        currentMonthSavedTipCount = currentMonthTips.count
+        allTimeSavedTipCount = tips.count
+        allTimeTotalWithTip = tips.reduce(0) { $0 + $1.totalAmountWithTip }
+        allTimeTipTotal = tips.reduce(0) { $0 + $1.tipAmount }
+        averageBillAmount = tips.isEmpty ? 0 : tips.reduce(0) { $0 + $1.billAmount } / Double(tips.count)
+        averageTipPercentage = tips.isEmpty ? 0 : tips.reduce(0) { $0 + $1.tipPercentage } / Double(tips.count)
+        mostCommonSplitCount = Self.mostCommonSplitCount(in: tips)
+        mostCommonTipPercentage = Self.mostCommonTipPercentage(in: tips)
+        let largestSavedTip = tips.max { lhs, rhs in
+            lhs.totalAmountWithTip < rhs.totalAmountWithTip
+        }
+        largestSavedBill = tips.map(\.totalAmountWithTip).max() ?? 0
+        largestSavedBillName = largestSavedTip?.name
+        let highestTip = tips.max { lhs, rhs in
+            lhs.tipPercentage < rhs.tipPercentage
+        }
+        highestTipPercentage = highestTip?.tipPercentage ?? 0
+        highestTipName = highestTip?.name
+        let mostRecentTip = tips.compactMap { tip -> (SavedTip, Date)? in
+            guard let date = tip.date else {
+                return nil
+            }
+
+            return (tip, date)
+        }
+        .max { lhs, rhs in
+            lhs.1 < rhs.1
+        }
+        mostRecentSavedTipName = mostRecentTip?.0.name
+        mostRecentSavedTipDate = mostRecentTip?.1
+        hasCurrentMonthTips = !currentMonthTips.isEmpty
+    }
+
+    private static func mostCommonSplitCount(in tips: [SavedTip]) -> Int {
+        let counts = tips.reduce(into: [Int: Int]()) { result, tip in
+            result[Int(tip.numberOfPeople), default: 0] += 1
+        }
+
+        return counts.sorted { lhs, rhs in
+            if lhs.value == rhs.value {
+                return lhs.key < rhs.key
+            }
+
+            return lhs.value > rhs.value
+        }
+        .first?
+        .key ?? 0
+    }
+
+    private static func mostCommonTipPercentage(in tips: [SavedTip]) -> Double {
+        let counts = tips.reduce(into: [Double: Int]()) { result, tip in
+            result[tip.tipPercentage, default: 0] += 1
+        }
+
+        return counts.sorted { lhs, rhs in
+            if lhs.value == rhs.value {
+                return lhs.key < rhs.key
+            }
+
+            return lhs.value > rhs.value
+        }
+        .first?
+        .key ?? 0
     }
 }
 
