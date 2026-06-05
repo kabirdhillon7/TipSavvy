@@ -78,7 +78,10 @@ final class SavedTipFilterTests: XCTestCase {
         XCTAssertEqual(insights.allTimeTotalWithTip, 175)
         XCTAssertEqual(insights.allTimeTipTotal, 25)
         XCTAssertEqual(insights.averageBillAmount, 87.5)
+        XCTAssertEqual(insights.averagePerPersonTotal, 36.875)
         XCTAssertEqual(insights.averageTipPercentage, 15)
+        XCTAssertEqual(insights.averageTaxAmount, 0)
+        XCTAssertEqual(insights.savedTipsWithTaxCount, 0)
         XCTAssertEqual(insights.mostCommonSplitCount, 2)
         XCTAssertEqual(insights.mostCommonTipPercentage, 10)
         XCTAssertEqual(insights.largestSavedBill, 120)
@@ -87,7 +90,19 @@ final class SavedTipFilterTests: XCTestCase {
         XCTAssertEqual(insights.highestTipName, "May Dinner")
         XCTAssertEqual(insights.mostRecentSavedTipName, "May Dinner")
         XCTAssertEqual(insights.mostRecentSavedTipDate, currentMonthDate)
+        XCTAssertEqual(insights.recentActivitySummary, "No saves in the last 7 days")
         XCTAssertTrue(insights.hasCurrentMonthTips)
+    }
+
+    func test_savedTipInsights_shouldSummarizeTaxAndPerPersonTrends() throws {
+        _ = try makeTip(name: "Tax Dinner", total: 128, tipAmount: 20, people: 2, subtotalAmount: 100, taxAmount: 8)
+        _ = try makeTip(name: "Simple Dinner", total: 96, tipAmount: 16, people: 4)
+
+        let insights = SavedTipInsights(tips: dataManager.savedTips)
+
+        XCTAssertEqual(insights.averagePerPersonTotal, 44)
+        XCTAssertEqual(insights.averageTaxAmount, 8)
+        XCTAssertEqual(insights.savedTipsWithTaxCount, 1)
     }
 
     func test_savedTipInsights_shouldUseSmallerSplitCountWhenCountsTie() throws {
@@ -129,7 +144,10 @@ final class SavedTipFilterTests: XCTestCase {
         XCTAssertEqual(insights.allTimeTotalWithTip, 0)
         XCTAssertEqual(insights.allTimeTipTotal, 0)
         XCTAssertEqual(insights.averageBillAmount, 0)
+        XCTAssertEqual(insights.averagePerPersonTotal, 0)
         XCTAssertEqual(insights.averageTipPercentage, 0)
+        XCTAssertEqual(insights.averageTaxAmount, 0)
+        XCTAssertEqual(insights.savedTipsWithTaxCount, 0)
         XCTAssertEqual(insights.mostCommonSplitCount, 0)
         XCTAssertEqual(insights.mostCommonTipPercentage, 0)
         XCTAssertEqual(insights.largestSavedBill, 0)
@@ -138,6 +156,7 @@ final class SavedTipFilterTests: XCTestCase {
         XCTAssertNil(insights.highestTipName)
         XCTAssertNil(insights.mostRecentSavedTipName)
         XCTAssertNil(insights.mostRecentSavedTipDate)
+        XCTAssertEqual(insights.recentActivitySummary, "No saves in the last 7 days")
         XCTAssertFalse(insights.hasCurrentMonthTips)
     }
 
@@ -166,6 +185,8 @@ final class SavedTipFilterTests: XCTestCase {
                          total: Double = 42,
                          tipAmount: Double? = nil,
                          people: Int = 1,
+                         subtotalAmount: Double? = nil,
+                         taxAmount: Double? = nil,
                          date: Date? = Date()) throws -> SavedTip {
         let resolvedTipAmount = tipAmount ?? total * tipPercentage / 100
         let result = dataManager.saveTip(name: name,
@@ -175,7 +196,10 @@ final class SavedTipFilterTests: XCTestCase {
                                          tipAmount: resolvedTipAmount,
                                          totalAmountWithTip: total,
                                          totalPerPerson: total / Double(people),
-                                         date: date ?? Date())
+                                         date: date ?? Date(),
+                                         subtotalAmount: subtotalAmount,
+                                         taxAmount: taxAmount,
+                                         tipsOnTax: taxAmount != nil ? false : nil)
 
         guard case .success(let tip) = result else {
             throw XCTSkip("Could not create saved tip fixture.")

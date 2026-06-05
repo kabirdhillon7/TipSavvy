@@ -20,7 +20,7 @@ struct SavedDetailView: View {
     @State private var renameText = ""
     @State private var showingRenameAlert = false
     @State private var showingDeleteConfirmation = false
-    @State private var showingCopiedConfirmation = false
+    @State private var showingCopiedBanner = false
 
     init(tip: SavedTip,
          onRename: @escaping (SavedTip, String) -> Void = { _, _ in },
@@ -44,8 +44,9 @@ struct SavedDetailView: View {
                 VStack(alignment: .leading, spacing: 18) {
                     header
                     totalsGrid
-                    detailsCard
                     useAgainButton
+                    detailsCard
+                    noteCard
                     shareCard
                     actionButtons
                 }
@@ -61,6 +62,9 @@ struct SavedDetailView: View {
                         dismiss()
                     }
                 }
+            }
+            .toastOverlay(isPresented: showingCopiedBanner) {
+                TipSavvySuccessBanner(message: String(localized: "Details copied"))
             }
         }
         .alert(String(localized: "Rename Saved Tip"), isPresented: $showingRenameAlert, actions: {
@@ -87,11 +91,6 @@ struct SavedDetailView: View {
         } message: {
             Text(String(localized: "This saved tip will be permanently deleted."))
         }
-        .alert(String(localized: "Copied"), isPresented: $showingCopiedConfirmation, actions: {
-            Button(String(localized: "OK"), role: .cancel) { }
-        }, message: {
-            Text(String(localized: "Saved tip details were copied."))
-        })
     }
 
     private var header: some View {
@@ -131,6 +130,14 @@ struct SavedDetailView: View {
     private var detailsCard: some View {
         VStack(spacing: 12) {
             InfoRow(title: String(localized: "Bill Amount"), value: viewModel.tip.billAmount.formatted(.currency(code: localCurrency)))
+            if viewModel.tip.hasTaxBreakdown {
+                Divider()
+                InfoRow(title: String(localized: "Subtotal"), value: viewModel.tip.savedSubtotalAmount.formatted(.currency(code: localCurrency)))
+                Divider()
+                InfoRow(title: String(localized: "Tax"), value: viewModel.tip.savedTaxAmount.formatted(.currency(code: localCurrency)))
+                Divider()
+                InfoRow(title: String(localized: "Tip Basis"), value: viewModel.tip.savedTipsOnTax ? String(localized: "Subtotal + Tax") : String(localized: "Subtotal"))
+            }
             Divider()
             InfoRow(title: String(localized: "Tip Percentage"), value: "\(Int(viewModel.tip.tipPercentage))%")
             Divider()
@@ -140,6 +147,25 @@ struct SavedDetailView: View {
         }
         .padding(18)
         .glassPanel(cornerRadius: 22)
+    }
+
+    @ViewBuilder
+    private var noteCard: some View {
+        if let note = viewModel.tip.note, !note.isEmpty {
+            VStack(alignment: .leading, spacing: 10) {
+                Label(String(localized: "Receipt Note"), systemImage: "note.text")
+                    .font(.headline)
+                    .foregroundStyle(.secondary)
+                Text(note)
+                    .font(.body)
+                    .foregroundStyle(.primary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(18)
+            .glassPanel(cornerRadius: 22)
+            .accessibilityIdentifier("Receipt Note")
+        }
     }
 
     private var shareCard: some View {
@@ -169,7 +195,11 @@ struct SavedDetailView: View {
     private var copyDetailsButton: some View {
         Button {
             UIPasteboard.general.string = shareText
-            showingCopiedConfirmation = true
+            showingCopiedBanner = true
+            Task {
+                try? await Task.sleep(for: .seconds(1.5))
+                await MainActor.run { showingCopiedBanner = false }
+            }
         } label: {
             Label(String(localized: "Copy Details"), systemImage: "doc.on.doc")
                 .frame(maxWidth: .infinity)

@@ -21,6 +21,10 @@ extension SavedTip {
     @NSManaged public var billAmount: Double
     @NSManaged public var tipPercentage: Double
     @NSManaged public var numberOfPeople: Int64
+    @NSManaged public var note: String?
+    @NSManaged public var subtotalAmount: NSNumber?
+    @NSManaged public var taxAmount: NSNumber?
+    @NSManaged public var tipsOnTax: NSNumber?
     @NSManaged public var tipAmount: Double
     @NSManaged public var totalAmountWithTip: Double
     @NSManaged public var totalPerPerson: Double

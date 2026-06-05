@@ -177,6 +177,59 @@ final class CalculationViewModelTests: XCTestCase {
         
         XCTAssertEqual(tipAmount, 0)
     }
+
+    func test_taxAmount_whenEmpty_shouldPreserveExistingNoTaxTotals() {
+        calculationViewModel.billAmount = 100
+        calculationViewModel.taxAmount = nil
+        calculationViewModel.tipPercentage = 20
+        calculationViewModel.numberOfPeople = 2
+
+        XCTAssertEqual(calculationViewModel.tipAmount, 20)
+        XCTAssertEqual(calculationViewModel.totalAmountWithTip, 120)
+        XCTAssertEqual(calculationViewModel.totalPerPerson, 60)
+        XCTAssertFalse(calculationViewModel.hasTax)
+    }
+
+    func test_taxAmount_withSubtotalOnlyBasis_shouldAddTaxWithoutTippingOnTax() {
+        calculationViewModel.billAmount = 100
+        calculationViewModel.taxAmount = 8
+        calculationViewModel.tipTaxBasis = .subtotalOnly
+        calculationViewModel.tipPercentage = 20
+        calculationViewModel.numberOfPeople = 2
+
+        XCTAssertEqual(calculationViewModel.tipAmount, 20)
+        XCTAssertEqual(calculationViewModel.totalAmountWithTip, 128)
+        XCTAssertEqual(calculationViewModel.totalPerPerson, 64)
+    }
+
+    func test_taxAmount_withSubtotalAndTaxBasis_shouldTipOnTax() {
+        calculationViewModel.billAmount = 100
+        calculationViewModel.taxAmount = 8
+        calculationViewModel.tipTaxBasis = .subtotalAndTax
+        calculationViewModel.tipPercentage = 20
+
+        XCTAssertEqual(calculationViewModel.tipAmount, 21.6)
+        XCTAssertEqual(calculationViewModel.totalAmountWithTip, 129.6)
+    }
+
+    func test_taxAmount_withRounding_shouldRoundTotalIncludingTax() {
+        calculationViewModel.billAmount = 100
+        calculationViewModel.taxAmount = 8
+        calculationViewModel.tipPercentage = 20
+        calculationViewModel.roundingMode = .roundTotalUp
+        calculationViewModel.numberOfPeople = 3
+
+        XCTAssertEqual(calculationViewModel.totalAmountWithTip, 128)
+        XCTAssertEqual(calculationViewModel.totalPerPerson, 128.0 / 3.0)
+    }
+
+    func test_taxValidationMessage_withNegativeTax_shouldInvalidateCalculation() {
+        calculationViewModel.billAmount = 100
+        calculationViewModel.taxAmount = -1
+
+        XCTAssertNotNil(calculationViewModel.taxValidationMessage)
+        XCTAssertFalse(calculationViewModel.hasValidCalculation)
+    }
     
     func test_tipItemName_shouldBeEmptyString() {
         calculationViewModel.tipItemName = ""

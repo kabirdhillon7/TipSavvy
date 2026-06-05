@@ -49,6 +49,40 @@ final class DataManagerTests: XCTestCase {
         XCTAssertEqual(dataManager.savedTips.last?.name, "Older Tip")
     }
 
+    func test_saveTip_withNoteAndTaxMetadata_shouldPersistOptionalFields() {
+        dataManager.saveTip(name: "Tax Dinner",
+                            note: "Window table",
+                            billAmount: 100,
+                            tipPercentage: 20,
+                            numberOfPeople: 2,
+                            tipAmount: 20,
+                            totalAmountWithTip: 128,
+                            totalPerPerson: 64,
+                            subtotalAmount: 100,
+                            taxAmount: 8,
+                            tipsOnTax: false)
+
+        let tip = dataManager.savedTips.first
+
+        XCTAssertEqual(tip?.note, "Window table")
+        XCTAssertEqual(tip?.subtotalAmount?.doubleValue, 100)
+        XCTAssertEqual(tip?.taxAmount?.doubleValue, 8)
+        XCTAssertEqual(tip?.tipsOnTax?.boolValue, false)
+        XCTAssertEqual(tip?.hasTaxBreakdown, true)
+    }
+
+    func test_saveTip_withoutOptionalMetadata_shouldBehaveLikeLegacySavedTip() {
+        dataManager.saveTip(name: "Simple Dinner", billAmount: 80, tipPercentage: 20, numberOfPeople: 2, tipAmount: 16, totalAmountWithTip: 96, totalPerPerson: 48)
+
+        let tip = dataManager.savedTips.first
+
+        XCTAssertNil(tip?.note)
+        XCTAssertNil(tip?.subtotalAmount)
+        XCTAssertNil(tip?.taxAmount)
+        XCTAssertNil(tip?.tipsOnTax)
+        XCTAssertEqual(tip?.hasTaxBreakdown, false)
+    }
+
     func test_deleteTips_shouldRemoveTip() {
         dataManager.saveTip(name: "Tip to Delete", billAmount: 100.0, tipPercentage: 20, numberOfPeople: 2, tipAmount: 20.0, totalAmountWithTip: 120.0, totalPerPerson: 60.0)
 
@@ -137,6 +171,32 @@ final class DataManagerTests: XCTestCase {
         XCTAssertTrue(shareText.contains("80.00"))
         XCTAssertTrue(shareText.contains("20%"))
         XCTAssertTrue(shareText.contains("Per Person"))
+    }
+
+    func test_savedTipShareText_withNoteAndTax_shouldIncludeOptionalDetails() {
+        dataManager.saveTip(name: "Tax Share",
+                            note: "Birthday",
+                            billAmount: 100,
+                            tipPercentage: 20,
+                            numberOfPeople: 2,
+                            tipAmount: 20,
+                            totalAmountWithTip: 128,
+                            totalPerPerson: 64,
+                            subtotalAmount: 100,
+                            taxAmount: 8,
+                            tipsOnTax: false)
+
+        guard let tip = dataManager.savedTips.first else {
+            XCTFail("Expected saved tip")
+            return
+        }
+
+        let shareText = tip.shareText(currencyCode: "USD")
+
+        XCTAssertTrue(shareText.contains("Subtotal"))
+        XCTAssertTrue(shareText.contains("Tax"))
+        XCTAssertTrue(shareText.contains("Tip Basis"))
+        XCTAssertTrue(shareText.contains("Birthday"))
     }
 }
 

@@ -17,10 +17,11 @@ struct CalculationView: View {
 
     @StateObject private var viewModel: CalculationViewModel
 
-    @State private var showingSavedAlert = false
-    @State private var showingSavedConfirmation = false
+    @State private var showingSaveSheet = false
+    @State private var successMessage: String?
     @State private var dataErrorMessage: String?
     @State private var copiedValueLabel: String?
+    @State private var showingTaxDetails = false
     @FocusState var keyboardFocusField: TipSavvyKeyboardField?
 
     private let localCurrency = Locale.current.currency?.identifier ?? "USD"
@@ -34,12 +35,6 @@ struct CalculationView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 18) {
-                    if let dataErrorMessage {
-                        TipSavvyErrorBanner(message: dataErrorMessage) {
-                            self.dataErrorMessage = nil
-                            dataManager.lastError = nil
-                        }
-                    }
                     totalsSummaryPanel
                     billAmountCard
                     splitCard
@@ -52,31 +47,21 @@ struct CalculationView: View {
             }
             .background(Color(.systemGroupedBackground))
             .navigationTitle("TipSavvy")
-            .alert(String(localized: "Save Tip Calculation"), isPresented: $showingSavedAlert, actions: {
-                TextField(String(localized: "Enter Name"), text: $viewModel.tipItemName)
-                    .autocorrectionDisabled()
-                    .accessibilityLabel(String(localized: "Enter Tip Calculation Name"))
-
-                Button(String(localized: "OK"), role: nil) {
-                    saveTipInfo()
+            .toastOverlay(isPresented: dataErrorMessage != nil || successMessage != nil) {
+                if let dataErrorMessage {
+                    TipSavvyErrorBanner(message: dataErrorMessage) {
+                        self.dataErrorMessage = nil
+                        dataManager.lastError = nil
+                    }
+                } else if let successMessage {
+                    TipSavvySuccessBanner(message: successMessage)
                 }
-                .disabled(!viewModel.canSaveTip)
-                .accessibilityLabel(String(localized: "OK"))
-
-                Button(String(localized: "Cancel"), role: .cancel) {
-                    viewModel.tipItemName = ""
-                }
-                .accessibilityLabel(String(localized: "Cancel"))
-            }, message: {
-                if !viewModel.hasValidCalculation {
-                    Text(viewModel.billValidationMessage ?? String(localized: "Enter a valid bill amount first."))
-                }
-            })
-            .alert(String(localized: "Saved"), isPresented: $showingSavedConfirmation, actions: {
-                Button(String(localized: "OK"), role: .cancel) { }
-            }, message: {
-                Text(String(localized: "Your tip calculation was saved."))
-            })
+            }
+            .sheet(isPresented: $showingSaveSheet) {
+                saveTipSheet
+                    .presentationDetents([.medium])
+                    .presentationDragIndicator(.visible)
+            }
             .onChange(of: viewModel.numberOfPeople, perform: { _ in
                 viewModel.persistSmartDefaults()
             })
@@ -86,6 +71,8 @@ struct CalculationView: View {
             .animation(reduceMotion ? nil : .easeInOut(duration: 0.2), value: viewModel.numberOfPeople)
             .animation(reduceMotion ? nil : .easeInOut(duration: 0.2), value: viewModel.totalAmountWithTip)
             .animation(reduceMotion ? nil : .easeInOut(duration: 0.2), value: viewModel.totalPerPerson)
+            .animation(reduceMotion ? nil : .easeInOut(duration: 0.2), value: showingTaxDetails)
+            .animation(reduceMotion ? nil : .easeInOut(duration: 0.25), value: successMessage)
             .toolbar {
                 ToolbarItem(placement: .keyboard) {
                     Spacer()
@@ -125,9 +112,70 @@ struct CalculationView: View {
                     .foregroundStyle(.secondary)
                     .accessibilityIdentifier("Bill Validation Message")
             }
+
+            taxDetailsSection
         }
         .padding(18)
         .glassPanel(cornerRadius: 22, interactive: true, highContrast: keyboardFocusField == .billAmount)
+    }
+
+    private var taxDetailsSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Button {
+                showingTaxDetails.toggle()
+                HapticFeedbackPerformer.selection(isEnabled: settings.hapticsEnabled)
+            } label: {
+                HStack(spacing: 10) {
+                    Label(String(localized: "Tax Details"), systemImage: "plus.forwardslash.minus")
+                        .font(.subheadline.weight(.medium))
+                    Spacer()
+                    Image(systemName: showingTaxDetails ? "chevron.up" : "chevron.down")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                }
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(String(localized: "Tax Details"))
+            .accessibilityIdentifier("Tax Details Toggle")
+
+            if showingTaxDetails {
+                VStack(alignment: .leading, spacing: 10) {
+                    TextField(String(localized: "Optional Tax Amount"),
+                              value: $viewModel.taxAmount,
+                              format: .currency(code: localCurrency))
+                        .font(.title3.weight(.semibold).monospacedDigit())
+                        .keyboardType(.decimalPad)
+                        .focused($keyboardFocusField, equals: .taxAmount)
+                        .textFieldStyle(.plain)
+                        .accessibilityLabel(String(localized: "Optional Tax Amount"))
+                        .accessibilityIdentifier("Optional Tax Amount")
+
+                    Picker(String(localized: "Tip Basis"), selection: $viewModel.tipTaxBasis) {
+                        ForEach(TipTaxBasis.allCases) { basis in
+                            Text(basis.title).tag(basis)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                    .onChange(of: viewModel.tipTaxBasis) { _ in
+                        viewModel.persistSmartDefaults()
+                    }
+                    .accessibilityIdentifier("Tip Tax Basis")
+
+                    if let message = viewModel.taxValidationMessage {
+                        Label(message, systemImage: "exclamationmark.circle")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                            .accessibilityIdentifier("Tax Validation Message")
+                    } else {
+                        Text(String(localized: "Leave tax empty to keep the simple bill total."))
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                .transition(reduceMotion ? .identity : .opacity.combined(with: .move(edge: .top)))
+            }
+        }
     }
 
     private var splitCard: some View {
@@ -287,7 +335,7 @@ struct CalculationView: View {
 
     private var serviceContextMenuLabel: some View {
         HStack(spacing: 10) {
-            Label(String(localized: "Context"), systemImage: "sparkles")
+            Label(String(localized: "Context"), systemImage: viewModel.serviceContext.systemImage)
                 .font(.subheadline.weight(.medium))
             Spacer(minLength: 10)
             Text(viewModel.serviceContext.label)
@@ -494,6 +542,10 @@ struct CalculationView: View {
             Divider()
 
             InfoRow(title: String(localized: "Subtotal"), value: (viewModel.billAmount ?? 0).formatted(.currency(code: localCurrency)))
+            if viewModel.hasTax {
+                InfoRow(title: String(localized: "Tax"), value: viewModel.sanitizedTaxAmount.formatted(.currency(code: localCurrency)))
+                InfoRow(title: String(localized: "Tip Basis"), value: viewModel.tipTaxBasis.title)
+            }
             InfoRow(title: String(localized: "Tip"), value: viewModel.tipAmount.formatted(.currency(code: localCurrency)))
 
             VStack(alignment: .leading, spacing: 8) {
@@ -565,23 +617,25 @@ struct CalculationView: View {
     }
 
     private var roundingExplanation: String? {
-        guard viewModel.hasValidCalculation else {
-            return nil
-        }
-
         switch viewModel.roundingMode {
         case .none:
             return nil
         case .roundTotalUp:
+            guard viewModel.hasValidCalculation else {
+                return String(localized: "The total will be rounded up to the nearest dollar.")
+            }
             return String(localized: "Rounded total from \(viewModel.unroundedTotalForDisplay.formatted(.currency(code: localCurrency))) to \(viewModel.totalAmountWithTip.formatted(.currency(code: localCurrency))).")
         case .roundPerPersonUp:
+            guard viewModel.hasValidCalculation else {
+                return String(localized: "Each person's share will be rounded up to the nearest dollar.")
+            }
             return String(localized: "Rounded each person from \(viewModel.unroundedPerPersonForDisplay.formatted(.currency(code: localCurrency))) to \(viewModel.totalPerPerson.formatted(.currency(code: localCurrency))).")
         }
     }
 
     private var saveButton: some View {
         Button {
-            showingSavedAlert = true
+            showingSaveSheet = true
         } label: {
             Label(String(localized: "Save"), systemImage: "tray.and.arrow.down")
                 .frame(maxWidth: .infinity)
@@ -591,6 +645,49 @@ struct CalculationView: View {
         .disabled(!viewModel.hasValidCalculation)
         .accessibilityLabel(String(localized: "Save Tip Calculation"))
         .accessibilityHint(viewModel.hasValidCalculation ? String(localized: "Saves the Tip Calculation") : String(localized: "Enter a bill amount greater than zero before saving"))
+    }
+
+    private var saveTipSheet: some View {
+        NavigationStack {
+            Form {
+                Section {
+                    TextField(String(localized: "Enter Name"), text: $viewModel.tipItemName)
+                        .autocorrectionDisabled()
+                        .accessibilityLabel(String(localized: "Enter Tip Calculation Name"))
+                        .accessibilityIdentifier("Enter Tip Calculation Name")
+
+                    TextField(String(localized: "Receipt Note"), text: $viewModel.receiptNote, axis: .vertical)
+                        .lineLimit(3, reservesSpace: true)
+                        .accessibilityLabel(String(localized: "Receipt Note"))
+                        .accessibilityIdentifier("Receipt Note")
+                } footer: {
+                    Text(String(localized: "Notes stay on this device with the saved calculation."))
+                }
+
+                Section {
+                    InfoRow(title: String(localized: "Total With Tip"), value: viewModel.totalAmountWithTip.formatted(.currency(code: localCurrency)))
+                    InfoRow(title: String(localized: "Per Person"), value: viewModel.totalPerPerson.formatted(.currency(code: localCurrency)))
+                }
+            }
+            .navigationTitle(String(localized: "Save Tip"))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(String(localized: "Cancel")) {
+                        viewModel.tipItemName = ""
+                        viewModel.receiptNote = ""
+                        showingSaveSheet = false
+                    }
+                }
+
+                ToolbarItem(placement: .confirmationAction) {
+                    Button(String(localized: "Save")) {
+                        saveTipInfo()
+                    }
+                    .disabled(!viewModel.canSaveTip)
+                }
+            }
+        }
     }
 
     private var resetButton: some View {
@@ -623,6 +720,10 @@ struct CalculationView: View {
             UIPasteboard.general.string = value
             copiedValueLabel = label
             HapticFeedbackPerformer.lightImpact(isEnabled: settings.hapticsEnabled)
+            Task {
+                try? await Task.sleep(for: .seconds(2))
+                await MainActor.run { copiedValueLabel = nil }
+            }
         } label: {
             Label(label, systemImage: "doc.on.doc")
                 .frame(maxWidth: .infinity)
@@ -639,12 +740,16 @@ struct CalculationView: View {
         }
 
         let result = dataManager.saveTip(name: viewModel.tipItemName.trimmingCharacters(in: .whitespacesAndNewlines),
+                                         note: viewModel.receiptNote,
                                          billAmount: billAmount,
                                          tipPercentage: viewModel.tipPercentage,
                                          numberOfPeople: viewModel.numberOfPeople,
                                          tipAmount: viewModel.tipAmount,
                                          totalAmountWithTip: viewModel.totalAmountWithTip,
-                                         totalPerPerson: viewModel.totalPerPerson)
+                                         totalPerPerson: viewModel.totalPerPerson,
+                                         subtotalAmount: viewModel.hasTax ? viewModel.subtotalAmount : nil,
+                                         taxAmount: viewModel.hasTax ? viewModel.sanitizedTaxAmount : nil,
+                                         tipsOnTax: viewModel.hasTax ? viewModel.tipTaxBasis == .subtotalAndTax : nil)
 
         guard case .success = result else {
             HapticFeedbackPerformer.warning(isEnabled: settings.hapticsEnabled)
@@ -653,6 +758,7 @@ struct CalculationView: View {
         }
 
         HapticFeedbackPerformer.success(isEnabled: settings.hapticsEnabled)
+        showingSaveSheet = false
 
         DispatchQueue.main.async {
             performAnimated(.spring(response: 0.32, dampingFraction: 0.82)) {
@@ -660,7 +766,13 @@ struct CalculationView: View {
                 viewModel.applySettingsDefaults(defaultTipPercentage: settings.defaultTipPercentage,
                                                 defaultNumberOfPeople: settings.defaultNumberOfPeople)
             }
-            showingSavedConfirmation = true
+            successMessage = String(localized: "Tip calculation saved.")
+            Task {
+                try? await Task.sleep(for: .seconds(2.5))
+                await MainActor.run {
+                    withAnimation { successMessage = nil }
+                }
+            }
         }
     }
 }

@@ -10,6 +10,7 @@ import SwiftUI
 /// A view that displays a list of saved tip calculations, or a message indicating that there are no saved tip calculations.
 struct SavedView: View {
     @EnvironmentObject var dataManager: DataManager
+    @EnvironmentObject var settings: TipSavvySettings
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     let onUseAgain: (SavedTip) -> Void
 
@@ -77,15 +78,6 @@ struct SavedView: View {
                     emptyState(title: String(localized: "No Saved Tips"), systemImage: "percent")
                 } else {
                     VStack(spacing: 0) {
-                        if let dataErrorMessage {
-                            TipSavvyErrorBanner(message: dataErrorMessage) {
-                                self.dataErrorMessage = nil
-                                dataManager.lastError = nil
-                            }
-                            .padding(.horizontal, 18)
-                            .padding(.top, 10)
-                        }
-
                         activeControlsSummary
                         savedCards
                     }
@@ -97,6 +89,14 @@ struct SavedView: View {
                 ToolbarItemGroup(placement: .navigationBarTrailing) {
                     sortMenu
                     filterMenu
+                }
+            }
+            .toastOverlay(isPresented: dataErrorMessage != nil) {
+                if let dataErrorMessage {
+                    TipSavvyErrorBanner(message: dataErrorMessage) {
+                        self.dataErrorMessage = nil
+                        dataManager.lastError = nil
+                    }
                 }
             }
         }
@@ -292,6 +292,15 @@ struct SavedView: View {
                     } label: {
                         Label(String(localized: "Delete"), systemImage: "trash")
                     }
+                }
+                .swipeActions(edge: .leading, allowsFullSwipe: true) {
+                    Button {
+                        onUseAgain(tip)
+                        HapticFeedbackPerformer.success(isEnabled: settings.hapticsEnabled)
+                    } label: {
+                        Label(String(localized: "Use Again"), systemImage: "arrow.counterclockwise")
+                    }
+                    .tint(.teal)
                 }
                 .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                     Button(role: .destructive) {
@@ -557,7 +566,13 @@ struct SavedInsightsDetailView: View {
             Divider()
             InfoRow(title: String(localized: "Average Bill"), value: insights.averageBillAmount.formatted(.currency(code: currencyCode)))
             Divider()
+            InfoRow(title: String(localized: "Average Per Person"), value: insights.averagePerPersonTotal.formatted(.currency(code: currencyCode)))
+            Divider()
             InfoRow(title: String(localized: "Average Tip"), value: percentageText(insights.averageTipPercentage))
+            if insights.savedTipsWithTaxCount > 0 {
+                Divider()
+                InfoRow(title: String(localized: "Average Tax"), value: insights.averageTaxAmount.formatted(.currency(code: currencyCode)))
+            }
         }
         .padding(18)
         .glassPanel(cornerRadius: 22)
@@ -579,6 +594,8 @@ struct SavedInsightsDetailView: View {
             } else {
                 detailCaption(nil)
             }
+            Divider()
+            InfoRow(title: String(localized: "Recent Activity"), value: insights.recentActivitySummary)
         }
         .padding(18)
         .glassPanel(cornerRadius: 22)
@@ -591,6 +608,10 @@ struct SavedInsightsDetailView: View {
             InfoRow(title: String(localized: "Common Split"), value: "\(insights.mostCommonSplitCount)")
             Divider()
             InfoRow(title: String(localized: "Common Tip"), value: percentageText(insights.mostCommonTipPercentage))
+            if insights.savedTipsWithTaxCount > 0 {
+                Divider()
+                InfoRow(title: String(localized: "Saved With Tax"), value: "\(insights.savedTipsWithTaxCount)")
+            }
         }
         .padding(18)
         .glassPanel(cornerRadius: 22)
@@ -623,7 +644,10 @@ struct SavedTipInsights: Equatable {
     let allTimeTotalWithTip: Double
     let allTimeTipTotal: Double
     let averageBillAmount: Double
+    let averagePerPersonTotal: Double
     let averageTipPercentage: Double
+    let averageTaxAmount: Double
+    let savedTipsWithTaxCount: Int
     let mostCommonSplitCount: Int
     let mostCommonTipPercentage: Double
     let largestSavedBill: Double
@@ -632,6 +656,7 @@ struct SavedTipInsights: Equatable {
     let highestTipName: String?
     let mostRecentSavedTipName: String?
     let mostRecentSavedTipDate: Date?
+    let recentActivitySummary: String
     let hasCurrentMonthTips: Bool
 
     init(tips: [SavedTip], now: Date = Date(), calendar: Calendar = .current) {
@@ -651,7 +676,11 @@ struct SavedTipInsights: Equatable {
         allTimeTotalWithTip = tips.reduce(0) { $0 + $1.totalAmountWithTip }
         allTimeTipTotal = tips.reduce(0) { $0 + $1.tipAmount }
         averageBillAmount = tips.isEmpty ? 0 : tips.reduce(0) { $0 + $1.billAmount } / Double(tips.count)
+        averagePerPersonTotal = tips.isEmpty ? 0 : tips.reduce(0) { $0 + $1.totalPerPerson } / Double(tips.count)
         averageTipPercentage = tips.isEmpty ? 0 : tips.reduce(0) { $0 + $1.tipPercentage } / Double(tips.count)
+        let tipsWithTax = tips.filter(\.hasTaxBreakdown)
+        savedTipsWithTaxCount = tipsWithTax.count
+        averageTaxAmount = tipsWithTax.isEmpty ? 0 : tipsWithTax.reduce(0) { $0 + $1.savedTaxAmount } / Double(tipsWithTax.count)
         mostCommonSplitCount = Self.mostCommonSplitCount(in: tips)
         mostCommonTipPercentage = Self.mostCommonTipPercentage(in: tips)
         let largestSavedTip = tips.max { lhs, rhs in
@@ -676,6 +705,7 @@ struct SavedTipInsights: Equatable {
         }
         mostRecentSavedTipName = mostRecentTip?.0.name
         mostRecentSavedTipDate = mostRecentTip?.1
+        recentActivitySummary = Self.recentActivitySummary(for: tips, now: now, calendar: calendar)
         hasCurrentMonthTips = !currentMonthTips.isEmpty
     }
 
@@ -709,6 +739,23 @@ struct SavedTipInsights: Equatable {
         }
         .first?
         .key ?? 0
+    }
+
+    private static func recentActivitySummary(for tips: [SavedTip], now: Date, calendar: Calendar) -> String {
+        let recentDate = calendar.date(byAdding: .day, value: -7, to: now) ?? now
+        let recentCount = tips.filter { tip in
+            guard let date = tip.date else {
+                return false
+            }
+
+            return date >= recentDate && date <= now
+        }.count
+
+        if recentCount == 0 {
+            return String(localized: "No saves in the last 7 days")
+        }
+
+        return String(localized: "\(recentCount) saved in the last 7 days")
     }
 }
 
@@ -805,19 +852,23 @@ enum SavedTipFilterMode: String, CaseIterable, Identifiable {
 #Preview {
     SavedView()
         .environmentObject(DataManager.preview)
+        .environmentObject(TipSavvySettings(defaults: UserDefaults(suiteName: "SavedPreview") ?? .standard))
 }
 
 #Preview("Empty Saved Tips") {
     SavedView()
         .environmentObject(DataManager.emptyPreview)
+        .environmentObject(TipSavvySettings(defaults: UserDefaults(suiteName: "SavedEmptyPreview") ?? .standard))
 }
 
 #Preview("Many Saved Tips") {
     SavedView()
         .environmentObject(DataManager.manyItemsPreview)
+        .environmentObject(TipSavvySettings(defaults: UserDefaults(suiteName: "SavedManyPreview") ?? .standard))
 }
 
 #Preview("Saved Tips Error") {
     SavedView()
         .environmentObject(DataManager.errorPreview)
+        .environmentObject(TipSavvySettings(defaults: UserDefaults(suiteName: "SavedErrorPreview") ?? .standard))
 }

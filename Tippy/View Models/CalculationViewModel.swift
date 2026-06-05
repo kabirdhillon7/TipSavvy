@@ -26,6 +26,22 @@ enum RoundingMode: String, CaseIterable {
     }
 }
 
+enum TipTaxBasis: String, CaseIterable, Identifiable {
+    case subtotalOnly
+    case subtotalAndTax
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .subtotalOnly:
+            return String(localized: "Subtotal")
+        case .subtotalAndTax:
+            return String(localized: "Subtotal + Tax")
+        }
+    }
+}
+
 extension RoundingMode: Identifiable {
     nonisolated var id: String { rawValue }
 }
@@ -152,6 +168,26 @@ enum TipServiceContext: String, CaseIterable, Identifiable {
         }
     }
 
+    var systemImage: String {
+        switch self {
+        case .restaurant: return "fork.knife"
+        case .bar: return "wineglass"
+        case .delivery: return "bicycle"
+        case .takeout: return "bag"
+        case .coffee: return "cup.and.saucer"
+        case .salon: return "scissors"
+        case .barber: return "scissors"
+        case .spa: return "sparkles"
+        case .nailSalon: return "paintbrush.pointed"
+        case .petGroomer: return "pawprint"
+        case .rideshare: return "car"
+        case .foodTruck: return "truck.box"
+        case .tourGuide: return "mappin.and.ellipse"
+        case .movers: return "shippingbox"
+        case .custom: return "slider.horizontal.3"
+        }
+    }
+
     var helperText: String {
         switch self {
         case .restaurant:
@@ -272,7 +308,10 @@ final class CalculationViewModel: ObservableObject  {
     @Published var numberOfPeople: Int
     @Published var roundingMode: RoundingMode
     @Published var serviceContext: TipServiceContext
+    @Published var taxAmount: Double?
+    @Published var tipTaxBasis: TipTaxBasis
     @Published var tipItemName = ""
+    @Published var receiptNote = ""
 
     private let defaults: UserDefaults
     private let settings: TipSavvySettings?
@@ -282,6 +321,7 @@ final class CalculationViewModel: ObservableObject  {
         static let numberOfPeople = "numberOfPeople"
         static let roundingMode = "roundingMode"
         static let serviceContext = "serviceContext"
+        static let tipTaxBasis = "tipTaxBasis"
     }
 
     init(defaults: UserDefaults = .standard, settings: TipSavvySettings? = nil) {
@@ -299,6 +339,9 @@ final class CalculationViewModel: ObservableObject  {
 
         let savedServiceContext = defaults.string(forKey: DefaultsKey.serviceContext)
         serviceContext = savedServiceContext.flatMap(TipServiceContext.init(rawValue:)) ?? .restaurant
+
+        let savedTipTaxBasis = defaults.string(forKey: DefaultsKey.tipTaxBasis)
+        tipTaxBasis = savedTipTaxBasis.flatMap(TipTaxBasis.init(rawValue:)) ?? .subtotalOnly
     }
 
     var hasValidCalculation: Bool {
@@ -306,7 +349,7 @@ final class CalculationViewModel: ObservableObject  {
             return false
         }
 
-        return billAmount > 0 && numberOfPeople >= 1
+        return billAmount > 0 && numberOfPeople >= 1 && taxValidationMessage == nil
     }
 
     var canSaveTip: Bool {
@@ -329,6 +372,55 @@ final class CalculationViewModel: ObservableObject  {
         return nil
     }
 
+    var taxValidationMessage: String? {
+        guard let taxAmount else {
+            return nil
+        }
+
+        guard taxAmount >= 0 else {
+            return String(localized: "Tax must be zero or more.")
+        }
+
+        guard taxAmount.isFinite else {
+            return String(localized: "Tax must be a valid number.")
+        }
+
+        return nil
+    }
+
+    var hasTax: Bool {
+        sanitizedTaxAmount > 0
+    }
+
+    var sanitizedTaxAmount: Double {
+        guard let taxAmount, taxAmount > 0 else {
+            return 0
+        }
+
+        return Self.sanitizedAmount(taxAmount)
+    }
+
+    var subtotalAmount: Double {
+        guard let billAmount else {
+            return 0
+        }
+
+        return Self.sanitizedAmount(billAmount)
+    }
+
+    var billAmountWithTax: Double {
+        Self.sanitizedAmount(subtotalAmount + sanitizedTaxAmount)
+    }
+
+    var tipBaseAmount: Double {
+        switch tipTaxBasis {
+        case .subtotalOnly:
+            return subtotalAmount
+        case .subtotalAndTax:
+            return billAmountWithTax
+        }
+    }
+
     static func clampedTipPercentage(_ percentage: Double) -> Double {
         min(max(percentage, 0), 30)
     }
@@ -344,13 +436,11 @@ final class CalculationViewModel: ObservableObject  {
         defaults.set(numberOfPeople, forKey: DefaultsKey.numberOfPeople)
         defaults.set(roundingMode.rawValue, forKey: DefaultsKey.roundingMode)
         defaults.set(serviceContext.rawValue, forKey: DefaultsKey.serviceContext)
+        defaults.set(tipTaxBasis.rawValue, forKey: DefaultsKey.tipTaxBasis)
     }
     
     var tipAmount: Double {
-        if let billAmount = billAmount {
-            return billAmount / 100 * tipPercentage
-        }
-        return 0
+        Self.sanitizedAmount(tipBaseAmount / 100 * tipPercentage)
     }
     
     var totalAmountWithTip: Double {
@@ -427,11 +517,7 @@ final class CalculationViewModel: ObservableObject  {
     }
 
     private var unroundedTotalAmountWithTip: Double {
-        guard let billAmount else {
-            return 0
-        }
-
-        return Self.sanitizedAmount(billAmount + tipAmount)
+        Self.sanitizedAmount(billAmountWithTax + tipAmount)
     }
 
     private var totalAmountForPeople: Double {
@@ -450,12 +536,17 @@ final class CalculationViewModel: ObservableObject  {
     }
 
     func accessibilityTotalsSummary(currencyCode: String) -> String {
-        [
+        var parts = [
             String(localized: "Subtotal") + ": " + Self.currencyString(billAmount ?? 0, currencyCode: currencyCode),
-            String(localized: "Tip") + ": " + Self.currencyString(tipAmount, currencyCode: currencyCode),
-            String(localized: "Total With Tip") + ": " + Self.currencyString(totalAmountWithTip, currencyCode: currencyCode),
-            String(localized: "Total Per Person") + ": " + Self.currencyString(totalPerPerson, currencyCode: currencyCode)
-        ].joined(separator: ", ")
+        ]
+        if hasTax {
+            parts.append(String(localized: "Tax") + ": " + Self.currencyString(sanitizedTaxAmount, currencyCode: currencyCode))
+            parts.append(String(localized: "Tip Basis") + ": " + tipTaxBasis.title)
+        }
+        parts.append(String(localized: "Tip") + ": " + Self.currencyString(tipAmount, currencyCode: currencyCode))
+        parts.append(String(localized: "Total With Tip") + ": " + Self.currencyString(totalAmountWithTip, currencyCode: currencyCode))
+        parts.append(String(localized: "Total Per Person") + ": " + Self.currencyString(totalPerPerson, currencyCode: currencyCode))
+        return parts.joined(separator: ", ")
     }
 
     private static func currencyString(_ amount: Double, currencyCode: String) -> String {
@@ -469,7 +560,10 @@ final class CalculationViewModel: ObservableObject  {
         numberOfPeople = settings?.defaultNumberOfPeople ?? 1
         roundingMode = .none
         serviceContext = .restaurant
+        taxAmount = nil
+        tipTaxBasis = .subtotalOnly
         tipItemName = ""
+        receiptNote = ""
         persistSmartDefaults()
     }
 
@@ -484,11 +578,15 @@ final class CalculationViewModel: ObservableObject  {
         tipPercentage = Self.clampedTipPercentage(savedTip.tipPercentage)
         numberOfPeople = Self.clampedNumberOfPeople(Int(savedTip.numberOfPeople))
         roundingMode = .none
+        taxAmount = savedTip.taxAmount?.doubleValue
+        tipTaxBasis = (savedTip.tipsOnTax?.boolValue == true) ? .subtotalAndTax : .subtotalOnly
         tipItemName = ""
+        receiptNote = savedTip.note ?? ""
         persistSmartDefaults()
     }
 }
 
 enum TipSavvyKeyboardField: Int, Hashable {
     case billAmount
+    case taxAmount
 }

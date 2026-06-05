@@ -41,13 +41,17 @@ protocol SavedTipStore {
 
     @discardableResult
     func saveTip(name: String,
+                 note: String?,
                  billAmount: Double,
                  tipPercentage: Double,
                  numberOfPeople: Int,
                  tipAmount: Double,
                  totalAmountWithTip: Double,
                  totalPerPerson: Double,
-                 date: Date) -> Result<SavedTip, DataManagerError>
+                 date: Date,
+                 subtotalAmount: Double?,
+                 taxAmount: Double?,
+                 tipsOnTax: Bool?) -> Result<SavedTip, DataManagerError>
 
     @discardableResult
     func deleteTips(_ tips: [SavedTip]) -> Result<Void, DataManagerError>
@@ -76,6 +80,11 @@ class DataManager: NSObject, ObservableObject {
             let description = NSPersistentStoreDescription()
             description.url = URL(fileURLWithPath: "/dev/null")
             container.persistentStoreDescriptions = [description]
+        }
+
+        if let description = container.persistentStoreDescriptions.first {
+            description.setOption(true as NSNumber, forKey: NSMigratePersistentStoresAutomaticallyOption)
+            description.setOption(true as NSNumber, forKey: NSInferMappingModelAutomaticallyOption)
         }
 
         container.loadPersistentStores { [weak self] _, error in
@@ -128,21 +137,37 @@ class DataManager: NSObject, ObservableObject {
     
     /// Saves a new tip to Core Data.
     @discardableResult
-    func saveTip(name: String, billAmount: Double, tipPercentage: Double, numberOfPeople: Int, tipAmount: Double, totalAmountWithTip: Double, totalPerPerson: Double, date: Date = Date()) -> Result<SavedTip, DataManagerError> {
+    func saveTip(name: String,
+                 note: String? = nil,
+                 billAmount: Double,
+                 tipPercentage: Double,
+                 numberOfPeople: Int,
+                 tipAmount: Double,
+                 totalAmountWithTip: Double,
+                 totalPerPerson: Double,
+                 date: Date = Date(),
+                 subtotalAmount: Double? = nil,
+                 taxAmount: Double? = nil,
+                 tipsOnTax: Bool? = nil) -> Result<SavedTip, DataManagerError> {
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedName.isEmpty else {
             lastError = .emptyName
             return .failure(.emptyName)
         }
+        let trimmedNote = note?.trimmingCharacters(in: .whitespacesAndNewlines)
 
         let context = container.viewContext
         
         let savedTip = SavedTip(context: context)
         savedTip.name = trimmedName
+        savedTip.note = trimmedNote?.isEmpty == false ? trimmedNote : nil
         savedTip.date = date
         savedTip.billAmount = billAmount
         savedTip.tipPercentage = tipPercentage
         savedTip.numberOfPeople = Int64(numberOfPeople)
+        savedTip.subtotalAmount = subtotalAmount.map(NSNumber.init(value:))
+        savedTip.taxAmount = taxAmount.map(NSNumber.init(value:))
+        savedTip.tipsOnTax = tipsOnTax.map(NSNumber.init(value:))
         savedTip.tipAmount = tipAmount
         savedTip.totalAmountWithTip = totalAmountWithTip
         savedTip.totalPerPerson = totalPerPerson
@@ -273,6 +298,22 @@ class DataManager: NSObject, ObservableObject {
 extension DataManager: SavedTipStore { }
 
 extension SavedTip {
+    var hasTaxBreakdown: Bool {
+        (taxAmount?.doubleValue ?? 0) > 0
+    }
+
+    var savedSubtotalAmount: Double {
+        subtotalAmount?.doubleValue ?? billAmount
+    }
+
+    var savedTaxAmount: Double {
+        taxAmount?.doubleValue ?? 0
+    }
+
+    var savedTipsOnTax: Bool {
+        tipsOnTax?.boolValue ?? false
+    }
+
     func accessibilitySummary(currencyCode: String, dateFormat: Date.FormatStyle = .dateTime.month().day().year()) -> String {
         let savedName = name ?? String(localized: "Untitled Tip")
         let dateText = date.map { $0.formatted(dateFormat) }
@@ -281,8 +322,15 @@ extension SavedTip {
         if let dateText {
             parts.append(dateText)
         }
+        if hasTaxBreakdown {
+            parts.append(String(localized: "Subtotal") + ": " + savedSubtotalAmount.formatted(.currency(code: currencyCode)))
+            parts.append(String(localized: "Tax") + ": " + savedTaxAmount.formatted(.currency(code: currencyCode)))
+        }
         parts.append(String(localized: "Total With Tip") + ": " + totalAmountWithTip.formatted(.currency(code: currencyCode)))
         parts.append(String(localized: "Per Person") + ": " + totalPerPerson.formatted(.currency(code: currencyCode)))
+        if let note, !note.isEmpty {
+            parts.append(String(localized: "Note") + ": " + note)
+        }
 
         return parts.joined(separator: ", ")
     }
@@ -290,13 +338,26 @@ extension SavedTip {
     func shareText(currencyCode: String, dateFormat: Date.FormatStyle = .dateTime.month().day().year()) -> String {
         let savedName = name ?? String(localized: "Untitled Tip")
         let dateText = date.map { "\n" + String(localized: "Date") + ": " + $0.formatted(dateFormat) } ?? ""
+        let taxText: String
+        if hasTaxBreakdown {
+            let basis = savedTipsOnTax ? String(localized: "Subtotal + Tax") : String(localized: "Subtotal")
+            taxText = """
+
+            \(String(localized: "Subtotal")): \(savedSubtotalAmount.formatted(.currency(code: currencyCode)))
+            \(String(localized: "Tax")): \(savedTaxAmount.formatted(.currency(code: currencyCode)))
+            \(String(localized: "Tip Basis")): \(basis)
+            """
+        } else {
+            taxText = ""
+        }
+        let noteText = note?.isEmpty == false ? "\n" + String(localized: "Note") + ": " + (note ?? "") : ""
 
         return """
         \(savedName)\(dateText)
-        \(String(localized: "Bill Amount")): \(billAmount.formatted(.currency(code: currencyCode)))
+        \(String(localized: "Bill Amount")): \(billAmount.formatted(.currency(code: currencyCode)))\(taxText)
         \(String(localized: "Tip")): \(tipAmount.formatted(.currency(code: currencyCode))) (\(Int(tipPercentage))%)
         \(String(localized: "Total With Tip")): \(totalAmountWithTip.formatted(.currency(code: currencyCode)))
-        \(String(localized: "Per Person")): \(totalPerPerson.formatted(.currency(code: currencyCode)))
+        \(String(localized: "Per Person")): \(totalPerPerson.formatted(.currency(code: currencyCode)))\(noteText)
         """
     }
 }

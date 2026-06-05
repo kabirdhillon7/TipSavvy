@@ -56,7 +56,8 @@ final class TippyUITests: XCTestCase {
         let app = XCUIApplication()
         enterBillAmount("25", in: app)
         app.buttons["Save Tip Calculation"].tap()
-        app.alerts["Save Tip Calculation"].scrollViews.otherElements.buttons["Cancel"].tap()
+        XCTAssertTrue(app.navigationBars["Save Tip"].waitForExistence(timeout: 2))
+        app.buttons["Cancel"].tap()
     }
     
     func test_enterbillAmountTextField_shouldAcceptInput() {
@@ -245,8 +246,10 @@ final class TippyUITests: XCTestCase {
         enterBillAmount("25", in: app)
 
         app.buttons["Save Tip Calculation"].tap()
-        app.alerts["Save Tip Calculation"].scrollViews.otherElements.textFields["Enter Name"].typeText("Lunch")
-        app.alerts["Save Tip Calculation"].scrollViews.otherElements.buttons["OK"].tap()
+        XCTAssertTrue(app.navigationBars["Save Tip"].waitForExistence(timeout: 2))
+        app.textFields["Enter Tip Calculation Name"].tap()
+        app.textFields["Enter Tip Calculation Name"].typeText("Lunch")
+        app.buttons["Save"].tap()
     }
     
     func test_saveTipCalculationButton_shouldCancel() {
@@ -255,7 +258,34 @@ final class TippyUITests: XCTestCase {
 
         enterBillAmount("25", in: app)
         app.buttons["Save Tip Calculation"].tap()
-        app.alerts["Save Tip Calculation"].scrollViews.otherElements.buttons["Cancel"].tap()
+        XCTAssertTrue(app.navigationBars["Save Tip"].waitForExistence(timeout: 2))
+        app.buttons["Cancel"].tap()
+    }
+
+    func test_taxDetailsAndReceiptNote_shouldSaveAndAppearInSavedDetail() {
+        let app = launchIsolatedUITestApp()
+
+        enterBillAmount("100", in: app)
+        enterTaxAmount("8", in: app)
+
+        app.buttons["Save Tip Calculation"].tap()
+        XCTAssertTrue(app.navigationBars["Save Tip"].waitForExistence(timeout: 2))
+        app.textFields["Enter Tip Calculation Name"].tap()
+        app.textFields["Enter Tip Calculation Name"].typeText("Tax Lunch")
+        app.textFields["Receipt Note"].tap()
+        app.textFields["Receipt Note"].typeText("Patio table")
+        app.buttons["Save"].tap()
+        _ = app.staticTexts.matching(NSPredicate(format: "label CONTAINS 'saved'")).firstMatch.waitForExistence(timeout: 3)
+
+        selectSavedTab(in: app)
+        let savedTip = app.descendants(matching: .any)
+            .matching(NSPredicate(format: "label CONTAINS %@", "Tax Lunch"))
+            .firstMatch
+        XCTAssertTrue(savedTip.waitForExistence(timeout: 2))
+        savedTip.tap()
+
+        XCTAssertTrue(app.staticTexts["Tax"].waitForExistence(timeout: 2))
+        XCTAssertTrue(app.otherElements["Receipt Note"].exists)
     }
 
     func test_savedSearch_shouldFilterByName() {
@@ -397,14 +427,8 @@ final class TippyUITests: XCTestCase {
         enterBillAmount("25", in: app)
         app.buttons["20%"].tap()
         app.buttons["Increase People"].tap()
-        app.buttons["Save Tip Calculation"].tap()
-        app.alerts["Save Tip Calculation"].scrollViews.otherElements.textFields["Enter Name"].typeText("Reuse Dinner")
-        app.alerts["Save Tip Calculation"].scrollViews.otherElements.buttons["OK"].tap()
-
-        let savedAlert = app.alerts["Saved"]
-        if savedAlert.waitForExistence(timeout: 2) {
-            savedAlert.buttons["OK"].tap()
-        }
+        saveCurrentTip(named: "Reuse Dinner", in: app)
+        _ = app.staticTexts.matching(NSPredicate(format: "label CONTAINS 'saved'")).firstMatch.waitForExistence(timeout: 3)
 
         app.tabBars["Tab Bar"].buttons["Saved"].tap()
         app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Reuse Dinner")).firstMatch.tap()
@@ -430,14 +454,8 @@ final class TippyUITests: XCTestCase {
         app.buttons["Copy Per Person"].tap()
         XCTAssertTrue(app.staticTexts["Copied Confirmation"].waitForExistence(timeout: 2))
 
-        app.buttons["Save Tip Calculation"].tap()
-        app.alerts["Save Tip Calculation"].scrollViews.otherElements.textFields["Enter Name"].typeText("E2E Dinner")
-        app.alerts["Save Tip Calculation"].scrollViews.otherElements.buttons["OK"].tap()
-
-        let savedAlert = app.alerts["Saved"]
-        if savedAlert.waitForExistence(timeout: 2) {
-            savedAlert.buttons["OK"].tap()
-        }
+        saveCurrentTip(named: "E2E Dinner", in: app)
+        _ = app.staticTexts.matching(NSPredicate(format: "label CONTAINS 'saved'")).firstMatch.waitForExistence(timeout: 3)
 
         app.tabBars["Tab Bar"].buttons["Saved"].tap()
         let savedTip = app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "E2E Dinner")).firstMatch
@@ -465,14 +483,37 @@ final class TippyUITests: XCTestCase {
     private func saveTip(named name: String, in app: XCUIApplication) {
         app.tabBars["Tab Bar"].buttons["Calculate"].tap()
         enterBillAmount("25", in: app)
-        app.buttons["Save Tip Calculation"].tap()
-        app.alerts["Save Tip Calculation"].scrollViews.otherElements.textFields["Enter Name"].typeText(name)
-        app.alerts["Save Tip Calculation"].scrollViews.otherElements.buttons["OK"].tap()
+        saveCurrentTip(named: name, in: app)
+        _ = app.staticTexts.matching(NSPredicate(format: "label CONTAINS 'saved'")).firstMatch.waitForExistence(timeout: 3)
+    }
 
-        let savedAlert = app.alerts["Saved"]
-        if savedAlert.waitForExistence(timeout: 2) {
-            savedAlert.buttons["OK"].tap()
+    private func saveCurrentTip(named name: String, in app: XCUIApplication) {
+        app.buttons["Save Tip Calculation"].tap()
+        XCTAssertTrue(app.navigationBars["Save Tip"].waitForExistence(timeout: 2))
+        let nameField = app.textFields["Enter Tip Calculation Name"]
+        nameField.tap()
+        nameField.typeText(name)
+        app.buttons["Save"].tap()
+    }
+
+    private func enterTaxAmount(_ amount: String, in app: XCUIApplication) {
+        let toggle = app.buttons["Tax Details Toggle"]
+        XCTAssertTrue(toggle.waitForExistence(timeout: 2))
+        if !toggle.isHittable {
+            app.scrollViews.firstMatch.swipeDown()
         }
+        toggle.tap()
+        let taxField = app.textFields["Optional Tax Amount"]
+        XCTAssertTrue(taxField.waitForExistence(timeout: 2))
+        taxField.tap()
+        taxField.typeText(amount)
+        app.toolbars["Toolbar"].buttons["Done"].tap()
+    }
+
+    private func selectSavedTab(in app: XCUIApplication) {
+        let tabBar = app.tabBars["Tab Bar"].exists ? app.tabBars["Tab Bar"] : app.tabBars.firstMatch
+        XCTAssertTrue(tabBar.waitForExistence(timeout: 2))
+        tabBar.coordinate(withNormalizedOffset: CGVector(dx: 0.75, dy: 0.5)).tap()
     }
 
     private func launchIsolatedUITestApp() -> XCUIApplication {
@@ -480,6 +521,7 @@ final class TippyUITests: XCTestCase {
         app.launchArguments += ["-ui-testing"]
         app.launchArguments += ["-AppleLanguages", "(en-US)"]
         app.launchArguments += ["-AppleLocale", "\"en-US\""]
+        app.terminate()
         app.launch()
         return app
     }
