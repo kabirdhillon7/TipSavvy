@@ -27,7 +27,7 @@ final class AppStoreScreenshotTests: XCTestCase {
 
     func test01CalculatorReadyToSplit() throws {
         enterBillAmount("86.40")
-        app.buttons["20%"].tap()
+        tapTipOption("20%")
         app.buttons["Increase People"].tap()
         app.buttons["Increase People"].tap()
         app.buttons["Person Up"].tap()
@@ -84,6 +84,20 @@ final class AppStoreScreenshotTests: XCTestCase {
         if doneButton.waitForExistence(timeout: 2) {
             doneButton.tap()
         }
+    }
+
+    private func tapTipOption(_ percent: String) {
+        let exactButton = app.buttons[percent]
+        if exactButton.waitForExistence(timeout: 1) {
+            exactButton.tap()
+            return
+        }
+
+        let enrichedLabelButton = app.buttons
+            .matching(NSPredicate(format: "label BEGINSWITH %@", "\(percent),"))
+            .firstMatch
+        XCTAssertTrue(enrichedLabelButton.waitForExistence(timeout: 2))
+        enrichedLabelButton.tap()
     }
 
     private func selectTab(_ label: String) {
