@@ -5,6 +5,7 @@
 //  Created by Kabir Dhillon on 6/8/23.
 //
 
+import Charts
 import SwiftUI
 
 /// A view that displays a list of saved tip calculations, or a message indicating that there are no saved tip calculations.
@@ -210,12 +211,12 @@ struct SavedView: View {
 
             ViewThatFits(in: .horizontal) {
                 HStack(alignment: .top, spacing: 12) {
-                    MetricCard(title: String(localized: "Spent This Month"), value: savedInsights.currentMonthTotalWithTip.formatted(.currency(code: localCurrency)), prominence: .primary)
+                    MetricCard(title: String(localized: "Spent This Month"), value: savedInsights.currentMonthTotalWithTip.formatted(.currency(code: localCurrency)), prominence: .primary, accentColor: settings.selectedTheme.accentColor)
                     MetricCard(title: String(localized: "Tips This Month"), value: savedInsights.currentMonthTipTotal.formatted(.currency(code: localCurrency)))
                 }
 
                 VStack(spacing: 12) {
-                    MetricCard(title: String(localized: "Spent This Month"), value: savedInsights.currentMonthTotalWithTip.formatted(.currency(code: localCurrency)), prominence: .primary)
+                    MetricCard(title: String(localized: "Spent This Month"), value: savedInsights.currentMonthTotalWithTip.formatted(.currency(code: localCurrency)), prominence: .primary, accentColor: settings.selectedTheme.accentColor)
                     MetricCard(title: String(localized: "Tips This Month"), value: savedInsights.currentMonthTipTotal.formatted(.currency(code: localCurrency)))
                 }
             }
@@ -351,11 +352,11 @@ struct SavedView: View {
             .foregroundStyle(.secondary)
 
             HStack(spacing: 8) {
-                Label("\(Int(tip.tipPercentage))%", systemImage: "percent")
+                tipPercentageBadge(for: tip)
                 Label("\(tip.numberOfPeople)", systemImage: "person.2")
+                    .font(.caption.weight(.medium))
+                    .foregroundStyle(.secondary)
             }
-            .font(.caption.weight(.medium))
-            .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(18)
@@ -421,6 +422,21 @@ struct SavedView: View {
         }
         .buttonStyle(.borderedProminent)
         .accessibilityIdentifier("Clear Saved Tip Filters")
+    }
+
+    private func tipPercentageBadge(for tip: SavedTip) -> some View {
+        let percentage = tip.tipPercentage
+        let color: Color = percentage >= 25 ? .orange : percentage >= 15 ? settings.selectedTheme.accentColor : .secondary
+        return Label("\(Int(percentage))%", systemImage: "percent")
+            .font(.caption.weight(.semibold))
+            .foregroundStyle(color)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .background(color.opacity(0.12), in: Capsule())
+            .overlay {
+                Capsule()
+                    .strokeBorder(color.opacity(0.25), lineWidth: 1)
+            }
     }
 
     private func savedTipName(for tip: SavedTip) -> some View {
@@ -495,6 +511,7 @@ struct SavedView: View {
 
 struct SavedInsightsDetailView: View {
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject var settings: TipSavvySettings
 
     let insights: SavedTipInsights
     let currencyCode: String
@@ -506,6 +523,7 @@ struct SavedInsightsDetailView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 18) {
+                    spendingChartSection
                     thisMonthSection
                     allTimeSection
                     highlightsSection
@@ -526,6 +544,49 @@ struct SavedInsightsDetailView: View {
             }
         }
         .accessibilityIdentifier("Saved Insights Detail")
+    }
+
+    private var spendingChartSection: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            sectionHeader(String(localized: "Monthly Spending"), systemImage: "chart.bar.fill")
+
+            if insights.monthlySpending.allSatisfy({ $0.totalSpent == 0 }) {
+                Label(String(localized: "Save tips to see your spending history."), systemImage: "chart.bar")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            } else {
+                let accentColor = settings.selectedTheme.accentColor
+                Chart(insights.monthlySpending) { entry in
+                    BarMark(
+                        x: .value(String(localized: "Month"), entry.month, unit: .month),
+                        y: .value(String(localized: "Spent"), entry.totalSpent)
+                    )
+                    .foregroundStyle(accentColor.gradient)
+                    .cornerRadius(6)
+                }
+                .chartXAxis {
+                    AxisMarks(values: .stride(by: .month)) { _ in
+                        AxisValueLabel(format: .dateTime.month(.abbreviated))
+                    }
+                }
+                .chartYAxis {
+                    AxisMarks { value in
+                        AxisGridLine()
+                        AxisValueLabel {
+                            if let amount = value.as(Double.self) {
+                                Text(amount, format: .currency(code: currencyCode).precision(.fractionLength(0)))
+                                    .font(.caption2)
+                            }
+                        }
+                    }
+                }
+                .frame(height: 160)
+                .accessibilityLabel(String(localized: "Monthly spending chart"))
+            }
+        }
+        .padding(18)
+        .glassPanel(cornerRadius: 22)
+        .accessibilityIdentifier("Saved Insights Spending Chart")
     }
 
     private var thisMonthSection: some View {
@@ -636,6 +697,12 @@ struct SavedInsightsDetailView: View {
     }
 }
 
+struct MonthlySpending: Identifiable, Equatable {
+    let id = UUID()
+    let month: Date
+    let totalSpent: Double
+}
+
 struct SavedTipInsights: Equatable {
     let currentMonthTotalWithTip: Double
     let currentMonthTipTotal: Double
@@ -658,6 +725,7 @@ struct SavedTipInsights: Equatable {
     let mostRecentSavedTipDate: Date?
     let recentActivitySummary: String
     let hasCurrentMonthTips: Bool
+    let monthlySpending: [MonthlySpending]
 
     init(tips: [SavedTip], now: Date = Date(), calendar: Calendar = .current) {
         let monthInterval = calendar.dateInterval(of: .month, for: now)
@@ -707,6 +775,15 @@ struct SavedTipInsights: Equatable {
         mostRecentSavedTipDate = mostRecentTip?.1
         recentActivitySummary = Self.recentActivitySummary(for: tips, now: now, calendar: calendar)
         hasCurrentMonthTips = !currentMonthTips.isEmpty
+        monthlySpending = (0..<6).reversed().compactMap { offset -> MonthlySpending? in
+            guard let monthStart = calendar.date(byAdding: .month, value: -offset, to: now),
+                  let interval = calendar.dateInterval(of: .month, for: monthStart) else { return nil }
+            let monthTips = tips.filter { tip in
+                guard let date = tip.date else { return false }
+                return interval.contains(date)
+            }
+            return MonthlySpending(month: interval.start, totalSpent: monthTips.reduce(0) { $0 + $1.totalAmountWithTip })
+        }
     }
 
     private static func mostCommonSplitCount(in tips: [SavedTip]) -> Int {

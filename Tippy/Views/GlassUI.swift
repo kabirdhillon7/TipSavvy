@@ -147,6 +147,7 @@ struct MetricCard: View {
     let title: String
     let value: String
     var prominence: Prominence = .regular
+    var accentColor: Color? = nil
 
     enum Prominence: Equatable {
         case regular
@@ -168,6 +169,17 @@ struct MetricCard: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(14)
         .glassPanel(cornerRadius: 16)
+        .overlay {
+            if prominence == .primary, let accentColor {
+                LinearGradient(
+                    colors: [accentColor.opacity(0.10), accentColor.opacity(0.02)],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .allowsHitTesting(false)
+            }
+        }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(title)
         .accessibilityValue(value)

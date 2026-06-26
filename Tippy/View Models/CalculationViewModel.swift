@@ -356,6 +356,11 @@ final class CalculationViewModel: ObservableObject  {
         hasValidCalculation && !tipItemName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
+    var suggestedTipName: String {
+        let dateString = Date().formatted(.dateTime.month(.abbreviated).day())
+        return "\(serviceContext.label), \(dateString)"
+    }
+
     var billValidationMessage: String? {
         guard let billAmount else {
             return String(localized: "Enter a bill amount to calculate totals.")

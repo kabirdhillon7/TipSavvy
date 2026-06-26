@@ -7,6 +7,7 @@
 
 import SwiftUI
 import UIKit
+import VisionKit
 
 /// A view that calculates a tip calculation.
 struct CalculationView: View {
@@ -18,6 +19,7 @@ struct CalculationView: View {
     @StateObject private var viewModel: CalculationViewModel
 
     @State private var showingSaveSheet = false
+    @State private var showingReceiptScanner = false
     @State private var successMessage: String?
     @State private var dataErrorMessage: String?
     @State private var copiedValueLabel: String?
@@ -62,6 +64,33 @@ struct CalculationView: View {
                     .presentationDetents([.medium])
                     .presentationDragIndicator(.visible)
             }
+            .sheet(isPresented: $showingReceiptScanner) {
+                ZStack(alignment: .topTrailing) {
+                    ReceiptScannerView { amount in
+                        viewModel.billAmount = amount
+                        showingReceiptScanner = false
+                        HapticFeedbackPerformer.success(isEnabled: settings.hapticsEnabled)
+                        successMessage = String(localized: "Bill amount scanned")
+                        Task {
+                            try? await Task.sleep(for: .seconds(2.5))
+                            await MainActor.run { successMessage = nil }
+                        }
+                    }
+
+                    Button {
+                        showingReceiptScanner = false
+                    } label: {
+                        Image(systemName: "xmark")
+                            .font(.title2.weight(.semibold))
+                            .foregroundStyle(.white)
+                            .frame(width: 44, height: 44)
+                            .background(.ultraThinMaterial, in: Circle())
+                    }
+                    .padding(.top, 16)
+                    .padding(.trailing, 16)
+                    .accessibilityLabel(String(localized: "Close Scanner"))
+                }
+            }
             .onChange(of: viewModel.numberOfPeople, perform: { _ in
                 viewModel.persistSmartDefaults()
             })
@@ -97,14 +126,30 @@ struct CalculationView: View {
                 .font(.headline)
                 .foregroundStyle(.secondary)
 
-            TextField(String(localized: "Enter Bill Amount"),
-                      value: $viewModel.billAmount,
-                      format: .currency(code: localCurrency))
-                .font(.largeTitle.weight(.bold).monospacedDigit())
-                .keyboardType(.decimalPad)
-                .focused($keyboardFocusField, equals: .billAmount)
-                .textFieldStyle(.plain)
-                .accessibilityLabel(String(localized: "Enter Bill Amount"))
+            HStack(alignment: .center, spacing: 12) {
+                TextField(String(localized: "Enter Bill Amount"),
+                          value: $viewModel.billAmount,
+                          format: .currency(code: localCurrency))
+                    .font(.largeTitle.weight(.bold).monospacedDigit())
+                    .keyboardType(.decimalPad)
+                    .focused($keyboardFocusField, equals: .billAmount)
+                    .textFieldStyle(.plain)
+                    .accessibilityLabel(String(localized: "Enter Bill Amount"))
+
+                if DataScannerViewController.isSupported {
+                    Button {
+                        keyboardFocusField = nil
+                        showingReceiptScanner = true
+                    } label: {
+                        Image(systemName: "camera.viewfinder")
+                            .font(.title2.weight(.medium))
+                            .foregroundStyle(settings.selectedTheme.accentColor)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(String(localized: "Scan Receipt"))
+                    .accessibilityHint(String(localized: "Opens camera to scan a receipt total"))
+                }
+            }
 
             if let message = viewModel.billValidationMessage, viewModel.billAmount != nil {
                 Label(message, systemImage: "exclamationmark.circle")
@@ -529,12 +574,12 @@ struct CalculationView: View {
 
             ViewThatFits(in: .horizontal) {
                 HStack(alignment: .top, spacing: 12) {
-                    MetricCard(title: String(localized: "Total Per Person"), value: viewModel.totalPerPerson.formatted(.currency(code: localCurrency)), prominence: .primary)
+                    MetricCard(title: String(localized: "Total Per Person"), value: viewModel.totalPerPerson.formatted(.currency(code: localCurrency)), prominence: .primary, accentColor: settings.selectedTheme.accentColor)
                     MetricCard(title: String(localized: "Total With Tip"), value: viewModel.totalAmountWithTip.formatted(.currency(code: localCurrency)))
                 }
 
                 VStack(spacing: 12) {
-                    MetricCard(title: String(localized: "Total Per Person"), value: viewModel.totalPerPerson.formatted(.currency(code: localCurrency)), prominence: .primary)
+                    MetricCard(title: String(localized: "Total Per Person"), value: viewModel.totalPerPerson.formatted(.currency(code: localCurrency)), prominence: .primary, accentColor: settings.selectedTheme.accentColor)
                     MetricCard(title: String(localized: "Total With Tip"), value: viewModel.totalAmountWithTip.formatted(.currency(code: localCurrency)))
                 }
             }
@@ -686,6 +731,11 @@ struct CalculationView: View {
                     }
                     .disabled(!viewModel.canSaveTip)
                 }
+            }
+        }
+        .onAppear {
+            if viewModel.tipItemName.isEmpty {
+                viewModel.tipItemName = viewModel.suggestedTipName
             }
         }
     }

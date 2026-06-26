@@ -102,6 +102,7 @@ struct TipSavvyApp: App {
                         }
                         .tag(TipSavvyTab.saved)
                         .environmentObject(manager)
+                        .environmentObject(settings)
 
                     SettingsView()
                         .tabItem {
