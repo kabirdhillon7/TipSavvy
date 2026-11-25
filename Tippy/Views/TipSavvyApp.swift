@@ -6,42 +6,15 @@
 //
 
 import SwiftUI
-import FirebaseCore
-import FirebaseCrashlytics
-
-class AppDelegate: NSObject, UIApplicationDelegate {
-    func application(_ application: UIApplication,
-                     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
-        if canConfigureFirebase {
-            if FirebaseApp.app() == nil {
-                FirebaseApp.configure()
-            }
-            Crashlytics.crashlytics().setCrashlyticsCollectionEnabled(true)
-        }
-        return true
-    }
-
-    private var canConfigureFirebase: Bool {
-        guard
-            let url = Bundle.main.url(forResource: "GoogleService-Info", withExtension: "plist"),
-            let config = NSDictionary(contentsOf: url) as? [String: Any],
-            let apiKey = config["API_KEY"] as? String,
-            let googleAppID = config["GOOGLE_APP_ID"] as? String
-        else {
-            return false
-        }
-
-        return !apiKey.hasPrefix("REPLACE_WITH") && !googleAppID.hasPrefix("REPLACE_WITH")
-    }
-}
 
 @main
 struct TipSavvyApp: App {
-    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @StateObject private var manager: DataManager
     @StateObject private var settings: TipSavvySettings
     @StateObject private var calculationViewModel: CalculationViewModel
     @State private var selectedTab: TipSavvyTab
+    /// One store for settings and `@AppStorage`, so UI tests get fully isolated state.
+    private let defaults: UserDefaults
 
     init() {
         let arguments = ProcessInfo.processInfo.arguments
@@ -54,7 +27,7 @@ struct TipSavvyApp: App {
         let defaults = arguments.contains("-ui-testing")
         ? UserDefaults(suiteName: "TipSavvyUITests") ?? .standard
         : .standard
-        if arguments.contains("-ui-testing") {
+        if arguments.contains("-ui-testing") && !arguments.contains("-ui-testing-keep-defaults") {
             defaults.removePersistentDomain(forName: "TipSavvyUITests")
         }
 
@@ -71,6 +44,7 @@ struct TipSavvyApp: App {
         _settings = StateObject(wrappedValue: appSettings)
         _calculationViewModel = StateObject(wrappedValue: calculatorViewModel)
         _selectedTab = State(initialValue: Self.initialTab(for: arguments))
+        self.defaults = defaults
     }
     
     var body: some Scene {
@@ -91,10 +65,12 @@ struct TipSavvyApp: App {
                         .environmentObject(manager)
                         .environmentObject(settings)
                     
-                    SavedView { tip in
+                    SavedView(onUseAgain: { tip in
                         calculationViewModel.applySavedTip(tip)
                         selectedTab = .calculate
-                    }
+                    }, onStartCalculation: {
+                        selectedTab = .calculate
+                    })
                         .tabItem {
                             Label(String(localized: "Saved"), systemImage: "bookmark")
                                 .accessibilityLabel(String(localized: "Saved"))
@@ -114,8 +90,10 @@ struct TipSavvyApp: App {
                         .environmentObject(settings)
                 }
                 .tint(settings.selectedTheme.accentColor)
+                .modifier(TabBarMinimizeOnScroll())
             }
         }
+        .defaultAppStorage(defaults)
     }
 
     private static func appStoreScreenshotMode(in arguments: [String]) -> String? {
@@ -135,6 +113,22 @@ struct TipSavvyApp: App {
         default:
             return .calculate
         }
+    }
+}
+
+/// Lets the tab bar shrink while scrolling on iOS 26, giving content more room.
+private struct TabBarMinimizeOnScroll: ViewModifier {
+    @ViewBuilder
+    func body(content: Content) -> some View {
+#if compiler(>=6.2)
+        if #available(iOS 26.0, *) {
+            content.tabBarMinimizeBehavior(.onScrollDown)
+        } else {
+            content
+        }
+#else
+        content
+#endif
     }
 }
 

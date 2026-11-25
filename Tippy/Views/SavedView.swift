@@ -5,6 +5,7 @@
 //  Created by Kabir Dhillon on 6/8/23.
 //
 
+import Accessibility
 import Charts
 import SwiftUI
 
@@ -14,15 +15,15 @@ struct SavedView: View {
     @EnvironmentObject var settings: TipSavvySettings
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     let onUseAgain: (SavedTip) -> Void
+    let onStartCalculation: () -> Void
 
     @State private var searchText = ""
     @State private var renameText = ""
     @State private var tipBeingRenamed: SavedTip?
-    @State private var tipPendingDelete: SavedTip?
+    @State private var recentlyDeleted: SavedTipRecord?
     @State private var selectedTip: SavedTip?
     @State private var showingSavedInsightsDetails = false
     @State private var showingRenameAlert = false
-    @State private var showingDeleteConfirmation = false
     @State private var dataErrorMessage: String?
     @AppStorage(SavedTipListPreferenceKey.sortMode) private var sortModeRawValue = SavedTipSortMode.newest.rawValue
     @AppStorage(SavedTipListPreferenceKey.filterMode) private var filterModeRawValue = SavedTipFilterMode.all.rawValue
@@ -30,8 +31,10 @@ struct SavedView: View {
     private let dateFormatMMDDYYYY = Date.FormatStyle.dateTime.month().day().year()
     private let localCurrency = Locale.current.currency?.identifier ?? "USD"
 
-    init(onUseAgain: @escaping (SavedTip) -> Void = { _ in }) {
+    init(onUseAgain: @escaping (SavedTip) -> Void = { _ in },
+         onStartCalculation: @escaping () -> Void = {}) {
         self.onUseAgain = onUseAgain
+        self.onStartCalculation = onStartCalculation
     }
 
     private var sortMode: SavedTipSortMode {
@@ -65,7 +68,9 @@ struct SavedView: View {
     private var filteredTips: [SavedTip] {
         let trimmedSearch = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
         let filtered = dataManager.savedTips.filter { tip in
-            let matchesSearch = trimmedSearch.isEmpty || (tip.name ?? "").localizedCaseInsensitiveContains(trimmedSearch)
+            let matchesSearch = trimmedSearch.isEmpty
+                || (tip.name ?? "").localizedCaseInsensitiveContains(trimmedSearch)
+                || (tip.note ?? "").localizedCaseInsensitiveContains(trimmedSearch)
             return matchesSearch && filterMode.includes(tip)
         }
 
@@ -78,26 +83,37 @@ struct SavedView: View {
                 if dataManager.savedTips.isEmpty {
                     emptyState(title: String(localized: "No Saved Tips"), systemImage: "percent")
                 } else {
-                    VStack(spacing: 0) {
-                        activeControlsSummary
-                        savedCards
-                    }
+                    savedList
                 }
             }
             .navigationTitle(String(localized: "Saved Tips"))
-            .searchable(text: $searchText, prompt: String(localized: "Search Saved Tips"))
+            .searchable(text: $searchText,
+                        placement: .navigationBarDrawer(displayMode: .always),
+                        prompt: String(localized: "Search Names and Notes"))
             .toolbar {
-                ToolbarItemGroup(placement: .navigationBarTrailing) {
-                    sortMenu
-                    filterMenu
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    listOptionsMenu
                 }
             }
-            .toastOverlay(isPresented: dataErrorMessage != nil) {
+            .toastOverlay(isPresented: dataErrorMessage != nil || recentlyDeleted != nil) {
                 if let dataErrorMessage {
                     TipSavvyErrorBanner(message: dataErrorMessage) {
                         self.dataErrorMessage = nil
                         dataManager.lastError = nil
                     }
+                } else if let recentlyDeleted {
+                    TipSavvyUndoBanner(message: String(localized: "Deleted \(recentlyDeleted.name)")) {
+                        undoDelete(recentlyDeleted)
+                    }
+                }
+            }
+            .task(id: recentlyDeleted) {
+                guard let record = recentlyDeleted else {
+                    return
+                }
+                try? await Task.sleep(for: .seconds(8))
+                if recentlyDeleted == record {
+                    recentlyDeleted = nil
                 }
             }
         }
@@ -128,242 +144,205 @@ struct SavedView: View {
             }
             .accessibilityLabel(String(localized: "Cancel"))
         })
-        .confirmationDialog(String(localized: "Delete Saved Tip"), isPresented: $showingDeleteConfirmation, titleVisibility: .visible) {
-            Button(String(localized: "Delete"), role: .destructive) {
-                if let tipPendingDelete {
-                    deleteTip(tipPendingDelete)
-                }
-                tipPendingDelete = nil
-            }
-
-            Button(String(localized: "Cancel"), role: .cancel) {
-                tipPendingDelete = nil
-            }
-        } message: {
-            Text(String(localized: "This saved tip will be permanently deleted."))
-        }
         .onChange(of: dataManager.lastError) { error in
             dataErrorMessage = error?.localizedDescription
         }
     }
 
-    private var sortMenu: some View {
+    private var isShowingDefaultListOptions: Bool {
+        sortMode == .newest && filterMode == .all
+    }
+
+    /// Sort and filter in one menu, as Mail and Files do. The icon fills when the list
+    /// is not in its default order and scope, so the state stays visible.
+    private var listOptionsMenu: some View {
         Menu {
-            Picker(String(localized: "Sort Saved Tips"), selection: sortModeBinding) {
-                ForEach(SavedTipSortMode.allCases) { mode in
-                    Label(mode.title, systemImage: mode.systemImage).tag(mode)
+            Section(String(localized: "Sort By")) {
+                Picker(String(localized: "Sort Saved Tips"), selection: sortModeBinding) {
+                    ForEach(SavedTipSortMode.allCases) { mode in
+                        Label(mode.title, systemImage: mode.systemImage).tag(mode)
+                    }
+                }
+            }
+            Section(String(localized: "Show")) {
+                Picker(String(localized: "Filter Saved Tips"), selection: filterModeBinding) {
+                    ForEach(SavedTipFilterMode.allCases) { mode in
+                        Label(mode.title, systemImage: mode.systemImage).tag(mode)
+                    }
                 }
             }
         } label: {
-            Image(systemName: "arrow.up.arrow.down")
-                .accessibilityLabel(String(localized: "Sort Saved Tips"))
+            Image(systemName: isShowingDefaultListOptions ? "line.3.horizontal.decrease.circle" : "line.3.horizontal.decrease.circle.fill")
+                .accessibilityLabel(String(localized: "Sort and Filter"))
         }
-        .accessibilityIdentifier("Saved Tips Sort")
+        .accessibilityValue(isShowingDefaultListOptions ? "" : "\(sortMode.title), \(filterMode.title)")
+        .accessibilityIdentifier("Saved Tips Options")
     }
 
-    private var filterMenu: some View {
-        Menu {
-            Picker(String(localized: "Filter Saved Tips"), selection: filterModeBinding) {
-                ForEach(SavedTipFilterMode.allCases) { mode in
-                    Label(mode.title, systemImage: mode.systemImage).tag(mode)
-                }
-            }
-        } label: {
-            Image(systemName: filterMode == .all ? "line.3.horizontal.decrease.circle" : "line.3.horizontal.decrease.circle.fill")
-                .accessibilityLabel(String(localized: "Filter Saved Tips"))
-        }
-        .accessibilityIdentifier("Saved Tips Filter")
-    }
-
+    /// This month's figure with a six-month sparkline beside it, so the number has context.
     private var savedInsightsButton: some View {
         Button {
             showingSavedInsightsDetails = true
         } label: {
-            savedInsightsPanel
+            HStack(alignment: .center, spacing: 14) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(String(localized: "Spent This Month"))
+                        .font(.subheadline.weight(.medium))
+                        .foregroundStyle(Color.secondary)
+                    Text(savedInsights.currentMonthTotalWithTip, format: .currency(code: localCurrency))
+                        .font(.title.weight(.bold).monospacedDigit())
+                        .foregroundStyle(settings.selectedTheme.accentColor)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                    Text(String(localized: "\(savedInsights.currentMonthTipTotal.formatted(.currency(code: localCurrency))) in tips"))
+                        .font(.caption)
+                        .foregroundStyle(Color.secondary)
+                        .monospacedDigit()
+                }
+
+                Spacer(minLength: 8)
+
+                SpendingSparkline(entries: savedInsights.monthlySpending, accentColor: settings.selectedTheme.accentColor)
+                    .frame(width: 84, height: 40)
+
+                Image(systemName: "chevron.right")
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(Color(.tertiaryLabel))
+            }
+            .padding(.vertical, 4)
+            .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(String(localized: "Spent This Month"))
+        .accessibilityValue(String(localized: "\(savedInsights.currentMonthTotalWithTip.formatted(.currency(code: localCurrency))), \(savedInsights.currentMonthTipTotal.formatted(.currency(code: localCurrency))) in tips"))
         .accessibilityHint(String(localized: "Shows detailed saved insights."))
+        .accessibilityAddTraits(.isButton)
         .accessibilityIdentifier("Saved Insights")
     }
 
-    private var savedInsightsPanel: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            ViewThatFits(in: .horizontal) {
-                HStack(alignment: .firstTextBaseline) {
-                    Label(String(localized: "Saved Insights"), systemImage: "chart.bar.xaxis")
-                        .font(.headline)
-                        .foregroundStyle(.secondary)
-                    Spacer(minLength: 12)
-                    Text(String(localized: "This Month"))
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(.secondary)
-                }
-
-                VStack(alignment: .leading, spacing: 4) {
-                    Label(String(localized: "Saved Insights"), systemImage: "chart.bar.xaxis")
-                        .font(.headline)
-                        .foregroundStyle(.secondary)
-                    Text(String(localized: "This Month"))
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(.secondary)
-                }
-            }
-
-            ViewThatFits(in: .horizontal) {
-                HStack(alignment: .top, spacing: 12) {
-                    MetricCard(title: String(localized: "Spent This Month"), value: savedInsights.currentMonthTotalWithTip.formatted(.currency(code: localCurrency)), prominence: .primary, accentColor: settings.selectedTheme.accentColor)
-                    MetricCard(title: String(localized: "Tips This Month"), value: savedInsights.currentMonthTipTotal.formatted(.currency(code: localCurrency)))
-                }
-
-                VStack(spacing: 12) {
-                    MetricCard(title: String(localized: "Spent This Month"), value: savedInsights.currentMonthTotalWithTip.formatted(.currency(code: localCurrency)), prominence: .primary, accentColor: settings.selectedTheme.accentColor)
-                    MetricCard(title: String(localized: "Tips This Month"), value: savedInsights.currentMonthTipTotal.formatted(.currency(code: localCurrency)))
-                }
-            }
-
-            Divider()
-
-            InfoRow(title: String(localized: "Saved Tips"), value: "\(savedInsights.allTimeSavedTipCount)")
-        }
-        .padding(18)
-        .glassPanel(cornerRadius: 22, interactive: true)
-        .accessibilityElement(children: .contain)
-    }
-
-    private var activeControlsSummary: some View {
-        HStack(spacing: 8) {
-            Label(sortMode.title, systemImage: sortMode.systemImage)
-            Label(filterMode.title, systemImage: filterMode.systemImage)
-            Spacer(minLength: 8)
-            Text("\(filteredTips.count)")
-                .font(.caption.weight(.semibold).monospacedDigit())
-                .foregroundStyle(.secondary)
-                .accessibilityLabel(String(localized: "Visible Saved Tips"))
-                .accessibilityValue("\(filteredTips.count)")
-        }
-        .font(.caption.weight(.medium))
-        .foregroundStyle(.secondary)
-        .padding(.horizontal, 18)
-        .padding(.top, 10)
-        .padding(.bottom, 2)
-        .background(Color(.systemGroupedBackground))
-        .accessibilityElement(children: .combine)
-        .accessibilityIdentifier("Saved Tips Controls Summary")
-    }
-
-    private var savedCards: some View {
-        ScrollView {
-            VStack(spacing: 14) {
+    private var savedList: some View {
+        List {
+            Section {
                 savedInsightsButton
+            }
 
+            Section {
                 if filteredTips.isEmpty {
-                    emptyState(title: String(localized: "No Matching Tips"), systemImage: "magnifyingglass")
-                        .frame(minHeight: 320)
+                    noMatchesRow
+                        .listRowBackground(Color.clear)
                 } else {
-                    savedTipList
+                    ForEach(filteredTips) { tip in
+                        savedTipRow(for: tip)
+                    }
+                }
+            } footer: {
+                if hasActiveFiltering && !filteredTips.isEmpty {
+                    Text(filteredTips.count == 1 ? String(localized: "1 matching tip") : String(localized: "\(filteredTips.count) matching tips"))
+                        .accessibilityIdentifier("Visible Saved Tips")
                 }
             }
-            .padding(.horizontal, 18)
-            .padding(.top, 12)
-            .padding(.bottom, 28)
         }
-        .background(Color(.systemGroupedBackground))
+        .listStyle(.insetGrouped)
         .animation(reduceMotion ? nil : .easeInOut(duration: 0.22), value: filteredTips.map(\.objectID))
         .animation(reduceMotion ? nil : .easeInOut(duration: 0.18), value: searchText)
     }
 
-    private var savedTipList: some View {
-        LazyVStack(spacing: 14) {
-            ForEach(filteredTips) { tip in
-                Button {
-                    selectedTip = tip
-                } label: {
-                    savedTipCard(for: tip)
-                }
-                .buttonStyle(.plain)
-                .contextMenu {
-                    Button {
-                        startRename(for: tip)
-                    } label: {
-                        Label(String(localized: "Rename"), systemImage: "pencil")
-                    }
+    private func savedTipRow(for tip: SavedTip) -> some View {
+        Button {
+            selectedTip = tip
+        } label: {
+            savedTipCard(for: tip)
+        }
+        .contextMenu {
+            Button {
+                useAgain(tip)
+            } label: {
+                Label(String(localized: "Use Again"), systemImage: "arrow.counterclockwise")
+            }
 
-                    Button(role: .destructive) {
-                        requestDelete(tip)
-                    } label: {
-                        Label(String(localized: "Delete"), systemImage: "trash")
-                    }
-                }
-                .swipeActions(edge: .leading, allowsFullSwipe: true) {
-                    Button {
-                        onUseAgain(tip)
-                        HapticFeedbackPerformer.success(isEnabled: settings.hapticsEnabled)
-                    } label: {
-                        Label(String(localized: "Use Again"), systemImage: "arrow.counterclockwise")
-                    }
-                    .tint(.teal)
-                }
-                .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                    Button(role: .destructive) {
-                        requestDelete(tip)
-                    } label: {
-                        Label(String(localized: "Delete"), systemImage: "trash")
-                    }
+            Button {
+                startRename(for: tip)
+            } label: {
+                Label(String(localized: "Rename"), systemImage: "pencil")
+            }
 
-                    Button {
-                        startRename(for: tip)
-                    } label: {
-                        Label(String(localized: "Rename"), systemImage: "pencil")
-                    }
-                    .tint(.blue)
-                }
+            Button(role: .destructive) {
+                deleteTip(tip)
+            } label: {
+                Label(String(localized: "Delete"), systemImage: "trash")
             }
         }
+        .swipeActions(edge: .leading, allowsFullSwipe: true) {
+            Button {
+                useAgain(tip)
+            } label: {
+                Label(String(localized: "Use Again"), systemImage: "arrow.counterclockwise")
+            }
+            .tint(.teal)
+        }
+        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+            Button(role: .destructive) {
+                deleteTip(tip)
+            } label: {
+                Label(String(localized: "Delete"), systemImage: "trash")
+            }
+            .tint(.red)
+
+            Button {
+                startRename(for: tip)
+            } label: {
+                Label(String(localized: "Rename"), systemImage: "pencil")
+            }
+            .tint(.blue)
+        }
+        .accessibilityAction(named: String(localized: "Use Again")) { useAgain(tip) }
+        .accessibilityAction(named: String(localized: "Rename")) { startRename(for: tip) }
+        .accessibilityAction(named: String(localized: "Delete")) { deleteTip(tip) }
     }
 
+    /// Two lines: what and how much, then when, how and per person.
     private func savedTipCard(for tip: SavedTip) -> some View {
-        VStack(alignment: .leading, spacing: 14) {
-            ViewThatFits(in: .horizontal) {
-                HStack(alignment: .firstTextBaseline) {
-                    savedTipName(for: tip)
-                    Spacer(minLength: 12)
-                    savedTipTotal(for: tip)
-                }
-
-                VStack(alignment: .leading, spacing: 4) {
-                    savedTipName(for: tip)
-                    savedTipTotal(for: tip)
-                }
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(alignment: .firstTextBaseline) {
+                Text(tip.name ?? String(localized: "Untitled Tip"))
+                    .font(.headline)
+                    .foregroundStyle(Color.primary)
+                    .lineLimit(2)
+                Spacer(minLength: 12)
+                Text(tip.totalAmountWithTip, format: .currency(code: localCurrency))
+                    .font(.headline.monospacedDigit())
+                    .foregroundStyle(Color.primary)
             }
 
-            ViewThatFits(in: .horizontal) {
-                HStack {
-                    savedTipDate(for: tip)
-                    Spacer(minLength: 12)
-                    savedTipPerPerson(for: tip)
-                }
-
-                VStack(alignment: .leading, spacing: 4) {
-                    savedTipDate(for: tip)
-                    savedTipPerPerson(for: tip)
+            HStack(alignment: .firstTextBaseline) {
+                Text(rowDetail(for: tip))
+                    .lineLimit(2)
+                Spacer(minLength: 12)
+                if tip.numberOfPeople > 1 {
+                    Text(String(localized: "\(tip.totalPerPerson.formatted(.currency(code: localCurrency))) each"))
+                        .monospacedDigit()
                 }
             }
             .font(.subheadline)
-            .foregroundStyle(.secondary)
-
-            HStack(spacing: 8) {
-                tipPercentageBadge(for: tip)
-                Label("\(tip.numberOfPeople)", systemImage: "person.2")
-                    .font(.caption.weight(.medium))
-                    .foregroundStyle(.secondary)
-            }
+            .foregroundStyle(Color.secondary)
         }
+        .padding(.vertical, 2)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(18)
-        .glassPanel(cornerRadius: 22, interactive: true)
+        .contentShape(Rectangle())
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(tip.accessibilitySummary(currencyCode: localCurrency, dateFormat: dateFormatMMDDYYYY))
         .accessibilityHint(String(localized: "Opens saved tip details"))
+    }
+
+    private func rowDetail(for tip: SavedTip) -> String {
+        var parts: [String] = []
+        if let date = tip.date {
+            let sameYear = Calendar.current.isDate(date, equalTo: Date(), toGranularity: .year)
+            parts.append(date.formatted(sameYear ? .dateTime.month(.abbreviated).day() : .dateTime.month(.abbreviated).day().year()))
+        }
+        parts.append("\(Int(tip.tipPercentage))%")
+        parts.append(tip.numberOfPeople == 1 ? String(localized: "1 person") : String(localized: "\(Int(tip.numberOfPeople)) people"))
+        return parts.joined(separator: " · ")
     }
 
     private func emptyState(title: String, systemImage: String) -> some View {
@@ -376,13 +355,15 @@ struct SavedView: View {
                 } actions: {
                     if hasActiveFiltering {
                         clearFiltersButton
+                    } else if dataManager.savedTips.isEmpty {
+                        startCalculationButton
                     }
                 }
             } else {
                 VStack(spacing: 12) {
                     Image(systemName: systemImage)
                         .fontWeight(.medium)
-                        .font(.system(size: 50))
+                        .font(.largeTitle)
                         .foregroundStyle(.secondary)
 
                     Text(title)
@@ -391,6 +372,8 @@ struct SavedView: View {
 
                     if hasActiveFiltering {
                         clearFiltersButton
+                    } else if dataManager.savedTips.isEmpty {
+                        startCalculationButton
                     }
                 }
             }
@@ -399,6 +382,30 @@ struct SavedView: View {
         .background(Color(.systemGroupedBackground))
         .accessibilityLabel(title)
         .transition(reduceMotion ? .identity : .opacity.combined(with: .scale(scale: 0.98)))
+    }
+
+    /// Shown inside the list when search or filter hides every tip. A plain stack rather than
+    /// `ContentUnavailableView`, which stretches its action button inside a list cell.
+    private var noMatchesRow: some View {
+        VStack(spacing: 10) {
+            Image(systemName: "magnifyingglass")
+                .font(.largeTitle)
+                .foregroundStyle(.secondary)
+                .accessibilityHidden(true)
+            Text(String(localized: "No Matching Tips"))
+                .font(.title3.weight(.semibold))
+            Text(emptyMatchingDescription)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+            if hasActiveFiltering {
+                clearFiltersButton
+                    .padding(.top, 6)
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 40)
+        .accessibilityElement(children: .contain)
     }
 
     private var hasActiveFiltering: Bool {
@@ -418,53 +425,20 @@ struct SavedView: View {
             searchText = ""
             filterMode = .all
         } label: {
-            Label(String(localized: "Clear Filters"), systemImage: "xmark.circle")
+            Text(String(localized: "Clear Filters"))
         }
         .buttonStyle(.borderedProminent)
         .accessibilityIdentifier("Clear Saved Tip Filters")
     }
 
-    private func tipPercentageBadge(for tip: SavedTip) -> some View {
-        let percentage = tip.tipPercentage
-        let color: Color = percentage >= 25 ? .orange : percentage >= 15 ? settings.selectedTheme.accentColor : .secondary
-        return Label("\(Int(percentage))%", systemImage: "percent")
-            .font(.caption.weight(.semibold))
-            .foregroundStyle(color)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 4)
-            .background(color.opacity(0.12), in: Capsule())
-            .overlay {
-                Capsule()
-                    .strokeBorder(color.opacity(0.25), lineWidth: 1)
-            }
-    }
-
-    private func savedTipName(for tip: SavedTip) -> some View {
-        Text(tip.name ?? String(localized: "Untitled Tip"))
-            .font(.headline)
-            .foregroundStyle(.primary)
-            .lineLimit(2)
-    }
-
-    private func savedTipTotal(for tip: SavedTip) -> some View {
-        Text(tip.totalAmountWithTip, format: .currency(code: localCurrency))
-            .font(.title3.weight(.bold))
-            .foregroundStyle(.primary)
-            .monospacedDigit()
-            .animatedTextChange(value: tip.totalAmountWithTip)
-    }
-
-    @ViewBuilder
-    private func savedTipDate(for tip: SavedTip) -> some View {
-        if let date = tip.date {
-            Label(date.formatted(dateFormatMMDDYYYY), systemImage: "calendar")
+    private var startCalculationButton: some View {
+        Button {
+            onStartCalculation()
+        } label: {
+            Label(String(localized: "Start a Calculation"), systemImage: "percent")
         }
-    }
-
-    private func savedTipPerPerson(for tip: SavedTip) -> some View {
-        Label(String(localized: "Per Person") + " " + tip.totalPerPerson.formatted(.currency(code: localCurrency)), systemImage: "person")
-            .monospacedDigit()
-            .animatedTextChange(value: tip.totalPerPerson)
+        .buttonStyle(.borderedProminent)
+        .accessibilityIdentifier("Start a Calculation")
     }
 
     private func startRename(for tip: SavedTip) {
@@ -479,15 +453,30 @@ struct SavedView: View {
         }
     }
 
+    /// Deletes immediately and offers an undo, rather than asking for confirmation first.
     private func deleteTip(_ tip: SavedTip) {
+        let record = SavedTipRecord(tip)
+        var result: Result<Void, DataManagerError> = .success(())
         performAnimated(.easeInOut(duration: 0.22)) {
-            _ = dataManager.deleteTip(tip)
+            result = dataManager.deleteTip(tip)
+        }
+        if case .success = result {
+            recentlyDeleted = record
+            HapticFeedbackPerformer.warning(isEnabled: settings.hapticsEnabled)
         }
     }
 
-    private func requestDelete(_ tip: SavedTip) {
-        tipPendingDelete = tip
-        showingDeleteConfirmation = true
+    private func undoDelete(_ record: SavedTipRecord) {
+        performAnimated(.easeInOut(duration: 0.22)) {
+            _ = dataManager.restoreTip(record)
+        }
+        recentlyDeleted = nil
+        HapticFeedbackPerformer.selection(isEnabled: settings.hapticsEnabled)
+    }
+
+    private func useAgain(_ tip: SavedTip) {
+        onUseAgain(tip)
+        HapticFeedbackPerformer.success(isEnabled: settings.hapticsEnabled)
     }
 
     private func renameSavedTip() {
@@ -516,18 +505,15 @@ struct SavedInsightsDetailView: View {
     let insights: SavedTipInsights
     let currencyCode: String
 
-    private let dateFormatMMDDYYYY = Date.FormatStyle.dateTime.month().day().year()
-    private var noneYetText: String { String(localized: "None Yet") }
+    @ScaledMetric(relativeTo: .body) private var chartHeight: CGFloat = 180
 
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: 18) {
+                VStack(alignment: .leading, spacing: 16) {
                     spendingChartSection
-                    thisMonthSection
                     allTimeSection
                     highlightsSection
-                    patternsSection
                 }
                 .padding(18)
                 .padding(.bottom, 18)
@@ -537,7 +523,7 @@ struct SavedInsightsDetailView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(String(localized: "Done")) {
+                    SheetCloseButton {
                         dismiss()
                     }
                 }
@@ -546,154 +532,243 @@ struct SavedInsightsDetailView: View {
         .accessibilityIdentifier("Saved Insights Detail")
     }
 
+    /// Bars carry their own value labels, so the y-axis and gridlines are dropped.
+    /// The current month is drawn at full strength; earlier months recede. The average
+    /// is labelled on its own rule rather than in a legend.
     private var spendingChartSection: some View {
         VStack(alignment: .leading, spacing: 14) {
-            sectionHeader(String(localized: "Monthly Spending"), systemImage: "chart.bar.fill")
+            sectionHeader(String(localized: "Spending by Month"))
 
             if insights.monthlySpending.allSatisfy({ $0.totalSpent == 0 }) {
-                Label(String(localized: "Save tips to see your spending history."), systemImage: "chart.bar")
+                Text(String(localized: "Save tips to see your spending history."))
                     .font(.caption)
                     .foregroundStyle(.secondary)
             } else {
                 let accentColor = settings.selectedTheme.accentColor
-                Chart(insights.monthlySpending) { entry in
-                    BarMark(
-                        x: .value(String(localized: "Month"), entry.month, unit: .month),
-                        y: .value(String(localized: "Spent"), entry.totalSpent)
-                    )
-                    .foregroundStyle(accentColor.gradient)
-                    .cornerRadius(6)
+                let currentMonth = insights.monthlySpending.last?.month
+                let average = insights.averageMonthlySpending
+                let peak = insights.monthlySpending.map(\.totalSpent).max() ?? 0
+
+                Chart {
+                    ForEach(insights.monthlySpending) { entry in
+                        BarMark(
+                            x: .value(String(localized: "Month"), entry.month, unit: .month),
+                            y: .value(String(localized: "Spent"), entry.totalSpent),
+                            width: .ratio(0.6)
+                        )
+                        .foregroundStyle(entry.month == currentMonth ? accentColor : accentColor.opacity(0.35))
+                        .cornerRadius(2)
+                        .annotation(position: .top, spacing: 4) {
+                            if entry.totalSpent > 0 {
+                                Text(entry.totalSpent, format: .currency(code: currencyCode).precision(.fractionLength(0)))
+                                    .font(.caption2.weight(entry.month == currentMonth ? .bold : .regular).monospacedDigit())
+                                    .foregroundStyle(entry.month == currentMonth ? Color.primary : Color.secondary)
+                            }
+                        }
+                    }
+
+                    if average > 0 {
+                        RuleMark(y: .value(String(localized: "Average"), average))
+                            .foregroundStyle(Color.secondary.opacity(0.6))
+                            .lineStyle(StrokeStyle(lineWidth: 1, dash: [3, 3]))
+                            .annotation(position: .bottom, alignment: .leading, spacing: 2) {
+                                Text(String(localized: "avg \(average.formatted(.currency(code: currencyCode).precision(.fractionLength(0))))"))
+                                    .font(.caption2.monospacedDigit())
+                                    .foregroundStyle(.secondary)
+                            }
+                    }
                 }
+                .chartYScale(domain: 0...(peak * 1.18))
+                .chartYAxis(.hidden)
                 .chartXAxis {
                     AxisMarks(values: .stride(by: .month)) { _ in
                         AxisValueLabel(format: .dateTime.month(.abbreviated))
                     }
                 }
-                .chartYAxis {
-                    AxisMarks { value in
-                        AxisGridLine()
-                        AxisValueLabel {
-                            if let amount = value.as(Double.self) {
-                                Text(amount, format: .currency(code: currencyCode).precision(.fractionLength(0)))
-                                    .font(.caption2)
-                            }
-                        }
-                    }
-                }
-                .frame(height: 160)
-                .accessibilityLabel(String(localized: "Monthly spending chart"))
+                .frame(height: chartHeight)
+                .accessibilityLabel(String(localized: "Spending by month"))
+                .accessibilityChartDescriptor(MonthlySpendingChartDescriptor(entries: insights.monthlySpending, currencyCode: currencyCode))
             }
+
+            Text(thisMonthSummary)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+                .accessibilityIdentifier("Saved Insights This Month")
         }
         .padding(18)
-        .glassPanel(cornerRadius: 22)
+        .contentCard()
+        .accessibilityElement(children: .contain)
         .accessibilityIdentifier("Saved Insights Spending Chart")
     }
 
-    private var thisMonthSection: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            sectionHeader(String(localized: "This Month"), systemImage: "calendar")
-
-            ViewThatFits(in: .horizontal) {
-                HStack(alignment: .top, spacing: 12) {
-                    MetricCard(title: String(localized: "Spent This Month"), value: insights.currentMonthTotalWithTip.formatted(.currency(code: currencyCode)), prominence: .primary)
-                    MetricCard(title: String(localized: "Tips This Month"), value: insights.currentMonthTipTotal.formatted(.currency(code: currencyCode)))
-                }
-
-                VStack(spacing: 12) {
-                    MetricCard(title: String(localized: "Spent This Month"), value: insights.currentMonthTotalWithTip.formatted(.currency(code: currencyCode)), prominence: .primary)
-                    MetricCard(title: String(localized: "Tips This Month"), value: insights.currentMonthTipTotal.formatted(.currency(code: currencyCode)))
-                }
-            }
-
-            InfoRow(title: String(localized: "Saved Tips"), value: "\(insights.currentMonthSavedTipCount)")
-
-            if !insights.hasCurrentMonthTips {
-                Label(String(localized: "No saved tips from this month yet."), systemImage: "calendar.badge.clock")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
+    private var thisMonthSummary: String {
+        guard insights.hasCurrentMonthTips else {
+            return String(localized: "No saved tips from this month yet.")
         }
-        .padding(18)
-        .glassPanel(cornerRadius: 22)
-        .accessibilityIdentifier("Saved Insights This Month")
+        let count = insights.currentMonthSavedTipCount
+        let spent = insights.currentMonthTotalWithTip.formatted(.currency(code: currencyCode))
+        let tips = insights.currentMonthTipTotal.formatted(.currency(code: currencyCode))
+        return count == 1
+            ? String(localized: "This month: \(spent) across 1 saved tip, \(tips) of it in tips.")
+            : String(localized: "This month: \(spent) across \(count) saved tips, \(tips) of it in tips.")
     }
 
+    /// Totals and averages side by side, so the pairs (spent vs. tips, bill vs. tip) compare directly.
     private var allTimeSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            sectionHeader(String(localized: "All Time"), systemImage: "sum")
-            InfoRow(title: String(localized: "Total Spent"), value: insights.allTimeTotalWithTip.formatted(.currency(code: currencyCode)))
-            Divider()
-            InfoRow(title: String(localized: "Total Tips"), value: insights.allTimeTipTotal.formatted(.currency(code: currencyCode)))
-            Divider()
-            InfoRow(title: String(localized: "Average Bill"), value: insights.averageBillAmount.formatted(.currency(code: currencyCode)))
-            Divider()
-            InfoRow(title: String(localized: "Average Per Person"), value: insights.averagePerPersonTotal.formatted(.currency(code: currencyCode)))
-            Divider()
-            InfoRow(title: String(localized: "Average Tip"), value: percentageText(insights.averageTipPercentage))
-            if insights.savedTipsWithTaxCount > 0 {
-                Divider()
-                InfoRow(title: String(localized: "Average Tax"), value: insights.averageTaxAmount.formatted(.currency(code: currencyCode)))
+        VStack(alignment: .leading, spacing: 14) {
+            sectionHeader(String(localized: "All Time"))
+
+            Grid(alignment: .leading, horizontalSpacing: 16, verticalSpacing: 14) {
+                GridRow {
+                    statCell(String(localized: "Total Spent"), insights.allTimeTotalWithTip.formatted(.currency(code: currencyCode)))
+                    statCell(String(localized: "Total Tips"), insights.allTimeTipTotal.formatted(.currency(code: currencyCode)))
+                }
+                GridRow {
+                    statCell(String(localized: "Average Bill"), insights.averageBillAmount.formatted(.currency(code: currencyCode)))
+                    statCell(String(localized: "Average Tip"), percentageText(insights.averageTipPercentage))
+                }
+                GridRow {
+                    statCell(String(localized: "Saved Tips"), "\(insights.allTimeSavedTipCount)")
+                    if insights.savedTipsWithTaxCount > 0 {
+                        statCell(String(localized: "Average Tax"), insights.averageTaxAmount.formatted(.currency(code: currencyCode)))
+                    } else {
+                        statCell(String(localized: "Average Per Person"), insights.averagePerPersonTotal.formatted(.currency(code: currencyCode)))
+                    }
+                }
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(18)
-        .glassPanel(cornerRadius: 22)
+        .contentCard()
+        .accessibilityElement(children: .contain)
         .accessibilityIdentifier("Saved Insights All Time")
     }
 
+    private func statCell(_ title: String, _ value: String) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(title)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            Text(value)
+                .font(.headline.monospacedDigit())
+                .foregroundStyle(.primary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(title)
+        .accessibilityValue(value)
+    }
+
+    /// Extremes and habits in one list. Whitespace separates rows; names ride under their figure.
     private var highlightsSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            sectionHeader(String(localized: "Highlights"), systemImage: "sparkles")
-            InfoRow(title: String(localized: "Largest Bill"), value: insights.largestSavedBill.formatted(.currency(code: currencyCode)))
-            detailCaption(insights.largestSavedBillName)
-            Divider()
-            InfoRow(title: String(localized: "Highest Tip"), value: percentageText(insights.highestTipPercentage))
-            detailCaption(insights.highestTipName)
-            Divider()
-            InfoRow(title: String(localized: "Most Recent"), value: insights.mostRecentSavedTipName ?? noneYetText)
-            if let date = insights.mostRecentSavedTipDate {
-                detailCaption(date.formatted(dateFormatMMDDYYYY))
-            } else {
-                detailCaption(nil)
+        VStack(alignment: .leading, spacing: 14) {
+            sectionHeader(String(localized: "Highlights"))
+            highlightRow(String(localized: "Largest Bill"), insights.largestSavedBill.formatted(.currency(code: currencyCode)), detail: insights.largestSavedBillName)
+            highlightRow(String(localized: "Highest Tip"), percentageText(insights.highestTipPercentage), detail: insights.highestTipName)
+            highlightRow(String(localized: "Common Tip"), percentageText(insights.mostCommonTipPercentage))
+            highlightRow(String(localized: "Common Split"), insights.mostCommonSplitCount == 1 ? String(localized: "1 person") : String(localized: "\(insights.mostCommonSplitCount) people"))
+            if insights.savedTipsWithTaxCount > 0 {
+                highlightRow(String(localized: "Saved With Tax"), "\(insights.savedTipsWithTaxCount)")
             }
-            Divider()
-            InfoRow(title: String(localized: "Recent Activity"), value: insights.recentActivitySummary)
+            highlightRow(String(localized: "Recent Activity"), insights.recentActivitySummary)
         }
         .padding(18)
-        .glassPanel(cornerRadius: 22)
+        .contentCard()
+        .accessibilityElement(children: .contain)
         .accessibilityIdentifier("Saved Insights Highlights")
     }
 
-    private var patternsSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            sectionHeader(String(localized: "Patterns"), systemImage: "chart.bar")
-            InfoRow(title: String(localized: "Common Split"), value: "\(insights.mostCommonSplitCount)")
-            Divider()
-            InfoRow(title: String(localized: "Common Tip"), value: percentageText(insights.mostCommonTipPercentage))
-            if insights.savedTipsWithTaxCount > 0 {
-                Divider()
-                InfoRow(title: String(localized: "Saved With Tax"), value: "\(insights.savedTipsWithTaxCount)")
+    private func highlightRow(_ title: String, _ value: String, detail: String? = nil) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            InfoRow(title: title, value: value)
+            if let detail, !detail.isEmpty {
+                Text(detail)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .trailing)
+                    .accessibilityHidden(true)
             }
         }
-        .padding(18)
-        .glassPanel(cornerRadius: 22)
-        .accessibilityIdentifier("Saved Insights Patterns")
     }
 
-    private func sectionHeader(_ title: String, systemImage: String) -> some View {
-        Label(title, systemImage: systemImage)
-            .font(.headline)
+    private func sectionHeader(_ title: String) -> some View {
+        Text(title)
+            .font(.subheadline.weight(.semibold))
             .foregroundStyle(.secondary)
-    }
-
-    private func detailCaption(_ text: String?) -> some View {
-        Text((text?.isEmpty == false ? text : nil) ?? noneYetText)
-            .font(.caption)
-            .foregroundStyle(.secondary)
-            .frame(maxWidth: .infinity, alignment: .leading)
+            .accessibilityAddTraits(.isHeader)
     }
 
     private func percentageText(_ percentage: Double) -> String {
         String(format: "%.0f%%", percentage)
+    }
+}
+
+/// A word-sized bar chart: six months, no axes or labels, the current month emphasized.
+struct SpendingSparkline: View {
+    let entries: [MonthlySpending]
+    let accentColor: Color
+
+    var body: some View {
+        let currentMonth = entries.last?.month
+        Chart {
+            ForEach(entries) { entry in
+                BarMark(
+                    x: .value(String(localized: "Month"), entry.month, unit: .month),
+                    y: .value(String(localized: "Spent"), entry.totalSpent),
+                    width: .ratio(0.62)
+                )
+                .foregroundStyle(entry.month == currentMonth ? accentColor : accentColor.opacity(0.3))
+                .cornerRadius(1.5)
+            }
+            // A baseline keeps empty months visible as slots rather than gaps.
+            RuleMark(y: .value(String(localized: "Spent"), 0))
+                .foregroundStyle(Color.secondary.opacity(0.35))
+                .lineStyle(StrokeStyle(lineWidth: 1))
+        }
+        .chartXAxis(.hidden)
+        .chartYAxis(.hidden)
+        .chartLegend(.hidden)
+        .accessibilityHidden(true)
+    }
+}
+
+/// Exposes the monthly bars to VoiceOver's chart navigation and Audio Graphs.
+struct MonthlySpendingChartDescriptor: AXChartDescriptorRepresentable {
+    let entries: [MonthlySpending]
+    let currencyCode: String
+
+    func makeChartDescriptor() -> AXChartDescriptor {
+        let monthFormat = Date.FormatStyle.dateTime.month(.wide).year()
+        let maxSpent = max(entries.map(\.totalSpent).max() ?? 0, 1)
+
+        let xAxis = AXCategoricalDataAxisDescriptor(
+            title: String(localized: "Month"),
+            categoryOrder: entries.map { $0.month.formatted(monthFormat) }
+        )
+        let yAxis = AXNumericDataAxisDescriptor(
+            title: String(localized: "Spent"),
+            range: 0...maxSpent,
+            gridlinePositions: []
+        ) { [currencyCode] value in
+            value.formatted(.currency(code: currencyCode))
+        }
+        let series = AXDataSeriesDescriptor(
+            name: String(localized: "Spending"),
+            isContinuous: false,
+            dataPoints: entries.map { entry in
+                AXDataPoint(x: entry.month.formatted(monthFormat), y: entry.totalSpent)
+            }
+        )
+
+        return AXChartDescriptor(
+            title: String(localized: "Spending by month"),
+            summary: nil,
+            xAxis: xAxis,
+            yAxis: yAxis,
+            additionalAxes: [],
+            series: [series]
+        )
     }
 }
 
@@ -726,6 +801,14 @@ struct SavedTipInsights: Equatable {
     let recentActivitySummary: String
     let hasCurrentMonthTips: Bool
     let monthlySpending: [MonthlySpending]
+
+    /// Mean across the months shown in the chart, including months with no spending.
+    var averageMonthlySpending: Double {
+        guard !monthlySpending.isEmpty else {
+            return 0
+        }
+        return monthlySpending.reduce(0) { $0 + $1.totalSpent } / Double(monthlySpending.count)
+    }
 
     init(tips: [SavedTip], now: Date = Date(), calendar: Calendar = .current) {
         let monthInterval = calendar.dateInterval(of: .month, for: now)

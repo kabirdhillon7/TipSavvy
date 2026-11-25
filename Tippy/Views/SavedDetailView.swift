@@ -11,6 +11,7 @@ import UIKit
 /// A view that displays the details of a saved tip calculation.
 struct SavedDetailView: View {
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject var settings: TipSavvySettings
     @StateObject var viewModel: SavedDetailViewModel
 
     let onRename: (SavedTip, String) -> Void
@@ -19,8 +20,6 @@ struct SavedDetailView: View {
 
     @State private var renameText = ""
     @State private var showingRenameAlert = false
-    @State private var showingDeleteConfirmation = false
-    @State private var showingCopiedBanner = false
 
     init(tip: SavedTip,
          onRename: @escaping (SavedTip, String) -> Void = { _, _ in },
@@ -38,17 +37,17 @@ struct SavedDetailView: View {
         viewModel.tip.shareText(currencyCode: localCurrency, dateFormat: dateFormatMMDDYYYY)
     }
 
+    private var accentColor: Color { settings.selectedTheme.accentColor }
+    private var tip: SavedTip { viewModel.tip }
+
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: 18) {
+                VStack(alignment: .leading, spacing: 16) {
                     header
-                    totalsGrid
-                    useAgainButton
-                    detailsCard
+                    receiptCard
                     noteCard
-                    shareCard
-                    actionButtons
+                    useAgainButton
                 }
                 .padding(18)
                 .padding(.bottom, 18)
@@ -57,14 +56,22 @@ struct SavedDetailView: View {
             .navigationTitle(String(localized: "Saved Tip Details"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(String(localized: "Done")) {
+                ToolbarItem(placement: .topBarLeading) {
+                    SheetCloseButton {
                         dismiss()
                     }
                 }
-            }
-            .toastOverlay(isPresented: showingCopiedBanner) {
-                TipSavvySuccessBanner(message: String(localized: "Details copied"))
+
+                ToolbarItem(placement: .topBarTrailing) {
+                    ShareLink(item: shareText) {
+                        Label(String(localized: "Share"), systemImage: "square.and.arrow.up")
+                    }
+                    .accessibilityIdentifier("Share")
+                }
+
+                ToolbarItem(placement: .topBarTrailing) {
+                    moreMenu
+                }
             }
         }
         .alert(String(localized: "Rename Saved Tip"), isPresented: $showingRenameAlert, actions: {
@@ -73,7 +80,7 @@ struct SavedDetailView: View {
                 .accessibilityLabel(String(localized: "Enter Tip Calculation Name"))
 
             Button(String(localized: "OK")) {
-                onRename(viewModel.tip, renameText)
+                onRename(tip, renameText)
             }
             .disabled(renameText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             .accessibilityLabel(String(localized: "OK"))
@@ -81,27 +88,17 @@ struct SavedDetailView: View {
             Button(String(localized: "Cancel"), role: .cancel) { }
                 .accessibilityLabel(String(localized: "Cancel"))
         })
-        .confirmationDialog(String(localized: "Delete Saved Tip"), isPresented: $showingDeleteConfirmation, titleVisibility: .visible) {
-            Button(String(localized: "Delete"), role: .destructive) {
-                onDelete(viewModel.tip)
-                dismiss()
-            }
-
-            Button(String(localized: "Cancel"), role: .cancel) { }
-        } message: {
-            Text(String(localized: "This saved tip will be permanently deleted."))
-        }
     }
 
     private var header: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(viewModel.tip.name ?? String(localized: "Untitled Tip"))
-                .font(.largeTitle.weight(.bold))
+        VStack(alignment: .leading, spacing: 4) {
+            Text(tip.name ?? String(localized: "Untitled Tip"))
+                .font(.title.weight(.bold))
                 .foregroundStyle(.primary)
                 .lineLimit(3)
 
-            if let date = viewModel.tip.date {
-                Label(date.formatted(dateFormatMMDDYYYY), systemImage: "calendar")
+            if let date = tip.date {
+                Text(date.formatted(dateFormatMMDDYYYY))
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .accessibilityLabel(String(localized: "Date"))
@@ -109,52 +106,68 @@ struct SavedDetailView: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(18)
-        .glassPanel(cornerRadius: 24)
+        .padding(.horizontal, 4)
     }
 
-    private var totalsGrid: some View {
-        ViewThatFits(in: .horizontal) {
-            HStack(spacing: 12) {
-                MetricCard(title: String(localized: "Total Per Person"), value: viewModel.tip.totalPerPerson.formatted(.currency(code: localCurrency)), prominence: .primary)
-                MetricCard(title: String(localized: "Total With Tip"), value: viewModel.tip.totalAmountWithTip.formatted(.currency(code: localCurrency)))
-            }
+    /// The calculation as a receipt: each line adds up to the next, ending at what each person owes.
+    private var receiptCard: some View {
+        let percent = "\(Int(tip.tipPercentage))%"
+        let tipTitle = tip.hasTaxBreakdown && tip.savedTipsOnTax
+            ? String(localized: "Tip \(percent) of Subtotal + Tax")
+            : String(localized: "Tip \(percent)")
+        let people = Int(tip.numberOfPeople)
 
-            VStack(spacing: 12) {
-                MetricCard(title: String(localized: "Total Per Person"), value: viewModel.tip.totalPerPerson.formatted(.currency(code: localCurrency)), prominence: .primary)
-                MetricCard(title: String(localized: "Total With Tip"), value: viewModel.tip.totalAmountWithTip.formatted(.currency(code: localCurrency)))
+        return VStack(spacing: 10) {
+            if tip.hasTaxBreakdown {
+                InfoRow(title: String(localized: "Subtotal"), value: tip.savedSubtotalAmount.formatted(.currency(code: localCurrency)))
+                InfoRow(title: String(localized: "Tax"), value: tip.savedTaxAmount.formatted(.currency(code: localCurrency)))
+            } else {
+                InfoRow(title: String(localized: "Bill Amount"), value: tip.billAmount.formatted(.currency(code: localCurrency)))
             }
-        }
-    }
+            InfoRow(title: tipTitle, value: tip.tipAmount.formatted(.currency(code: localCurrency)))
 
-    private var detailsCard: some View {
-        VStack(spacing: 12) {
-            InfoRow(title: String(localized: "Bill Amount"), value: viewModel.tip.billAmount.formatted(.currency(code: localCurrency)))
-            if viewModel.tip.hasTaxBreakdown {
-                Divider()
-                InfoRow(title: String(localized: "Subtotal"), value: viewModel.tip.savedSubtotalAmount.formatted(.currency(code: localCurrency)))
-                Divider()
-                InfoRow(title: String(localized: "Tax"), value: viewModel.tip.savedTaxAmount.formatted(.currency(code: localCurrency)))
-                Divider()
-                InfoRow(title: String(localized: "Tip Basis"), value: viewModel.tip.savedTipsOnTax ? String(localized: "Subtotal + Tax") : String(localized: "Subtotal"))
+            Divider()
+
+            receiptTotalRow(title: String(localized: "Total With Tip"),
+                            value: tip.totalAmountWithTip.formatted(.currency(code: localCurrency)),
+                            emphasized: people <= 1)
+
+            if people > 1 {
+                receiptTotalRow(title: String(localized: "Split \(people) ways"),
+                                value: String(localized: "\(tip.totalPerPerson.formatted(.currency(code: localCurrency))) each"),
+                                emphasized: true)
             }
-            Divider()
-            InfoRow(title: String(localized: "Tip Percentage"), value: "\(Int(viewModel.tip.tipPercentage))%")
-            Divider()
-            InfoRow(title: String(localized: "Number of People"), value: "\(viewModel.tip.numberOfPeople)")
-            Divider()
-            InfoRow(title: String(localized: "Tip Amount"), value: viewModel.tip.tipAmount.formatted(.currency(code: localCurrency)))
         }
         .padding(18)
-        .glassPanel(cornerRadius: 22)
+        .contentCard()
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("Saved Tip Receipt")
+    }
+
+    private func receiptTotalRow(title: String, value: String, emphasized: Bool) -> some View {
+        HStack(alignment: .firstTextBaseline) {
+            Text(title)
+                .font(.headline)
+                .foregroundStyle(.primary)
+            Spacer(minLength: 12)
+            Text(value)
+                .font(emphasized ? .title2.weight(.bold) : .headline)
+                .foregroundStyle(emphasized ? accentColor : Color.primary)
+                .monospacedDigit()
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(title)
+        .accessibilityValue(value)
     }
 
     @ViewBuilder
     private var noteCard: some View {
-        if let note = viewModel.tip.note, !note.isEmpty {
-            VStack(alignment: .leading, spacing: 10) {
-                Label(String(localized: "Receipt Note"), systemImage: "note.text")
-                    .font(.headline)
+        if let note = tip.note, !note.isEmpty {
+            VStack(alignment: .leading, spacing: 6) {
+                Text(String(localized: "Note"))
+                    .font(.subheadline.weight(.semibold))
                     .foregroundStyle(.secondary)
                 Text(note)
                     .font(.body)
@@ -163,107 +176,53 @@ struct SavedDetailView: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(18)
-            .glassPanel(cornerRadius: 22)
+            .contentCard()
+            .accessibilityElement(children: .combine)
             .accessibilityIdentifier("Receipt Note")
         }
     }
 
-    private var shareCard: some View {
-        ViewThatFits(in: .horizontal) {
-            HStack(spacing: 12) {
-                copyDetailsButton
-                ShareLink(item: shareText) {
-                    Label(String(localized: "Share"), systemImage: "square.and.arrow.up")
-                        .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
-            }
-
-            VStack(spacing: 12) {
-                copyDetailsButton
-                ShareLink(item: shareText) {
-                    Label(String(localized: "Share"), systemImage: "square.and.arrow.up")
-                        .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
-            }
-        }
-    }
-
-    private var copyDetailsButton: some View {
-        Button {
-            UIPasteboard.general.string = shareText
-            showingCopiedBanner = true
-            Task {
-                try? await Task.sleep(for: .seconds(1.5))
-                await MainActor.run { showingCopiedBanner = false }
-            }
-        } label: {
-            Label(String(localized: "Copy Details"), systemImage: "doc.on.doc")
-                .frame(maxWidth: .infinity)
-        }
-        .buttonStyle(.bordered)
-        .controlSize(.large)
-        .accessibilityLabel(String(localized: "Copy Details"))
-    }
-
     private var useAgainButton: some View {
         Button {
-            onUseAgain(viewModel.tip)
+            onUseAgain(tip)
             dismiss()
         } label: {
             Label(String(localized: "Use Again"), systemImage: "arrow.counterclockwise")
+                .font(.headline)
                 .frame(maxWidth: .infinity)
         }
-        .buttonStyle(.borderedProminent)
+        .glassProminentButtonStyle()
         .controlSize(.large)
+        .tint(accentColor)
         .accessibilityLabel(String(localized: "Use Again"))
         .accessibilityIdentifier("Use Saved Tip Again")
     }
 
-    private var actionButtons: some View {
-        ViewThatFits(in: .horizontal) {
-            HStack(spacing: 12) {
-                renameButton
-                deleteButton
+    private var moreMenu: some View {
+        Menu {
+            Button {
+                renameText = tip.name ?? ""
+                showingRenameAlert = true
+            } label: {
+                Label(String(localized: "Rename"), systemImage: "pencil")
             }
 
-            VStack(spacing: 12) {
-                renameButton
-                deleteButton
+            Button(role: .destructive) {
+                // The list offers an undo toast, so delete immediately rather than confirming.
+                onDelete(tip)
+                dismiss()
+            } label: {
+                Label(String(localized: "Delete"), systemImage: "trash")
             }
-        }
-    }
-
-    private var renameButton: some View {
-        Button {
-            renameText = viewModel.tip.name ?? ""
-            showingRenameAlert = true
         } label: {
-            Label(String(localized: "Rename"), systemImage: "pencil")
-                .frame(maxWidth: .infinity)
+            Label(String(localized: "More"), systemImage: "ellipsis")
         }
-        .buttonStyle(.bordered)
-        .controlSize(.large)
-        .accessibilityLabel(String(localized: "Rename"))
-    }
-
-    private var deleteButton: some View {
-        Button(role: .destructive) {
-            showingDeleteConfirmation = true
-        } label: {
-            Label(String(localized: "Delete"), systemImage: "trash")
-                .frame(maxWidth: .infinity)
-        }
-        .buttonStyle(.bordered)
-        .controlSize(.large)
-        .accessibilityLabel(String(localized: "Delete"))
+        .accessibilityIdentifier("Saved Tip More")
     }
 }
 
 #Preview {
     let manager = DataManager.preview
     return SavedDetailView(tip: manager.savedTips[0])
+        .environmentObject(TipSavvySettings(defaults: UserDefaults(suiteName: "SavedDetailPreview") ?? .standard))
 }

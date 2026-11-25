@@ -8,49 +8,142 @@
 import SwiftUI
 import UIKit
 
-struct GlassPanelModifier: ViewModifier {
+/// Shared corner radii so every container reads as one family.
+enum GlassRadius {
+    /// Top-level section panels.
+    static let panel: CGFloat = 22
+    /// Rows and controls inside a panel.
+    static let inner: CGFloat = 12
+}
+
+/// The content layer: an opaque grouped surface. Liquid Glass is reserved for elements that
+/// float above content (bars, toasts, controls), so cards never use it.
+struct ContentCardModifier: ViewModifier {
     @Environment(\.colorSchemeContrast) private var colorSchemeContrast
 
     let cornerRadius: CGFloat
-    let interactive: Bool
-    let highContrast: Bool
+    let highlight: Color?
+
+    func body(content: Content) -> some View {
+        let shape = RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+        content
+            .background(Color(.secondarySystemGroupedBackground), in: shape)
+            .overlay {
+                if let highlight {
+                    shape.strokeBorder(highlight, lineWidth: 1.5)
+                } else if colorSchemeContrast == .increased {
+                    shape.strokeBorder(.primary.opacity(0.4), lineWidth: 1)
+                }
+            }
+    }
+}
+
+/// The functional layer: Liquid Glass on iOS 26, a material on earlier versions.
+struct FloatingGlassModifier<S: Shape>: ViewModifier {
+    @Environment(\.colorSchemeContrast) private var colorSchemeContrast
+
+    let shape: S
 
     @ViewBuilder
     func body(content: Content) -> some View {
-        let useHighContrast = highContrast || colorSchemeContrast == .increased
-
 #if compiler(>=6.2)
         if #available(iOS 26.0, *) {
-            content
-                .glassEffect(.regular.interactive(interactive), in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
-                .overlay {
-                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                        .strokeBorder(.primary.opacity(useHighContrast ? 0.45 : 0.18), lineWidth: useHighContrast ? 1.5 : 1)
-                }
+            content.glassEffect(.regular, in: shape)
         } else {
-            content
-                .background(.regularMaterial, in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
-                .overlay {
-                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                        .strokeBorder(.primary.opacity(useHighContrast ? 0.5 : 0.18), lineWidth: useHighContrast ? 1.5 : 1)
-                }
-                .shadow(color: .primary.opacity(useHighContrast ? 0.05 : 0.08), radius: 12, y: 6)
+            fallback(content)
         }
 #else
+        fallback(content)
+#endif
+    }
+
+    private func fallback(_ content: Content) -> some View {
         content
-            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+            .background(.regularMaterial, in: shape)
             .overlay {
-                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .strokeBorder(.primary.opacity(useHighContrast ? 0.5 : 0.18), lineWidth: useHighContrast ? 1.5 : 1)
+                shape.stroke(.primary.opacity(colorSchemeContrast == .increased ? 0.45 : 0.12), lineWidth: 1)
             }
-            .shadow(color: .primary.opacity(useHighContrast ? 0.05 : 0.08), radius: 12, y: 6)
+            .shadow(color: .black.opacity(0.14), radius: 14, y: 6)
+    }
+}
+
+private struct GlassButtonStyleModifier: ViewModifier {
+    let prominent: Bool
+
+    @ViewBuilder
+    func body(content: Content) -> some View {
+#if compiler(>=6.2)
+        if #available(iOS 26.0, *) {
+            if prominent {
+                content.buttonStyle(.glassProminent)
+            } else {
+                content.buttonStyle(.glass)
+            }
+        } else {
+            fallback(content)
+        }
+#else
+        fallback(content)
+#endif
+    }
+
+    @ViewBuilder
+    private func fallback(_ content: Content) -> some View {
+        if prominent {
+            content.buttonStyle(.borderedProminent)
+        } else {
+            content.buttonStyle(.bordered)
+        }
+    }
+}
+
+/// Dismisses a sheet: the iOS 26 close button, or "Done" on earlier versions.
+struct SheetCloseButton: View {
+    let action: () -> Void
+
+    var body: some View {
+#if compiler(>=6.2)
+        if #available(iOS 26.0, *) {
+            Button(role: .close, action: action)
+                .accessibilityIdentifier("Done")
+        } else {
+            Button(String(localized: "Done"), action: action)
+                .accessibilityIdentifier("Done")
+        }
+#else
+        Button(String(localized: "Done"), action: action)
+            .accessibilityIdentifier("Done")
 #endif
     }
 }
 
 extension View {
-    func glassPanel(cornerRadius: CGFloat = 18, interactive: Bool = false, highContrast: Bool = false) -> some View {
-        modifier(GlassPanelModifier(cornerRadius: cornerRadius, interactive: interactive, highContrast: highContrast))
+    /// An opaque card for content. `highlight` draws an accent edge, e.g. for focus.
+    func contentCard(cornerRadius: CGFloat = GlassRadius.panel, highlight: Color? = nil) -> some View {
+        modifier(ContentCardModifier(cornerRadius: cornerRadius, highlight: highlight))
+    }
+
+    /// Liquid Glass for an element that floats above content.
+    func floatingGlass<S: Shape>(in shape: S) -> some View {
+        modifier(FloatingGlassModifier(shape: shape))
+    }
+
+    func glassButtonStyle() -> some View {
+        modifier(GlassButtonStyleModifier(prominent: false))
+    }
+
+    func glassProminentButtonStyle() -> some View {
+        modifier(GlassButtonStyleModifier(prominent: true))
+    }
+
+    /// A round glass button, for icon-only controls.
+    @ViewBuilder
+    func glassCircleButtonStyle() -> some View {
+        if #available(iOS 17.0, *) {
+            glassButtonStyle().buttonBorderShape(.circle)
+        } else {
+            glassButtonStyle().buttonBorderShape(.capsule)
+        }
     }
 
     func toastOverlay<Toast: View>(isPresented: Bool, @ViewBuilder content: () -> Toast) -> some View {
@@ -112,37 +205,8 @@ private struct AnimatedTextChangeModifier<Value: Equatable>: ViewModifier {
     }
 }
 
-struct TipPresetButtonStyle: ButtonStyle {
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @Environment(\.colorSchemeContrast) private var colorSchemeContrast
-
-    let isSelected: Bool
-    let accentColor: Color
-
-    func makeBody(configuration: Configuration) -> some View {
-        let highContrast = colorSchemeContrast == .increased
-        let shape = Capsule(style: .continuous)
-
-        configuration.label
-            .font(.subheadline.weight(.semibold))
-            .foregroundStyle(isSelected ? accentColor : Color.primary)
-            .padding(.vertical, 9)
-            .background {
-                shape
-                    .fill(isSelected ? accentColor.opacity(highContrast ? 0.24 : 0.14) : Color.primary.opacity(highContrast ? 0.08 : 0.04))
-            }
-            .overlay {
-                shape
-                    .strokeBorder(isSelected ? accentColor : Color.primary.opacity(highContrast ? 0.35 : 0.14), lineWidth: isSelected || highContrast ? 1.5 : 1)
-            }
-            .contentShape(shape)
-            .scaleEffect(!reduceMotion && configuration.isPressed ? 0.96 : 1)
-            .opacity(configuration.isPressed ? 0.9 : 1)
-            .animation(reduceMotion ? nil : .easeInOut(duration: 0.18), value: configuration.isPressed)
-            .animation(reduceMotion ? nil : .easeInOut(duration: 0.18), value: isSelected)
-    }
-}
-
+/// A labeled figure. Drawn without its own container so it can sit inside a panel
+/// without nesting boxes; primacy comes from type size and weight.
 struct MetricCard: View {
     let title: String
     let value: String
@@ -155,31 +219,19 @@ struct MetricCard: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: 4) {
             Text(title)
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
             Text(value)
-                .font(prominence == .primary ? .title2.weight(.bold) : .headline.weight(.semibold))
-                .foregroundStyle(.primary)
+                .font(prominence == .primary ? .largeTitle.weight(.bold) : .title2.weight(.semibold))
+                .foregroundStyle(prominence == .primary ? (accentColor ?? .primary) : .primary)
                 .monospacedDigit()
-                .minimumScaleFactor(0.85)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
                 .animatedTextChange(value: value)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(14)
-        .glassPanel(cornerRadius: 16)
-        .overlay {
-            if prominence == .primary, let accentColor {
-                LinearGradient(
-                    colors: [accentColor.opacity(0.10), accentColor.opacity(0.02)],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-                .allowsHitTesting(false)
-            }
-        }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(title)
         .accessibilityValue(value)
@@ -304,45 +356,54 @@ struct TipSavvySuccessBanner: View {
     }
 }
 
+/// A toast that reports a change and offers to reverse it.
+struct TipSavvyUndoBanner: View {
+    let message: String
+    let onUndo: () -> Void
+
+    var body: some View {
+        HStack(spacing: 12) {
+            toastIcon(systemName: "arrow.uturn.backward", tint: .secondary)
+
+            Text(message)
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(.primary)
+                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+            Button(String(localized: "Undo"), action: onUndo)
+                .font(.subheadline.weight(.bold))
+                .buttonStyle(.bordered)
+                .buttonBorderShape(.capsule)
+                .accessibilityIdentifier("Undo")
+        }
+        .padding(.leading, 14)
+        .padding(.trailing, 8)
+        .padding(.vertical, 8)
+        .liquidGlassToast()
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("Undo Banner")
+        .onAppear {
+            UIAccessibility.post(notification: .announcement, argument: message)
+        }
+    }
+}
+
 private struct LiquidGlassToastModifier: ViewModifier {
     @Environment(\.colorSchemeContrast) private var colorSchemeContrast
 
     let highContrast: Bool
 
-    @ViewBuilder
     func body(content: Content) -> some View {
-        let useHighContrast = highContrast || colorSchemeContrast == .increased
         let shape = Capsule(style: .continuous)
-
-#if compiler(>=6.2)
-        if #available(iOS 26.0, *) {
-            content
-                .background {
-                    shape
-                        .fill(.ultraThinMaterial)
-                        .glassEffect(.regular, in: shape)
-                }
-                .overlay {
-                    shape
-                        .strokeBorder(.primary.opacity(useHighContrast ? 0.45 : 0.2), lineWidth: useHighContrast ? 1.5 : 1)
-                }
-                .shadow(color: .black.opacity(useHighContrast ? 0.18 : 0.22), radius: 18, y: 10)
-        } else {
-            fallbackToast(content: content, shape: shape, useHighContrast: useHighContrast)
-        }
-#else
-        fallbackToast(content: content, shape: shape, useHighContrast: useHighContrast)
-#endif
-    }
-
-    private func fallbackToast(content: Content, shape: Capsule, useHighContrast: Bool) -> some View {
         content
-            .background(.ultraThinMaterial, in: shape)
+            .floatingGlass(in: shape)
             .overlay {
-                shape
-                    .strokeBorder(.primary.opacity(useHighContrast ? 0.5 : 0.22), lineWidth: useHighContrast ? 1.5 : 1)
+                if highContrast || colorSchemeContrast == .increased {
+                    shape.strokeBorder(.primary.opacity(0.45), lineWidth: 1.5)
+                }
             }
-            .shadow(color: .black.opacity(useHighContrast ? 0.16 : 0.2), radius: 18, y: 10)
     }
 }
 
@@ -352,7 +413,7 @@ private extension View {
     }
 }
 
-private func toastIcon(systemName: String, tint: Color) -> some View {
+private func toastIcon(systemName: String, tint: some ShapeStyle) -> some View {
     Image(systemName: systemName)
         .font(.subheadline.weight(.bold))
         .foregroundStyle(tint)

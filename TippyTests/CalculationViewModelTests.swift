@@ -503,6 +503,51 @@ final class CalculationViewModelTests: XCTestCase {
         XCTAssertEqual(comparison.totalAmountWithTip, 12)
     }
 
+    func test_tipComparisons_withTaxOnSubtotalBasis_shouldMatchHeadlineTotals() throws {
+        calculationViewModel.billAmount = 100
+        calculationViewModel.taxAmount = 8
+        calculationViewModel.tipTaxBasis = .subtotalOnly
+        calculationViewModel.tipPercentage = 20
+        calculationViewModel.numberOfPeople = 2
+
+        let comparison = try XCTUnwrap(calculationViewModel.tipComparisons(for: [20]).first)
+
+        XCTAssertEqual(comparison.tipAmount, 20, accuracy: 0.001)
+        XCTAssertEqual(comparison.totalAmountWithTip, calculationViewModel.totalAmountWithTip, accuracy: 0.001)
+        XCTAssertEqual(comparison.totalAmountWithTip, 128, accuracy: 0.001)
+        XCTAssertEqual(comparison.totalPerPerson, calculationViewModel.totalPerPerson, accuracy: 0.001)
+    }
+
+    func test_tipComparisons_withTaxOnSubtotalAndTaxBasis_shouldMatchHeadlineTotals() throws {
+        calculationViewModel.billAmount = 100
+        calculationViewModel.taxAmount = 8
+        calculationViewModel.tipTaxBasis = .subtotalAndTax
+        calculationViewModel.tipPercentage = 20
+
+        let comparison = try XCTUnwrap(calculationViewModel.tipComparisons(for: [20]).first)
+
+        XCTAssertEqual(comparison.tipAmount, 21.6, accuracy: 0.001)
+        XCTAssertEqual(comparison.totalAmountWithTip, calculationViewModel.totalAmountWithTip, accuracy: 0.001)
+        XCTAssertEqual(comparison.totalAmountWithTip, 129.6, accuracy: 0.001)
+    }
+
+    func test_restoreSnapshot_shouldUndoReset() {
+        calculationViewModel.billAmount = 42
+        calculationViewModel.taxAmount = 3
+        calculationViewModel.tipPercentage = 22
+        calculationViewModel.numberOfPeople = 3
+        calculationViewModel.tipItemName = "Lunch"
+        let snapshot = calculationViewModel.snapshot()
+
+        calculationViewModel.resetValues()
+        XCTAssertFalse(calculationViewModel.hasUserInput)
+
+        calculationViewModel.restore(snapshot)
+
+        XCTAssertEqual(calculationViewModel.snapshot(), snapshot)
+        XCTAssertTrue(calculationViewModel.hasUserInput)
+    }
+
     func test_applySavedTip_shouldRestoreSavedInputsAndResetRounding() throws {
         calculationViewModel.billAmount = 12
         calculationViewModel.tipPercentage = 25

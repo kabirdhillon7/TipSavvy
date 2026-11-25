@@ -9,7 +9,7 @@ TipSavvy is a production-minded SwiftUI tip calculator for iPhone. It calculates
 - SwiftUI calculator with Dynamic Type-friendly layouts, haptics, validation, rounding modes, copy actions, and persisted defaults.
 - Saved tips experience backed by Core Data with persisted search-adjacent sort/filter choices, rename/delete flows, and shareable summaries.
 - Settings surface for default tip percentage, default split count, app themes, haptics, locale/currency clarity, and privacy posture.
-- Production guardrails: recoverable persistence errors, non-blocking error banners, Crashlytics initialization, UI tests, unit tests, and previews.
+- Production guardrails: recoverable persistence errors, non-blocking error banners, UI tests, unit tests, and previews.
 
 ## Engineering Highlights
 
@@ -32,7 +32,7 @@ flowchart LR
 - Testability: settings, rounding, saved-tip filtering, sort behavior, and persistence edge cases are covered with isolated XCTest fixtures.
 - Accessibility: VoiceOver labels, grouped accessibility summaries, Reduce Motion-aware animations, high-contrast-aware panels, and UI tests for discoverability.
 - Localization and formatting: copy, share, and accessibility strings use localized labels, while currency values respect the user's current locale.
-- App quality: Crashlytics is configured at launch, App Shortcuts open the calculator, privacy-sensitive copy is explicit, and glass UI falls back to system material on older iOS versions.
+- App quality: no third-party SDKs, App Shortcuts open the calculator, privacy-sensitive copy is explicit, and glass UI falls back to system material on older iOS versions.
 
 ## Screen Tour
 
@@ -50,17 +50,11 @@ flowchart LR
 
 - SwiftUI
 - Core Data
-- Firebase Crashlytics
 - XCTest and XCUITest
 
 ## Local Verification
 
-TipSavvy uses Firebase Crashlytics. The real `GoogleService-Info.plist` is intentionally ignored and must not be committed. To set up a local or release machine:
-
-1. Rotate or create a replacement Firebase iOS app configuration in Firebase/Google Cloud.
-2. Download the new `GoogleService-Info.plist` and place it at the repository root.
-3. Use `GoogleService-Info.plist.example` only as a field reference; do not build or release with placeholder values.
-4. Revoke any Google API key that has appeared in git history or a secret scanning alert before closing the alert.
+TipSavvy has no third-party dependencies, so a fresh clone builds with no extra setup.
 
 ```bash
 xcodebuild test \
@@ -92,7 +86,7 @@ Scripts/release_preflight.sh
 
 The preflight checks App Store icon dimensions/alpha, export compliance metadata, release documentation, and local build tooling. Use [Release checklist](docs/ReleaseChecklist.md) for App Store metadata, privacy nutrition, accessibility claims, manual QA, and upload checks.
 
-The preflight also verifies that the local Firebase plist exists, is not the example template, and does not contain the known revoked Google API key from the secret scanning alert.
+The preflight also verifies that the working tree does not contain the known revoked Google API key from an earlier secret scanning alert.
 
 Manual QA matrix:
 
@@ -111,13 +105,13 @@ Supporting checklists:
 
 ## Privacy
 
-TipSavvy stores saved calculations locally with Core Data. It does not require an account, and saved bill names or totals are not sent to an app-owned backend. Firebase Crashlytics is configured for crash diagnostics.
+TipSavvy stores saved calculations locally with Core Data. It does not require an account, and nothing is sent to an app-owned backend or a third-party SDK.
 
 Privacy nutrition:
 
 - Account: not required.
 - Local data: saved calculations stay in the app's Core Data store on device.
-- Diagnostics: Firebase Crashlytics is used for crash reporting.
+- Diagnostics: no crash reporting SDK. Crash reports come only from Apple, for users who opt in to share analytics with developers.
 - Analytics: no product analytics or event tracking is configured.
 - Network data: TipSavvy does not sync bill names, totals, or saved calculations to a custom backend.
 

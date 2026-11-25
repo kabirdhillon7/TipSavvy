@@ -61,21 +61,18 @@ final class TippyUITests: XCTestCase {
     }
     
     func test_enterbillAmountTextField_shouldAcceptInput() {
-        let app = XCUIApplication()
-        app.launch()
-        
-        let enterBillAmountTextField = app.textFields["Enter Bill Amount"]
-        enterBillAmountTextField.tap()
-        
-        app/*@START_MENU_TOKEN@*/.keys["2"]/*[[".keyboards.keys[\"2\"]",".keys[\"2\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
-        app/*@START_MENU_TOKEN@*/.keys["4"]/*[[".keyboards.keys[\"4\"]",".keys[\"4\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
-        app/*@START_MENU_TOKEN@*/.keys["Delete"]/*[[".keyboards.keys[\"Delete\"]",".keys[\"Delete\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
-        app/*@START_MENU_TOKEN@*/.keys["5"]/*[[".keyboards.keys[\"5\"]",".keys[\"5\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
+        let app = launchIsolatedUITestApp()
+
+        let field = app.textFields["Enter Bill Amount"]
+        field.tap()
+        XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 3))
+        field.typeText("24")
+
+        XCTAssertTrue((field.value as? String)?.contains("24") == true, "\(field.value ?? "nil")")
     }
     
     func test_slider_shouldTapAndSwipeRight() {
-        let app = XCUIApplication()
-        app.launch()
+        let app = launchIsolatedUITestApp()
         
         let tipPercentageSelectionSlider = app.sliders["Tip Percentage Selection"]
         tipPercentageSelectionSlider.tap()
@@ -84,54 +81,50 @@ final class TippyUITests: XCTestCase {
     }
     
     func test_stepper_shouldAdjustNumberOfPeople() {
-        let app = XCUIApplication()
-        app.launch()
+        let app = launchIsolatedUITestApp()
         
         app.buttons["Increase People"].tap()
         app.buttons["Decrease People"].tap()
     }
 
     func test_tipPreset_shouldSelectTwentyPercent() {
-        let app = XCUIApplication()
-        app.launch()
+        let app = launchIsolatedUITestApp()
 
-        app.buttons["20%"].tap()
-        XCTAssertEqual(app.buttons["20%"].value as? String, "Selected")
+        tapScrolledIntoView(app.buttons["20%"], in: app)
+        XCTAssertTrue(app.buttons["20%"].isSelected)
     }
 
     func test_tipComparison_shouldAppearAndApplyPreset() {
-        let app = XCUIApplication()
-        app.launch()
+        let app = launchIsolatedUITestApp()
 
         enterBillAmount("42", in: app)
 
         XCTAssertTrue(app.otherElements["Tip Comparison"].waitForExistence(timeout: 2))
-        app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "25% tip comparison")).firstMatch.tap()
+        tapScrolledIntoView(app.buttons["25%"], in: app)
 
-        XCTAssertEqual(app.buttons["25%"].value as? String, "Selected")
+        XCTAssertTrue(app.buttons["25%"].isSelected)
     }
 
     func test_calculatorAccessibilityElements_shouldBeDiscoverable() {
-        let app = XCUIApplication()
-        app.launchArguments += ["-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryXXXL"]
-        app.launchArguments += ["-UIAccessibilityReduceMotionEnabled", "YES"]
-        app.launch()
+        let app = launchIsolatedUITestApp(extraArguments: [
+            "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryXXXL",
+            "-UIAccessibilityReduceMotionEnabled", "YES"
+        ])
 
-        XCTAssertTrue(app.textFields["Enter Bill Amount"].exists)
-        XCTAssertTrue(app.staticTexts["Number of People"].exists)
-        XCTAssertTrue(app.buttons["Tip Service Context"].exists)
-        XCTAssertTrue(app.staticTexts["Tip Context Helper"].exists)
-        XCTAssertTrue(app.buttons["15%"].exists)
-        XCTAssertTrue(app.sliders["Tip Percentage Selection"].exists)
-        XCTAssertTrue(app.buttons["Save Tip Calculation"].exists)
-        XCTAssertTrue(app.buttons["Reset"].exists)
-        XCTAssertTrue(app.otherElements["Bill Totals Summary"].exists)
-        XCTAssertTrue(app.otherElements["Tip Comparison"].exists)
+        XCTAssertTrue(app.textFields["Enter Bill Amount"].exists, "Enter Bill Amount")
+        XCTAssertTrue(app.otherElements["Number of People"].exists, "Number of People")
+        XCTAssertTrue(app.buttons["Tip Service Context"].exists, "Tip Service Context")
+        XCTAssertTrue(app.buttons["15%"].exists, "15%")
+        XCTAssertTrue(app.sliders["Tip Percentage Selection"].exists, "Tip Percentage Selection")
+        XCTAssertTrue(app.buttons["Save Tip Calculation"].exists, "Save Tip Calculation")
+        XCTAssertTrue(app.buttons["Reset"].exists, "Reset")
+        XCTAssertTrue(app.buttons["Copy Menu"].exists, "Copy Menu")
+        XCTAssertTrue(app.otherElements["Bill Totals Summary"].exists, "Bill Totals Summary")
+        XCTAssertTrue(app.otherElements["Tip Comparison"].exists, "Tip Comparison")
     }
 
     func test_tipContext_shouldUpdateVisiblePresets() {
-        let app = XCUIApplication()
-        app.launch()
+        let app = launchIsolatedUITestApp()
 
         selectTipContext("Delivery", in: app)
 
@@ -142,119 +135,115 @@ final class TippyUITests: XCTestCase {
     }
 
     func test_tipContextCoffee_shouldUpdateComparisonRows() {
-        let app = XCUIApplication()
-        app.launch()
+        let app = launchIsolatedUITestApp()
 
         enterBillAmount("42", in: app)
         selectTipContext("Coffee", in: app)
 
         XCTAssertTrue(app.otherElements["Tip Comparison"].waitForExistence(timeout: 2))
-        XCTAssertTrue(app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "10% tip comparison")).firstMatch.exists)
-        XCTAssertTrue(app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "15% tip comparison")).firstMatch.exists)
-        XCTAssertTrue(app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "20% tip comparison")).firstMatch.exists)
+        XCTAssertTrue(app.buttons["10%"].exists)
+        XCTAssertTrue(app.buttons["15%"].exists)
+        XCTAssertTrue(app.buttons["20%"].exists)
     }
 
     func test_tipContextPreset_shouldApplySelectedPercentage() {
-        let app = XCUIApplication()
-        app.launch()
+        let app = launchIsolatedUITestApp()
 
         selectTipContext("Movers", in: app)
-        app.buttons["5%"].tap()
+        tapScrolledIntoView(app.buttons["5%"], in: app)
 
-        XCTAssertEqual(app.buttons["5%"].value as? String, "Selected")
+        XCTAssertTrue(app.buttons["5%"].isSelected)
     }
 
     func test_settings_shouldExposeDefaultsAndQualitySignals() {
-        let app = XCUIApplication()
-        app.launch()
+        let app = launchIsolatedUITestApp()
 
-        app.tabBars["Tab Bar"].buttons["Settings"].tap()
+        selectTab("Settings", in: app)
 
         XCTAssertTrue(app.navigationBars["Settings"].exists)
         XCTAssertTrue(app.sliders["Default Tip"].exists)
         XCTAssertTrue(app.switches["Haptic Feedback"].exists)
-        XCTAssertTrue(app.staticTexts["Currency"].exists)
-        XCTAssertTrue(app.buttons["Request App Review"].exists)
-        XCTAssertTrue(app.buttons["Rate on the App Store"].exists)
-        XCTAssertTrue(app.otherElements["About TipSavvy"].exists)
         XCTAssertTrue(app.buttons["Privacy Policy"].exists)
-        XCTAssertTrue(app.buttons["Contact Support"].exists)
+        XCTAssertTrue(app.descendants(matching: .any)["Rate on the App Store"].exists)
+        XCTAssertTrue(app.descendants(matching: .any)["Contact Support"].exists)
+
+        // Form rows below the fold are created lazily.
+        app.swipeUp()
+        app.swipeUp()
+        XCTAssertTrue(app.staticTexts["Currency"].exists)
+        XCTAssertTrue(app.descendants(matching: .any)["About TipSavvy"].exists)
         XCTAssertTrue(app.buttons["Reset Preferences"].exists)
     }
 
     func test_settingsPrivacyPolicy_shouldOpenAndDismiss() {
-        let app = XCUIApplication()
-        app.launch()
+        let app = launchIsolatedUITestApp()
 
-        app.tabBars["Tab Bar"].buttons["Settings"].tap()
+        selectTab("Settings", in: app)
         app.buttons["Privacy Policy"].tap()
 
         XCTAssertTrue(app.webViews.firstMatch.waitForExistence(timeout: 5))
-        app.buttons["Done"].tap()
+        let close = app.buttons["Close"].exists ? app.buttons["Close"] : app.buttons["Done"]
+        close.tap()
         XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 2))
     }
 
     func test_tipPreset_shouldPersistAfterRelaunch() {
-        let app = XCUIApplication()
-        app.launch()
+        let app = launchIsolatedUITestApp()
 
-        app.buttons["20%"].tap()
-        app.terminate()
-        app.launch()
+        tapScrolledIntoView(app.buttons["20%"], in: app)
+        relaunchKeepingState(app)
 
-        XCTAssertEqual(app.buttons["20%"].value as? String, "Selected")
+        XCTAssertTrue(app.buttons["20%"].isSelected)
     }
 
     func test_stepper_shouldPersistPeopleCountAfterRelaunch() {
-        let app = XCUIApplication()
-        app.launch()
+        let app = launchIsolatedUITestApp()
 
         app.buttons["Increase People"].tap()
-        app.terminate()
-        app.launch()
+        relaunchKeepingState(app)
 
         XCTAssertTrue(app.staticTexts["2"].exists)
     }
     
     func test_tabBar_shouldSelectSavedTab() {
-        let app = XCUIApplication()
-        app.launch()
+        let app = launchIsolatedUITestApp()
         
-        let tabBar = XCUIApplication().tabBars["Tab Bar"]
-        tabBar.buttons["Calculate"].tap()
-        tabBar.buttons["Saved"].tap()
+        selectTab("Calculate", in: app)
+        selectTab("Saved", in: app)
     }
     
-    func test_resetButton_shouldTap() {
-        let app = XCUIApplication()
-        app.launch()
-        
+    func test_clearButton_shouldClearAndOfferUndo() {
+        let app = launchIsolatedUITestApp()
+
+        XCTAssertFalse(app.buttons["Reset"].isEnabled)
+        enterBillAmount("25", in: app)
+        XCTAssertTrue(app.buttons["Reset"].isEnabled)
+
         app.buttons["Reset"].tap()
+
+        XCTAssertTrue(app.descendants(matching: .any)["Undo Banner"].waitForExistence(timeout: 2))
+        XCTAssertFalse(app.buttons["Save Tip Calculation"].isEnabled)
     }
     
     func test_saveTipCalculationButton_shouldBeDisabledForInvalidCalculation() {
-        let app = XCUIApplication()
-        app.launch()
+        let app = launchIsolatedUITestApp()
         
         XCTAssertFalse(app.buttons["Save Tip Calculation"].isEnabled)
     }
     
     func test_saveTipCalculationButton_shouldSave() {
-        let app = XCUIApplication()
-        app.launch()
+        let app = launchIsolatedUITestApp()
 
         enterBillAmount("25", in: app)
 
         app.buttons["Save Tip Calculation"].tap()
         XCTAssertTrue(app.navigationBars["Save Tip"].waitForExistence(timeout: 2))
-        app.textFields["Enter Tip Calculation Name"].tap()
-        app.textFields["Enter Tip Calculation Name"].typeText("Lunch")
+        replaceText(in: app.textFields["Enter Tip Calculation Name"], with: "Lunch")
         app.buttons["Save"].tap()
     }
     
     func test_saveTipCalculationButton_shouldCancel() {
-        let app = XCUIApplication()
-        app.launch()
+        let app = launchIsolatedUITestApp()
 
         enterBillAmount("25", in: app)
         app.buttons["Save Tip Calculation"].tap()
@@ -270,8 +259,7 @@ final class TippyUITests: XCTestCase {
 
         app.buttons["Save Tip Calculation"].tap()
         XCTAssertTrue(app.navigationBars["Save Tip"].waitForExistence(timeout: 2))
-        app.textFields["Enter Tip Calculation Name"].tap()
-        app.textFields["Enter Tip Calculation Name"].typeText("Tax Lunch")
+        replaceText(in: app.textFields["Enter Tip Calculation Name"], with: "Tax Lunch")
         app.textFields["Receipt Note"].tap()
         app.textFields["Receipt Note"].typeText("Patio table")
         app.buttons["Save"].tap()
@@ -284,45 +272,49 @@ final class TippyUITests: XCTestCase {
         XCTAssertTrue(savedTip.waitForExistence(timeout: 2))
         savedTip.tap()
 
-        XCTAssertTrue(app.staticTexts["Tax"].waitForExistence(timeout: 2))
-        XCTAssertTrue(app.otherElements["Receipt Note"].exists)
+        XCTAssertTrue(app.descendants(matching: .any)["Tax"].waitForExistence(timeout: 2))
+        XCTAssertTrue(app.descendants(matching: .any)["Receipt Note"].exists)
     }
 
     func test_savedSearch_shouldFilterByName() {
-        let app = XCUIApplication()
-        app.launch()
+        let app = launchIsolatedUITestApp()
 
         saveTip(named: "Search Lunch", in: app)
-        app.tabBars["Tab Bar"].buttons["Saved"].tap()
-        app.navigationBars["Saved Tips"].searchFields["Search Saved Tips"].tap()
-        app.navigationBars["Saved Tips"].searchFields["Search Saved Tips"].typeText("Search Lunch")
+        selectTab("Saved", in: app)
+        app.searchFields["Search Names and Notes"].tap()
+        app.searchFields["Search Names and Notes"].typeText("Search Lunch")
 
         XCTAssertTrue(app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Search Lunch")).firstMatch.exists)
     }
 
     func test_savedControls_shouldExposeSortAndFilter() {
-        let app = XCUIApplication()
-        app.launch()
+        let app = launchIsolatedUITestApp()
 
         saveTip(named: "Filter Dinner", in: app)
-        app.tabBars["Tab Bar"].buttons["Saved"].tap()
+        selectTab("Saved", in: app)
 
-        XCTAssertTrue(app.buttons["Saved Tips Filter"].exists)
-        XCTAssertTrue(app.buttons["Saved Tips Sort"].exists)
-        XCTAssertTrue(app.staticTexts["Newest"].exists)
-        XCTAssertTrue(app.staticTexts["All"].exists)
+        let options = app.buttons["Saved Tips Options"]
+        XCTAssertTrue(options.exists)
+        options.tap()
+        XCTAssertTrue(app.buttons["Newest"].waitForExistence(timeout: 2))
+        XCTAssertTrue(app.buttons["Name"].exists)
+        XCTAssertTrue(app.buttons["Recent"].exists)
+        app.buttons["Recent"].tap()
+
+        XCTAssertTrue(app.staticTexts["Visible Saved Tips"].waitForExistence(timeout: 2))
+        XCTAssertTrue(app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Filter Dinner")).firstMatch.exists)
     }
 
     func test_savedInsights_shouldAppearWhenTipsExist() {
         let app = launchIsolatedUITestApp()
 
         saveTip(named: "Insight Dinner", in: app)
-        app.tabBars["Tab Bar"].buttons["Saved"].tap()
+        selectTab("Saved", in: app)
 
-        XCTAssertTrue(app.buttons["Saved Insights"].waitForExistence(timeout: 2))
-        XCTAssertTrue(app.staticTexts["Spent This Month"].exists)
-        XCTAssertTrue(app.staticTexts["Tips This Month"].exists)
-        XCTAssertTrue(app.staticTexts["Saved Tips"].exists)
+        let insights = app.buttons["Saved Insights"]
+        XCTAssertTrue(insights.waitForExistence(timeout: 2))
+        XCTAssertEqual(insights.label, "Spent This Month")
+        XCTAssertTrue((insights.value as? String)?.contains("in tips") == true)
         XCTAssertFalse(app.staticTexts["Total Saved"].exists)
         XCTAssertFalse(app.staticTexts["Average Tip"].exists)
         XCTAssertFalse(app.staticTexts["Most Common Split"].exists)
@@ -332,7 +324,7 @@ final class TippyUITests: XCTestCase {
     func test_savedInsights_shouldHideWhenNoTipsExist() {
         let app = launchIsolatedUITestApp()
 
-        app.tabBars["Tab Bar"].buttons["Saved"].tap()
+        selectTab("Saved", in: app)
 
         XCTAssertTrue(app.staticTexts["No Saved Tips"].waitForExistence(timeout: 2))
         XCTAssertFalse(app.buttons["Saved Insights"].exists)
@@ -342,9 +334,9 @@ final class TippyUITests: XCTestCase {
         let app = launchIsolatedUITestApp()
 
         saveTip(named: "Visible Insight Dinner", in: app)
-        app.tabBars["Tab Bar"].buttons["Saved"].tap()
-        app.navigationBars["Saved Tips"].searchFields["Search Saved Tips"].tap()
-        app.navigationBars["Saved Tips"].searchFields["Search Saved Tips"].typeText("No Results Expected")
+        selectTab("Saved", in: app)
+        app.searchFields["Search Names and Notes"].tap()
+        app.searchFields["Search Names and Notes"].typeText("No Results Expected")
 
         XCTAssertTrue(app.buttons["Saved Insights"].waitForExistence(timeout: 2))
         XCTAssertTrue(app.staticTexts["No Matching Tips"].waitForExistence(timeout: 2))
@@ -354,14 +346,14 @@ final class TippyUITests: XCTestCase {
         let app = launchIsolatedUITestApp()
 
         saveTip(named: "Insight Detail Dinner", in: app)
-        app.tabBars["Tab Bar"].buttons["Saved"].tap()
+        selectTab("Saved", in: app)
         app.buttons["Saved Insights"].tap()
 
         XCTAssertTrue(app.navigationBars["Saved Insights"].waitForExistence(timeout: 2))
-        XCTAssertTrue(app.otherElements["Saved Insights This Month"].exists)
+        XCTAssertTrue(app.descendants(matching: .any)["Saved Insights Spending Chart"].exists)
+        XCTAssertTrue(app.staticTexts["Saved Insights This Month"].exists)
         XCTAssertTrue(app.otherElements["Saved Insights All Time"].exists)
         XCTAssertTrue(app.otherElements["Saved Insights Highlights"].exists)
-        XCTAssertTrue(app.otherElements["Saved Insights Patterns"].exists)
 
         app.buttons["Done"].tap()
 
@@ -369,73 +361,71 @@ final class TippyUITests: XCTestCase {
     }
 
     func test_savedSearch_shouldShowNoMatchingTips() {
-        let app = XCUIApplication()
-        app.launch()
+        let app = launchIsolatedUITestApp()
 
         saveTip(named: "Findable Dinner", in: app)
-        app.tabBars["Tab Bar"].buttons["Saved"].tap()
-        app.navigationBars["Saved Tips"].searchFields["Search Saved Tips"].tap()
-        app.navigationBars["Saved Tips"].searchFields["Search Saved Tips"].typeText("No Results Expected")
+        selectTab("Saved", in: app)
+        app.searchFields["Search Names and Notes"].tap()
+        app.searchFields["Search Names and Notes"].typeText("No Results Expected")
 
         XCTAssertTrue(app.staticTexts["No Matching Tips"].exists)
     }
 
     func test_savedRename_shouldUpdateDisplayedName() {
-        let app = XCUIApplication()
-        app.launch()
+        let app = launchIsolatedUITestApp()
 
         saveTip(named: "Rename Dinner", in: app)
-        app.tabBars["Tab Bar"].buttons["Saved"].tap()
+        selectTab("Saved", in: app)
         app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Rename Dinner")).firstMatch.press(forDuration: 1)
         app.buttons["Rename"].tap()
-        app.alerts["Rename Saved Tip"].scrollViews.otherElements.textFields["Enter Name"].tap()
-        app.alerts["Rename Saved Tip"].scrollViews.otherElements.textFields["Enter Name"].typeText(" Updated")
-        app.alerts["Rename Saved Tip"].scrollViews.otherElements.buttons["OK"].tap()
+        let renameField = app.alerts["Rename Saved Tip"].textFields["Enter Name"]
+        renameField.coordinate(withNormalizedOffset: CGVector(dx: 0.98, dy: 0.5)).tap()
+        renameField.typeText(" Updated")
+        app.alerts["Rename Saved Tip"].buttons["OK"].tap()
 
         XCTAssertTrue(app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Rename Dinner Updated")).firstMatch.exists)
     }
 
     func test_savedRowAccessibilitySummary_shouldBeDiscoverable() {
-        let app = XCUIApplication()
-        app.launch()
+        let app = launchIsolatedUITestApp()
 
         saveTip(named: "Accessible Dinner", in: app)
-        app.tabBars["Tab Bar"].buttons["Saved"].tap()
+        selectTab("Saved", in: app)
 
         XCTAssertTrue(app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Accessible Dinner")).firstMatch.exists)
         XCTAssertTrue(app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Per Person")).firstMatch.exists)
     }
 
     func test_savedCard_shouldOpenDetailSheet() {
-        let app = XCUIApplication()
-        app.launch()
+        let app = launchIsolatedUITestApp()
 
         saveTip(named: "Sheet Dinner", in: app)
-        app.tabBars["Tab Bar"].buttons["Saved"].tap()
+        selectTab("Saved", in: app)
         app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Sheet Dinner")).firstMatch.tap()
 
         XCTAssertTrue(app.navigationBars["Saved Tip Details"].exists)
         XCTAssertTrue(app.buttons["Use Saved Tip Again"].exists)
-        XCTAssertTrue(app.buttons["Rename"].exists)
+        XCTAssertTrue(app.buttons["Share"].exists)
+        app.buttons["Saved Tip More"].tap()
+        XCTAssertTrue(app.buttons["Rename"].waitForExistence(timeout: 2))
         XCTAssertTrue(app.buttons["Delete"].exists)
     }
 
     func test_savedDetailUseAgain_shouldReturnToCalculatorWithSavedInputs() {
-        let app = XCUIApplication()
-        app.launch()
+        let app = launchIsolatedUITestApp()
 
         enterBillAmount("25", in: app)
-        app.buttons["20%"].tap()
+        tapScrolledIntoView(app.buttons["20%"], in: app)
         app.buttons["Increase People"].tap()
         saveCurrentTip(named: "Reuse Dinner", in: app)
         _ = app.staticTexts.matching(NSPredicate(format: "label CONTAINS 'saved'")).firstMatch.waitForExistence(timeout: 3)
 
-        app.tabBars["Tab Bar"].buttons["Saved"].tap()
+        selectTab("Saved", in: app)
         app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Reuse Dinner")).firstMatch.tap()
         app.buttons["Use Saved Tip Again"].tap()
 
         XCTAssertTrue(app.navigationBars["TipSavvy"].waitForExistence(timeout: 2))
-        XCTAssertEqual(app.buttons["20%"].value as? String, "Selected")
+        XCTAssertTrue(app.buttons["20%"].isSelected)
         XCTAssertEqual(app.otherElements["Number of People"].value as? String, "2")
     }
 
@@ -445,26 +435,27 @@ final class TippyUITests: XCTestCase {
         app.launch()
 
         enterBillAmount("25", in: app)
-        app.buttons["20%"].tap()
+        tapScrolledIntoView(app.buttons["20%"], in: app)
         app.buttons["Increase People"].tap()
-        app.buttons["Total Up"].tap()
+        tapScrolledIntoView(app.buttons["Total Up"], in: app)
 
         XCTAssertTrue(app.staticTexts["Rounding Explanation"].waitForExistence(timeout: 2))
 
+        app.buttons["Copy Menu"].tap()
         app.buttons["Copy Per Person"].tap()
-        XCTAssertTrue(app.staticTexts["Copied Confirmation"].waitForExistence(timeout: 2))
+        XCTAssertTrue(app.descendants(matching: .any)["Success Banner"].waitForExistence(timeout: 2))
 
         saveCurrentTip(named: "E2E Dinner", in: app)
         _ = app.staticTexts.matching(NSPredicate(format: "label CONTAINS 'saved'")).firstMatch.waitForExistence(timeout: 3)
 
-        app.tabBars["Tab Bar"].buttons["Saved"].tap()
+        selectTab("Saved", in: app)
         let savedTip = app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "E2E Dinner")).firstMatch
         XCTAssertTrue(savedTip.waitForExistence(timeout: 2))
         savedTip.tap()
 
         XCTAssertTrue(app.navigationBars["Saved Tip Details"].waitForExistence(timeout: 2))
-        XCTAssertTrue(app.buttons["Copy Details"].exists)
         XCTAssertTrue(app.buttons["Share"].exists)
+        XCTAssertTrue(app.descendants(matching: .any)["Saved Tip Receipt"].exists)
     }
     
     func test_keyboardDoneButton_shouldDimissKeyboard() {
@@ -481,7 +472,7 @@ final class TippyUITests: XCTestCase {
     }
 
     private func saveTip(named name: String, in app: XCUIApplication) {
-        app.tabBars["Tab Bar"].buttons["Calculate"].tap()
+        selectTab("Calculate", in: app)
         enterBillAmount("25", in: app)
         saveCurrentTip(named: name, in: app)
         _ = app.staticTexts.matching(NSPredicate(format: "label CONTAINS 'saved'")).firstMatch.waitForExistence(timeout: 3)
@@ -490,9 +481,7 @@ final class TippyUITests: XCTestCase {
     private func saveCurrentTip(named name: String, in app: XCUIApplication) {
         app.buttons["Save Tip Calculation"].tap()
         XCTAssertTrue(app.navigationBars["Save Tip"].waitForExistence(timeout: 2))
-        let nameField = app.textFields["Enter Tip Calculation Name"]
-        nameField.tap()
-        nameField.typeText(name)
+        replaceText(in: app.textFields["Enter Tip Calculation Name"], with: name)
         app.buttons["Save"].tap()
     }
 
@@ -511,20 +500,69 @@ final class TippyUITests: XCTestCase {
     }
 
     private func selectSavedTab(in app: XCUIApplication) {
-        let tabBar = app.tabBars["Tab Bar"].exists ? app.tabBars["Tab Bar"] : app.tabBars.firstMatch
-        XCTAssertTrue(tabBar.waitForExistence(timeout: 2))
-        tabBar.coordinate(withNormalizedOffset: CGVector(dx: 0.75, dy: 0.5)).tap()
+        selectTab("Saved", in: app)
     }
 
-    private func launchIsolatedUITestApp() -> XCUIApplication {
+    /// The tab bar minimizes on scroll and then shows only the current tab,
+    /// so scroll back up (or tap the collapsed bar) to reveal the others.
+    private func selectTab(_ name: String, in app: XCUIApplication) {
+        let tabBar = app.tabBars.firstMatch
+        XCTAssertTrue(tabBar.waitForExistence(timeout: 2))
+        if !tabBar.buttons[name].exists {
+            app.scrollViews.firstMatch.swipeDown()
+        }
+        if !tabBar.buttons[name].exists {
+            tabBar.buttons.firstMatch.tap()
+        }
+        XCTAssertTrue(tabBar.buttons[name].waitForExistence(timeout: 2), "Tab \(name)")
+        tabBar.buttons[name].tap()
+    }
+
+    /// Replaces a text field's contents. Fields can arrive pre-filled (the save sheet
+    /// suggests a name), and typing would otherwise append to it.
+    private func replaceText(in field: XCUIElement, with text: String) {
+        field.tap()
+        if let current = field.value as? String, !current.isEmpty, current != field.placeholderValue {
+            field.coordinate(withNormalizedOffset: CGVector(dx: 0.98, dy: 0.5)).tap()
+            field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: current.count))
+        }
+        field.typeText(text)
+    }
+
+    /// The tab bar floats over content, and XCUITest's own scroll-to-visible ignores it,
+    /// so scroll until the element sits clear of the bar before tapping.
+    private func tapScrolledIntoView(_ element: XCUIElement, in app: XCUIApplication) {
+        XCTAssertTrue(element.waitForExistence(timeout: 2))
+        let tabBar = app.tabBars.firstMatch
+        var attempts = 0
+        while attempts < 4,
+              !element.isHittable || (tabBar.exists && element.frame.maxY > tabBar.frame.minY - 8) {
+            app.scrollViews.firstMatch.swipeUp(velocity: .slow)
+            attempts += 1
+        }
+        element.tap()
+    }
+
+    /// Every test launches with `-ui-testing`: an in-memory store and freshly reset defaults,
+    /// so state never leaks between tests or runs.
+    private func launchIsolatedUITestApp(extraArguments: [String] = []) -> XCUIApplication {
         let app = XCUIApplication()
         app.launchArguments += ["-ui-testing"]
         app.launchArguments += ["-AppleLanguages", "(en-US)"]
         app.launchArguments += ["-AppleLocale", "\"en-US\""]
+        app.launchArguments += extraArguments
         app.terminate()
         app.launch()
         return app
     }
+
+    /// Relaunches without resetting defaults, to check that preferences persist.
+    private func relaunchKeepingState(_ app: XCUIApplication) {
+        app.terminate()
+        app.launchArguments += ["-ui-testing-keep-defaults"]
+        app.launch()
+    }
+
 
     private func selectTipContext(_ context: String, in app: XCUIApplication) {
         let contextButton = app.buttons["Tip Service Context"]

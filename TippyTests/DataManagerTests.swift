@@ -91,6 +91,33 @@ final class DataManagerTests: XCTestCase {
         XCTAssertTrue(dataManager.savedTips.isEmpty)
     }
 
+    func test_restoreTip_afterDelete_shouldRecreateAllFields() throws {
+        let date = Date(timeIntervalSince1970: 1_700_000_000)
+        dataManager.saveTip(name: "Undo Dinner",
+                            note: "Booth",
+                            billAmount: 100,
+                            tipPercentage: 20,
+                            numberOfPeople: 2,
+                            tipAmount: 20,
+                            totalAmountWithTip: 128,
+                            totalPerPerson: 64,
+                            date: date,
+                            subtotalAmount: 100,
+                            taxAmount: 8,
+                            tipsOnTax: false)
+        let original = try XCTUnwrap(dataManager.savedTips.first)
+        let record = SavedTipRecord(original)
+
+        dataManager.deleteTip(original)
+        XCTAssertTrue(dataManager.savedTips.isEmpty)
+
+        dataManager.restoreTip(record)
+
+        let restored = try XCTUnwrap(dataManager.savedTips.first)
+        XCTAssertEqual(SavedTipRecord(restored), record)
+        XCTAssertEqual(restored.date, date)
+    }
+
     func test_renameTip_shouldUpdateExpectedTip() {
         dataManager.saveTip(name: "Dinner", billAmount: 100.0, tipPercentage: 20, numberOfPeople: 2, tipAmount: 20.0, totalAmountWithTip: 120.0, totalPerPerson: 60.0)
 

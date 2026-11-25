@@ -297,6 +297,56 @@ class DataManager: NSObject, ObservableObject {
 
 extension DataManager: SavedTipStore { }
 
+/// A detached copy of a saved tip's fields, kept so a delete can be undone.
+struct SavedTipRecord: Equatable {
+    let name: String
+    let note: String?
+    let date: Date
+    let billAmount: Double
+    let tipPercentage: Double
+    let numberOfPeople: Int
+    let tipAmount: Double
+    let totalAmountWithTip: Double
+    let totalPerPerson: Double
+    let subtotalAmount: Double?
+    let taxAmount: Double?
+    let tipsOnTax: Bool?
+
+    init(_ tip: SavedTip) {
+        name = tip.name ?? String(localized: "Untitled Tip")
+        note = tip.note
+        date = tip.date ?? Date()
+        billAmount = tip.billAmount
+        tipPercentage = tip.tipPercentage
+        numberOfPeople = Int(tip.numberOfPeople)
+        tipAmount = tip.tipAmount
+        totalAmountWithTip = tip.totalAmountWithTip
+        totalPerPerson = tip.totalPerPerson
+        subtotalAmount = tip.subtotalAmount?.doubleValue
+        taxAmount = tip.taxAmount?.doubleValue
+        tipsOnTax = tip.tipsOnTax?.boolValue
+    }
+}
+
+extension DataManager {
+    /// Re-creates a deleted saved tip from its record.
+    @discardableResult
+    func restoreTip(_ record: SavedTipRecord) -> Result<SavedTip, DataManagerError> {
+        saveTip(name: record.name,
+                note: record.note,
+                billAmount: record.billAmount,
+                tipPercentage: record.tipPercentage,
+                numberOfPeople: record.numberOfPeople,
+                tipAmount: record.tipAmount,
+                totalAmountWithTip: record.totalAmountWithTip,
+                totalPerPerson: record.totalPerPerson,
+                date: record.date,
+                subtotalAmount: record.subtotalAmount,
+                taxAmount: record.taxAmount,
+                tipsOnTax: record.tipsOnTax)
+    }
+}
+
 extension SavedTip {
     var hasTaxBreakdown: Bool {
         (taxAmount?.doubleValue ?? 0) > 0

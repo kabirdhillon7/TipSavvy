@@ -1,2 +1,7 @@
 GoogleService-Info.plist
 Tippy/GoogleService-Info.plist
+
+# Local build and test output
+build/
+.DS_Store
+xcuserdata/

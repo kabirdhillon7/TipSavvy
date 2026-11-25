@@ -6,7 +6,6 @@
 //
 
 import XCTest
-import FirebaseCore
 
 @testable import Tippy
 

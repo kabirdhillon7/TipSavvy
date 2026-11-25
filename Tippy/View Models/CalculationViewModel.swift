@@ -8,6 +8,7 @@
 import Foundation
 import Combine
 import SwiftUI
+import UIKit
 
 enum RoundingMode: String, CaseIterable {
     case none
@@ -70,19 +71,28 @@ enum AppTheme: String, CaseIterable, Identifiable {
         }
     }
 
+    /// Light values pass WCAG AA (4.5:1) on white; dark values are lightened to pass on
+    /// dark grouped cards, the same way system colors shift in dark mode.
     var accentColor: Color {
         switch self {
         case .green:
-            return Color(red: 0.0, green: 0.537, blue: 0.263)
+            return Self.adaptive(light: (0.000, 0.537, 0.263), dark: (0.130, 0.597, 0.359))
         case .blue:
-            return Color(red: 0.0, green: 0.431, blue: 0.820)
+            return Self.adaptive(light: (0.000, 0.431, 0.820), dark: (0.190, 0.539, 0.854))
         case .pink:
-            return Color(red: 0.745, green: 0.118, blue: 0.384)
+            return Self.adaptive(light: (0.745, 0.118, 0.384), dark: (0.819, 0.374, 0.563))
         case .orange:
-            return Color(red: 0.741, green: 0.294, blue: 0.0)
+            return Self.adaptive(light: (0.741, 0.294, 0.000), dark: (0.790, 0.428, 0.190))
         case .purple:
-            return Color(red: 0.455, green: 0.220, blue: 0.753)
+            return Self.adaptive(light: (0.455, 0.220, 0.753), dark: (0.613, 0.446, 0.825))
         }
+    }
+
+    private static func adaptive(light: (CGFloat, CGFloat, CGFloat), dark: (CGFloat, CGFloat, CGFloat)) -> Color {
+        Color(UIColor { traits in
+            let rgb = traits.userInterfaceStyle == .dark ? dark : light
+            return UIColor(red: rgb.0, green: rgb.1, blue: rgb.2, alpha: 1)
+        })
     }
 }
 
@@ -312,6 +322,14 @@ final class CalculationViewModel: ObservableObject  {
     @Published var tipTaxBasis: TipTaxBasis
     @Published var tipItemName = ""
     @Published var receiptNote = ""
+    /// The most recent reversible change, shown as an undo toast.
+    @Published var undoOffer: UndoOffer?
+
+    struct UndoOffer: Identifiable, Equatable {
+        let id = UUID()
+        let message: String
+        let snapshot: Snapshot
+    }
 
     private let defaults: UserDefaults
     private let settings: TipSavvySettings?
@@ -492,13 +510,13 @@ final class CalculationViewModel: ObservableObject  {
     }
 
     func tipComparisons(for presets: [Double]) -> [TipComparison] {
-        guard hasValidCalculation, let billAmount else {
+        guard hasValidCalculation else {
             return []
         }
 
         return presets.map { preset in
-            let tipAmount = billAmount / 100 * preset
-            let unroundedTotal = Self.sanitizedAmount(billAmount + tipAmount)
+            let tipAmount = tipBaseAmount / 100 * preset
+            let unroundedTotal = Self.sanitizedAmount(billAmountWithTax + tipAmount)
             let totalPerPerson: Double
             let totalAmountWithTip: Double
 
@@ -558,6 +576,59 @@ final class CalculationViewModel: ObservableObject  {
         amount.formatted(.currency(code: currencyCode))
     }
     
+    /// A copy of the editable calculation, used to undo a reset or a loaded saved tip.
+    struct Snapshot: Equatable {
+        let billAmount: Double?
+        let tipPercentage: Double
+        let numberOfPeople: Int
+        let roundingMode: RoundingMode
+        let serviceContext: TipServiceContext
+        let taxAmount: Double?
+        let tipTaxBasis: TipTaxBasis
+        let tipItemName: String
+        let receiptNote: String
+    }
+
+    func snapshot() -> Snapshot {
+        Snapshot(billAmount: billAmount,
+                 tipPercentage: tipPercentage,
+                 numberOfPeople: numberOfPeople,
+                 roundingMode: roundingMode,
+                 serviceContext: serviceContext,
+                 taxAmount: taxAmount,
+                 tipTaxBasis: tipTaxBasis,
+                 tipItemName: tipItemName,
+                 receiptNote: receiptNote)
+    }
+
+    func restore(_ snapshot: Snapshot) {
+        billAmount = snapshot.billAmount
+        tipPercentage = Self.clampedTipPercentage(snapshot.tipPercentage)
+        numberOfPeople = Self.clampedNumberOfPeople(snapshot.numberOfPeople)
+        roundingMode = snapshot.roundingMode
+        serviceContext = snapshot.serviceContext
+        taxAmount = snapshot.taxAmount
+        tipTaxBasis = snapshot.tipTaxBasis
+        tipItemName = snapshot.tipItemName
+        receiptNote = snapshot.receiptNote
+        persistSmartDefaults()
+    }
+
+    /// Reverts to the state captured by the current undo offer.
+    func undo() {
+        guard let undoOffer else {
+            return
+        }
+
+        restore(undoOffer.snapshot)
+        self.undoOffer = nil
+    }
+
+    /// Whether the calculator holds user input worth protecting with an undo.
+    var hasUserInput: Bool {
+        billAmount != nil || taxAmount != nil || !tipItemName.isEmpty || !receiptNote.isEmpty
+    }
+
     /// Resets the tip calculation values.
     func resetValues() {
         billAmount = nil
@@ -579,6 +650,12 @@ final class CalculationViewModel: ObservableObject  {
     }
 
     func applySavedTip(_ savedTip: SavedTip) {
+        let previous = snapshot()
+        if hasUserInput {
+            let name = savedTip.name ?? String(localized: "Saved Tip")
+            undoOffer = UndoOffer(message: String(localized: "Loaded \(name)"), snapshot: previous)
+        }
+
         billAmount = Self.sanitizedAmount(savedTip.billAmount)
         tipPercentage = Self.clampedTipPercentage(savedTip.tipPercentage)
         numberOfPeople = Self.clampedNumberOfPeople(Int(savedTip.numberOfPeople))

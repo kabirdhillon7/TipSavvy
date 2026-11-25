@@ -7,10 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		480874FD2A9339DE0036A3C4 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 480874FC2A9339DE0036A3C4 /* FirebaseCrashlytics */; settings = {ATTRIBUTES = (Required, ); }; };
-		480875052A933EB80036A3C4 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 480875042A933EB80036A3C4 /* FirebaseCrashlytics */; };
 		483809F02AC54E0B00A9D486 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 483809EF2AC54E0B00A9D486 /* Localizable.xcstrings */; };
-		48380A032AC5624100A9D486 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 48380A022AC5624100A9D486 /* GoogleService-Info.plist */; };
 		48DE4E2D2A36E20200BB3E98 /* SavedTip+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48DE4E2B2A36E20200BB3E98 /* SavedTip+CoreDataClass.swift */; };
 		48DE4E2E2A36E20200BB3E98 /* SavedTip+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48DE4E2C2A36E20200BB3E98 /* SavedTip+CoreDataProperties.swift */; };
 /* End PBXBuildFile section */
@@ -34,7 +31,6 @@
 
 /* Begin PBXFileReference section */
 		483809EF2AC54E0B00A9D486 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
-		48380A022AC5624100A9D486 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		4841E29F2A145CBB0074CC0B /* Tippy.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = Tippy.xctestplan; sourceTree = "<group>"; };
 		4882DCE02A11CCD6000E8882 /* Tippy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Tippy.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4882DCF02A11CCD8000E8882 /* TippyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TippyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -64,7 +60,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				480874FD2A9339DE0036A3C4 /* FirebaseCrashlytics in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -72,7 +67,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				480875052A933EB80036A3C4 /* FirebaseCrashlytics in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -97,7 +91,6 @@
 			isa = PBXGroup;
 			children = (
 				4841E29F2A145CBB0074CC0B /* Tippy.xctestplan */,
-				48380A022AC5624100A9D486 /* GoogleService-Info.plist */,
 				483809EF2AC54E0B00A9D486 /* Localizable.xcstrings */,
 				48DE4E2B2A36E20200BB3E98 /* SavedTip+CoreDataClass.swift */,
 				48DE4E2C2A36E20200BB3E98 /* SavedTip+CoreDataProperties.swift */,
@@ -129,7 +122,6 @@
 				4882DCDC2A11CCD6000E8882 /* Sources */,
 				4882DCDD2A11CCD6000E8882 /* Frameworks */,
 				4882DCDE2A11CCD6000E8882 /* Resources */,
-				480875002A933C240036A3C4 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -139,9 +131,6 @@
 				481AE7822FAE9F9C004A67D1 /* Tippy */,
 			);
 			name = Tippy;
-			packageProductDependencies = (
-				480874FC2A9339DE0036A3C4 /* FirebaseCrashlytics */,
-			);
 			productName = Tippy;
 			productReference = 4882DCE02A11CCD6000E8882 /* Tippy.app */;
 			productType = "com.apple.product-type.application";
@@ -163,9 +152,6 @@
 				481AE7962FAE9F9F004A67D1 /* TippyTests */,
 			);
 			name = TippyTests;
-			packageProductDependencies = (
-				480875042A933EB80036A3C4 /* FirebaseCrashlytics */,
-			);
 			productName = TippyTests;
 			productReference = 4882DCF02A11CCD8000E8882 /* TippyTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
@@ -229,9 +215,6 @@
 				"pt-PT",
 			);
 			mainGroup = 4882DCD72A11CCD6000E8882;
-			packageReferences = (
-				480874FB2A9339DE0036A3C4 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
-			);
 			productRefGroup = 4882DCE12A11CCD6000E8882 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -249,7 +232,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				483809F02AC54E0B00A9D486 /* Localizable.xcstrings in Resources */,
-				48380A032AC5624100A9D486 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -268,32 +250,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
-
-/* Begin PBXShellScriptBuildPhase section */
-		480875002A933C240036A3C4 /* ShellScript */ = {
-			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}",
-				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Resources/DWARF/${PRODUCT_NAME}",
-				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Info.plist",
-				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/GoogleService-Info.plist",
-				"$(TARGET_BUILD_DIR)/$(EXECUTABLE_PATH)",
-			);
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${BUILD_DIR%/Build/*}/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/run\"\n";
-		};
-/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		4882DCDC2A11CCD6000E8882 /* Sources */ = {
@@ -472,6 +428,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Tippy/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = TipSavvy;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -507,6 +464,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Tippy/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = TipSavvy;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -637,30 +595,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCRemoteSwiftPackageReference section */
-		480874FB2A9339DE0036A3C4 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 10.0.0;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
-
-/* Begin XCSwiftPackageProductDependency section */
-		480874FC2A9339DE0036A3C4 /* FirebaseCrashlytics */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 480874FB2A9339DE0036A3C4 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
-			productName = FirebaseCrashlytics;
-		};
-		480875042A933EB80036A3C4 /* FirebaseCrashlytics */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 480874FB2A9339DE0036A3C4 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
-			productName = FirebaseCrashlytics;
-		};
-/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 4882DCD82A11CCD6000E8882 /* Project object */;
 }

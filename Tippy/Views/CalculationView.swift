@@ -7,9 +7,11 @@
 
 import SwiftUI
 import UIKit
-import VisionKit
 
 /// A view that calculates a tip calculation.
+///
+/// Layout: a compact results readout first, then the inputs in the order people think
+/// about them (bill, people, tip), then Save. Clear and Copy live in the toolbar.
 struct CalculationView: View {
     @EnvironmentObject var dataManager: DataManager
     @EnvironmentObject var settings: TipSavvySettings
@@ -19,11 +21,11 @@ struct CalculationView: View {
     @StateObject private var viewModel: CalculationViewModel
 
     @State private var showingSaveSheet = false
-    @State private var showingReceiptScanner = false
     @State private var successMessage: String?
     @State private var dataErrorMessage: String?
-    @State private var copiedValueLabel: String?
     @State private var showingTaxDetails = false
+    @State private var isDraggingTipSlider = false
+    @State private var totalsPanelIsOffscreen = false
     @FocusState var keyboardFocusField: TipSavvyKeyboardField?
 
     private let localCurrency = Locale.current.currency?.identifier ?? "USD"
@@ -33,63 +35,78 @@ struct CalculationView: View {
         _viewModel = StateObject(wrappedValue: viewModel ?? CalculationViewModel())
     }
 
+    private var accentColor: Color { settings.selectedTheme.accentColor }
+    private var isSplit: Bool { viewModel.numberOfPeople > 1 }
+
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: 18) {
-                    totalsSummaryPanel
+                VStack(spacing: 16) {
+                    totalsReadout
+                        .modifier(ScrollVisibilityModifier { isVisible in
+                            if isVisible == totalsPanelIsOffscreen {
+                                performAnimated(.easeInOut(duration: 0.2)) {
+                                    totalsPanelIsOffscreen = !isVisible
+                                }
+                            }
+                        })
                     billAmountCard
                     splitCard
                     tipCard
-                    actionButtons
+                    saveButton
                 }
                 .padding(.horizontal, 18)
-                .padding(.top, 12)
+                .padding(.top, 8)
                 .padding(.bottom, 28)
+            }
+            // An overlay rather than a safe-area inset, so content doesn't jump under the finger.
+            .overlay(alignment: .top) {
+                if totalsPanelIsOffscreen {
+                    pinnedTotalsBar
+                        .transition(reduceMotion ? .opacity : .move(edge: .top).combined(with: .opacity))
+                }
             }
             .background(Color(.systemGroupedBackground))
             .navigationTitle("TipSavvy")
-            .toastOverlay(isPresented: dataErrorMessage != nil || successMessage != nil) {
+            .toastOverlay(isPresented: dataErrorMessage != nil || successMessage != nil || viewModel.undoOffer != nil) {
                 if let dataErrorMessage {
                     TipSavvyErrorBanner(message: dataErrorMessage) {
                         self.dataErrorMessage = nil
                         dataManager.lastError = nil
                     }
+                } else if let undoOffer = viewModel.undoOffer {
+                    TipSavvyUndoBanner(message: undoOffer.message) {
+                        performAnimated(.spring(response: 0.32, dampingFraction: 0.82)) {
+                            viewModel.undo()
+                        }
+                        HapticFeedbackPerformer.selection(isEnabled: settings.hapticsEnabled)
+                    }
                 } else if let successMessage {
                     TipSavvySuccessBanner(message: successMessage)
+                }
+            }
+            .task(id: viewModel.undoOffer?.id) {
+                guard let offerID = viewModel.undoOffer?.id else {
+                    return
+                }
+                try? await Task.sleep(for: .seconds(8))
+                if viewModel.undoOffer?.id == offerID {
+                    viewModel.undoOffer = nil
+                }
+            }
+            .task(id: successMessage) {
+                guard let message = successMessage else {
+                    return
+                }
+                try? await Task.sleep(for: .seconds(2.5))
+                if successMessage == message {
+                    successMessage = nil
                 }
             }
             .sheet(isPresented: $showingSaveSheet) {
                 saveTipSheet
                     .presentationDetents([.medium])
                     .presentationDragIndicator(.visible)
-            }
-            .sheet(isPresented: $showingReceiptScanner) {
-                ZStack(alignment: .topTrailing) {
-                    ReceiptScannerView { amount in
-                        viewModel.billAmount = amount
-                        showingReceiptScanner = false
-                        HapticFeedbackPerformer.success(isEnabled: settings.hapticsEnabled)
-                        successMessage = String(localized: "Bill amount scanned")
-                        Task {
-                            try? await Task.sleep(for: .seconds(2.5))
-                            await MainActor.run { successMessage = nil }
-                        }
-                    }
-
-                    Button {
-                        showingReceiptScanner = false
-                    } label: {
-                        Image(systemName: "xmark")
-                            .font(.title2.weight(.semibold))
-                            .foregroundStyle(.white)
-                            .frame(width: 44, height: 44)
-                            .background(.ultraThinMaterial, in: Circle())
-                    }
-                    .padding(.top, 16)
-                    .padding(.trailing, 16)
-                    .accessibilityLabel(String(localized: "Close Scanner"))
-                }
             }
             .onChange(of: viewModel.numberOfPeople, perform: { _ in
                 viewModel.persistSmartDefaults()
@@ -103,6 +120,14 @@ struct CalculationView: View {
             .animation(reduceMotion ? nil : .easeInOut(duration: 0.2), value: showingTaxDetails)
             .animation(reduceMotion ? nil : .easeInOut(duration: 0.25), value: successMessage)
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    clearButton
+                }
+
+                ToolbarItem(placement: .topBarTrailing) {
+                    copyMenu
+                }
+
                 ToolbarItem(placement: .keyboard) {
                     Spacer()
                 }
@@ -120,11 +145,135 @@ struct CalculationView: View {
         }
     }
 
+    // MARK: - Results
+
+    /// The answer, stated once: the hero figure, then the arithmetic that produced it.
+    private var totalsReadout: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Group {
+                if isSplit {
+                    ViewThatFits(in: .horizontal) {
+                        HStack(alignment: .top, spacing: 12) {
+                            perPersonMetric
+                            totalMetric(prominence: .regular)
+                        }
+
+                        VStack(alignment: .leading, spacing: 12) {
+                            perPersonMetric
+                            totalMetric(prominence: .regular)
+                        }
+                    }
+                } else {
+                    // With one person, per-person equals the total; show it once.
+                    totalMetric(prominence: .primary)
+                }
+            }
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(String(localized: "Totals"))
+            .accessibilityValue(viewModel.accessibilityTotalsSummary(currencyCode: localCurrency))
+            .contextMenu { copyMenuItems }
+
+            VStack(spacing: 8) {
+                InfoRow(title: String(localized: "Subtotal"), value: viewModel.subtotalAmount.formatted(.currency(code: localCurrency)))
+                if viewModel.hasTax {
+                    InfoRow(title: String(localized: "Tax"), value: viewModel.sanitizedTaxAmount.formatted(.currency(code: localCurrency)))
+                }
+                InfoRow(title: tipBreakdownTitle, value: viewModel.tipAmount.formatted(.currency(code: localCurrency)))
+            }
+
+            if let roundingExplanation {
+                Text(roundingExplanation)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityIdentifier("Rounding Explanation")
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(18)
+        .contentCard()
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel(String(localized: "Bill Totals"))
+        .accessibilityIdentifier("Bill Totals Summary")
+    }
+
+    private var perPersonMetric: some View {
+        MetricCard(title: String(localized: "Per Person"),
+                   value: viewModel.totalPerPerson.formatted(.currency(code: localCurrency)),
+                   prominence: .primary,
+                   accentColor: accentColor)
+    }
+
+    private func totalMetric(prominence: MetricCard.Prominence) -> some View {
+        MetricCard(title: String(localized: "Total With Tip"),
+                   value: viewModel.totalAmountWithTip.formatted(.currency(code: localCurrency)),
+                   prominence: prominence,
+                   accentColor: accentColor)
+    }
+
+    private var percentText: String {
+        String(format: "%.0f%%", viewModel.tipPercentage)
+    }
+
+    private var tipBreakdownTitle: String {
+        if viewModel.hasTax && viewModel.tipTaxBasis == .subtotalAndTax {
+            return String(localized: "Tip \(percentText) of Subtotal + Tax")
+        }
+        return String(localized: "Tip \(percentText)")
+    }
+
+    private var roundingExplanation: String? {
+        guard viewModel.hasValidCalculation else {
+            return nil
+        }
+        switch viewModel.roundingMode {
+        case .none:
+            return nil
+        case .roundTotalUp:
+            return String(localized: "Rounded total from \(viewModel.unroundedTotalForDisplay.formatted(.currency(code: localCurrency))) to \(viewModel.totalAmountWithTip.formatted(.currency(code: localCurrency))).")
+        case .roundPerPersonUp:
+            return String(localized: "Rounded each person from \(viewModel.unroundedPerPersonForDisplay.formatted(.currency(code: localCurrency))) to \(viewModel.totalPerPerson.formatted(.currency(code: localCurrency))).")
+        }
+    }
+
+    /// A compact readout that floats over the inputs once the results card scrolls away.
+    private var pinnedTotalsBar: some View {
+        HStack(alignment: .firstTextBaseline) {
+            VStack(alignment: .leading, spacing: 0) {
+                Text(isSplit ? String(localized: "Per Person") : String(localized: "Total"))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Text(isSplit ? viewModel.totalPerPerson : viewModel.totalAmountWithTip, format: .currency(code: localCurrency))
+                    .font(.title3.weight(.bold).monospacedDigit())
+                    .foregroundStyle(accentColor)
+                    .animatedTextChange(value: isSplit ? viewModel.totalPerPerson : viewModel.totalAmountWithTip)
+            }
+            Spacer(minLength: 12)
+            VStack(alignment: .trailing, spacing: 0) {
+                Text(isSplit ? String(localized: "Total") + " · " + percentText : String(localized: "Tip") + " · " + percentText)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Text(isSplit ? viewModel.totalAmountWithTip : viewModel.tipAmount, format: .currency(code: localCurrency))
+                    .font(.title3.weight(.semibold).monospacedDigit())
+                    .animatedTextChange(value: isSplit ? viewModel.totalAmountWithTip : viewModel.tipAmount)
+            }
+        }
+        .padding(.horizontal, 22)
+        .padding(.vertical, 10)
+        .floatingGlass(in: Capsule(style: .continuous))
+        .padding(.horizontal, 14)
+        .padding(.top, 6)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(String(localized: "Totals"))
+        .accessibilityValue(viewModel.accessibilityTotalsSummary(currencyCode: localCurrency))
+        .accessibilityIdentifier("Pinned Totals")
+    }
+
+    // MARK: - Bill
+
     private var billAmountCard: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Label(String(localized: "Bill Amount"), systemImage: "receipt")
-                .font(.headline)
-                .foregroundStyle(.secondary)
+            cardHeader(String(localized: "Bill"))
 
             HStack(alignment: .center, spacing: 12) {
                 TextField(String(localized: "Enter Bill Amount"),
@@ -135,33 +284,30 @@ struct CalculationView: View {
                     .focused($keyboardFocusField, equals: .billAmount)
                     .textFieldStyle(.plain)
                     .accessibilityLabel(String(localized: "Enter Bill Amount"))
-
-                if DataScannerViewController.isSupported {
-                    Button {
-                        keyboardFocusField = nil
-                        showingReceiptScanner = true
-                    } label: {
-                        Image(systemName: "camera.viewfinder")
-                            .font(.title2.weight(.medium))
-                            .foregroundStyle(settings.selectedTheme.accentColor)
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel(String(localized: "Scan Receipt"))
-                    .accessibilityHint(String(localized: "Opens camera to scan a receipt total"))
-                }
             }
 
-            if let message = viewModel.billValidationMessage, viewModel.billAmount != nil {
-                Label(message, systemImage: "exclamationmark.circle")
+            if let message = viewModel.billValidationMessage, viewModel.billAmount != nil || keyboardFocusField != .billAmount {
+                let isError = viewModel.billAmount != nil
+                Label(message, systemImage: isError ? "exclamationmark.circle.fill" : "info.circle")
                     .font(.footnote)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(isError ? Color.red : Color.secondary)
                     .accessibilityIdentifier("Bill Validation Message")
             }
+
+            Divider()
 
             taxDetailsSection
         }
         .padding(18)
-        .glassPanel(cornerRadius: 22, interactive: true, highContrast: keyboardFocusField == .billAmount)
+        .contentCard(highlight: keyboardFocusField == .billAmount ? accentColor : nil)
+    }
+
+    /// The collapsed row states what tax is doing, so nothing is hidden behind the disclosure.
+    private var taxSummary: String {
+        if viewModel.hasTax {
+            return String(localized: "Tax \(viewModel.sanitizedTaxAmount.formatted(.currency(code: localCurrency))) · tip on \(viewModel.tipTaxBasis.title)")
+        }
+        return String(localized: "Add Tax")
     }
 
     private var taxDetailsSection: some View {
@@ -171,17 +317,20 @@ struct CalculationView: View {
                 HapticFeedbackPerformer.selection(isEnabled: settings.hapticsEnabled)
             } label: {
                 HStack(spacing: 10) {
-                    Label(String(localized: "Tax Details"), systemImage: "plus.forwardslash.minus")
+                    Text(showingTaxDetails ? String(localized: "Tax") : taxSummary)
                         .font(.subheadline.weight(.medium))
+                        .foregroundStyle(viewModel.hasTax || showingTaxDetails ? Color.primary : accentColor)
                     Spacer()
-                    Image(systemName: showingTaxDetails ? "chevron.up" : "chevron.down")
+                    Image(systemName: "chevron.down")
                         .font(.caption.weight(.semibold))
                         .foregroundStyle(.secondary)
+                        .rotationEffect(.degrees(showingTaxDetails ? 180 : 0))
                 }
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
             .accessibilityLabel(String(localized: "Tax Details"))
+            .accessibilityValue(viewModel.hasTax ? taxSummary : "")
             .accessibilityIdentifier("Tax Details Toggle")
 
             if showingTaxDetails {
@@ -196,26 +345,27 @@ struct CalculationView: View {
                         .accessibilityLabel(String(localized: "Optional Tax Amount"))
                         .accessibilityIdentifier("Optional Tax Amount")
 
-                    Picker(String(localized: "Tip Basis"), selection: $viewModel.tipTaxBasis) {
-                        ForEach(TipTaxBasis.allCases) { basis in
-                            Text(basis.title).tag(basis)
-                        }
-                    }
-                    .pickerStyle(.segmented)
-                    .onChange(of: viewModel.tipTaxBasis) { _ in
-                        viewModel.persistSmartDefaults()
-                    }
-                    .accessibilityIdentifier("Tip Tax Basis")
-
-                    if let message = viewModel.taxValidationMessage {
-                        Label(message, systemImage: "exclamationmark.circle")
-                            .font(.footnote)
-                            .foregroundStyle(.secondary)
-                            .accessibilityIdentifier("Tax Validation Message")
-                    } else {
-                        Text(String(localized: "Leave tax empty to keep the simple bill total."))
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text(String(localized: "Tip On"))
                             .font(.caption)
                             .foregroundStyle(.secondary)
+                        Picker(String(localized: "Tip Basis"), selection: $viewModel.tipTaxBasis) {
+                            ForEach(TipTaxBasis.allCases) { basis in
+                                Text(basis.title).tag(basis)
+                            }
+                        }
+                        .pickerStyle(.segmented)
+                        .onChange(of: viewModel.tipTaxBasis) { _ in
+                            viewModel.persistSmartDefaults()
+                        }
+                        .accessibilityIdentifier("Tip Tax Basis")
+                    }
+
+                    if let message = viewModel.taxValidationMessage {
+                        Label(message, systemImage: "exclamationmark.circle.fill")
+                            .font(.footnote)
+                            .foregroundStyle(.red)
+                            .accessibilityIdentifier("Tax Validation Message")
                     }
                 }
                 .transition(reduceMotion ? .identity : .opacity.combined(with: .move(edge: .top)))
@@ -223,57 +373,34 @@ struct CalculationView: View {
         }
     }
 
+    // MARK: - People
+
     private var splitCard: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            Label(String(localized: "Number of People"), systemImage: "person.2")
-                .font(.headline)
-                .foregroundStyle(.secondary)
+        HStack {
+            peopleButton(systemImage: "minus", label: String(localized: "Decrease People"), isDisabled: viewModel.numberOfPeople <= 1) {
+                viewModel.numberOfPeople = max(1, viewModel.numberOfPeople - 1)
+            }
 
-            ViewThatFits(in: .horizontal) {
-                HStack {
-                    peopleButton(systemImage: "minus", label: String(localized: "Decrease People"), isDisabled: viewModel.numberOfPeople <= 1) {
-                        viewModel.numberOfPeople = max(1, viewModel.numberOfPeople - 1)
-                        HapticFeedbackPerformer.selection(isEnabled: settings.hapticsEnabled)
-                    }
+            Spacer(minLength: 12)
+            peopleCount
+            Spacer(minLength: 12)
 
-                    Spacer(minLength: 16)
-                    peopleCount
-                    Spacer(minLength: 16)
-
-                    peopleButton(systemImage: "plus", label: String(localized: "Increase People"), isDisabled: viewModel.numberOfPeople >= 99) {
-                        viewModel.numberOfPeople = min(99, viewModel.numberOfPeople + 1)
-                        HapticFeedbackPerformer.selection(isEnabled: settings.hapticsEnabled)
-                    }
-                }
-
-                VStack(spacing: 12) {
-                    peopleCount
-                    HStack {
-                        peopleButton(systemImage: "minus", label: String(localized: "Decrease People"), isDisabled: viewModel.numberOfPeople <= 1) {
-                            viewModel.numberOfPeople = max(1, viewModel.numberOfPeople - 1)
-                            HapticFeedbackPerformer.selection(isEnabled: settings.hapticsEnabled)
-                        }
-                        Spacer()
-                        peopleButton(systemImage: "plus", label: String(localized: "Increase People"), isDisabled: viewModel.numberOfPeople >= 99) {
-                            viewModel.numberOfPeople = min(99, viewModel.numberOfPeople + 1)
-                            HapticFeedbackPerformer.selection(isEnabled: settings.hapticsEnabled)
-                        }
-                    }
-                }
+            peopleButton(systemImage: "plus", label: String(localized: "Increase People"), isDisabled: viewModel.numberOfPeople >= 99) {
+                viewModel.numberOfPeople = min(99, viewModel.numberOfPeople + 1)
             }
         }
         .padding(18)
-        .glassPanel(cornerRadius: 22)
+        .contentCard()
         .accessibilityElement(children: .contain)
     }
 
     private var peopleCount: some View {
-        VStack(spacing: 2) {
+        VStack(spacing: 0) {
             Text(viewModel.numberOfPeople, format: .number)
                 .font(.system(.largeTitle, design: .rounded).weight(.bold))
                 .monospacedDigit()
                 .animatedTextChange(value: viewModel.numberOfPeople)
-            Text(String(localized: "People"))
+            Text(viewModel.numberOfPeople == 1 ? String(localized: "Person") : String(localized: "People"))
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
         }
@@ -288,312 +415,43 @@ struct CalculationView: View {
             performAnimated(.spring(response: 0.26, dampingFraction: 0.82)) {
                 action()
             }
+            HapticFeedbackPerformer.selection(isEnabled: settings.hapticsEnabled)
         } label: {
             Image(systemName: systemImage)
                 .font(.headline.weight(.bold))
-                .frame(width: 48, height: 48)
-                .contentShape(Circle())
+                .frame(width: 36, height: 36)
         }
-        .buttonStyle(.plain)
-        .background(.regularMaterial, in: Circle())
-        .overlay {
-            Circle()
-                .strokeBorder(.primary.opacity(colorSchemeContrast == .increased ? 0.45 : 0.18), lineWidth: colorSchemeContrast == .increased ? 1.5 : 1)
-        }
+        .glassCircleButtonStyle()
         .disabled(isDisabled)
-        .opacity(isDisabled ? 0.45 : 1)
         .accessibilityLabel(label)
     }
 
+    // MARK: - Tip
+
     private var tipCard: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Label(String(localized: "Tip Amount"), systemImage: "percent")
-                .font(.headline)
-                .foregroundStyle(.secondary)
-
-            serviceContextSection
-
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 68), spacing: 8)], spacing: 8) {
-                ForEach(viewModel.serviceContext.suggestedPresets, id: \.self) { preset in
-                    tipPresetButton(for: preset)
-                }
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(alignment: .firstTextBaseline) {
+                cardHeader(String(localized: "Tip"))
+                Spacer(minLength: 12)
+                servicePicker
             }
 
             tipComparisonSection
 
-            VStack(alignment: .leading, spacing: 8) {
-                ViewThatFits(in: .horizontal) {
-                    HStack {
-                        Text(String(localized: "Custom Tip"))
-                            .font(.subheadline.weight(.medium))
-                            .foregroundStyle(.secondary)
-                        Spacer()
-                        tipPercentageText
-                    }
-
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(String(localized: "Custom Tip"))
-                            .font(.subheadline.weight(.medium))
-                            .foregroundStyle(.secondary)
-                        tipPercentageText
-                    }
+            VStack(alignment: .leading, spacing: 6) {
+                HStack(alignment: .firstTextBaseline) {
+                    Text(String(localized: "Custom"))
+                        .font(.subheadline.weight(.medium))
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                    customTipText
                 }
                 tipSlider
-            }
-        }
-        .padding(18)
-        .glassPanel(cornerRadius: 22)
-    }
-
-    private var serviceContextSection: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            serviceContextMenu
-            .accessibilityLabel(String(localized: "Tip Service Context"))
-            .accessibilityValue(viewModel.serviceContext.label)
-            .accessibilityIdentifier("Tip Service Context")
-
-            Text(serviceContextHelperText)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
-                .accessibilityIdentifier("Tip Context Helper")
-        }
-    }
-
-    private var serviceContextMenu: some View {
-        Menu {
-            ForEach(TipServiceContext.allCases) { context in
-                serviceContextButton(for: context)
-            }
-        } label: {
-            serviceContextMenuLabel
-        }
-    }
-
-    private func serviceContextButton(for context: TipServiceContext) -> some View {
-        Button {
-            selectServiceContext(context)
-        } label: {
-            Label(context.label, systemImage: serviceContextSystemImage(for: context))
-        }
-    }
-
-    private var serviceContextMenuLabel: some View {
-        HStack(spacing: 10) {
-            Label(String(localized: "Context"), systemImage: viewModel.serviceContext.systemImage)
-                .font(.subheadline.weight(.medium))
-            Spacer(minLength: 10)
-            Text(viewModel.serviceContext.label)
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(.primary)
-                .lineLimit(1)
-            Image(systemName: "chevron.down")
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(.secondary)
-        }
-        .padding(12)
-        .frame(maxWidth: .infinity)
-        .background {
-            serviceContextShape
-                .fill(serviceContextBackground)
-        }
-        .overlay {
-            serviceContextBorder
-        }
-        .contentShape(serviceContextShape)
-    }
-
-    private var serviceContextBackground: some ShapeStyle {
-        Color.primary.opacity(colorSchemeContrast == .increased ? 0.08 : 0.04)
-    }
-
-    private var serviceContextBorder: some View {
-        serviceContextShape
-            .strokeBorder(Color.primary.opacity(colorSchemeContrast == .increased ? 0.28 : 0.08), lineWidth: colorSchemeContrast == .increased ? 1.5 : 1)
-    }
-
-    private var serviceContextShape: RoundedRectangle {
-        RoundedRectangle(cornerRadius: 14, style: .continuous)
-    }
-
-    private var serviceContextHelperText: String {
-        viewModel.serviceContext.helperText + " " + String(localized: "Suggestions are general. Choose what feels right.")
-    }
-
-    private func serviceContextSystemImage(for context: TipServiceContext) -> String {
-        context == viewModel.serviceContext ? "checkmark" : "circle"
-    }
-
-    private func selectServiceContext(_ context: TipServiceContext) {
-        viewModel.serviceContext = context
-        viewModel.persistSmartDefaults()
-        HapticFeedbackPerformer.selection(isEnabled: settings.hapticsEnabled)
-    }
-
-    private var tipComparisonSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text(String(localized: "Tip Comparison"))
-                .font(.subheadline.weight(.medium))
-                .foregroundStyle(.secondary)
-
-            let comparisons = viewModel.tipComparisons(for: viewModel.serviceContext.suggestedPresets)
-            if comparisons.isEmpty {
-                Label(String(localized: "Enter a bill amount to compare common tips."), systemImage: "chart.bar")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-            } else {
-                VStack(spacing: 8) {
-                    ForEach(comparisons) { comparison in
-                        tipComparisonRow(comparison)
-                    }
-                }
-            }
-        }
-        .padding(12)
-        .background(Color.primary.opacity(colorSchemeContrast == .increased ? 0.08 : 0.04), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .strokeBorder(Color.primary.opacity(colorSchemeContrast == .increased ? 0.28 : 0.08), lineWidth: colorSchemeContrast == .increased ? 1.5 : 1)
-        }
-        .accessibilityIdentifier("Tip Comparison")
-    }
-
-    private func tipComparisonRow(_ comparison: TipComparison) -> some View {
-        let isSelected = viewModel.tipPercentage == comparison.percentage
-        let themeColor = settings.selectedTheme.accentColor
-
-        return Button {
-            performAnimated(.spring(response: 0.28, dampingFraction: 0.78)) {
-                viewModel.tipPercentage = comparison.percentage
-                viewModel.persistSmartDefaults()
-            }
-            HapticFeedbackPerformer.selection(isEnabled: settings.hapticsEnabled)
-        } label: {
-            ViewThatFits(in: .horizontal) {
-                HStack(spacing: 10) {
-                    tipComparisonPercent(comparison, isSelected: isSelected)
-                    Spacer(minLength: 8)
-                    tipComparisonAmounts(comparison)
-                }
-
-                VStack(alignment: .leading, spacing: 6) {
-                    tipComparisonPercent(comparison, isSelected: isSelected)
-                    tipComparisonAmounts(comparison)
-                }
-            }
-            .padding(10)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background {
-                if isSelected {
-                    RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .fill(themeColor.opacity(colorSchemeContrast == .increased ? 0.24 : 0.13))
-                }
-            }
-            .overlay {
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .strokeBorder(isSelected ? themeColor : Color.primary.opacity(colorSchemeContrast == .increased ? 0.2 : 0.08), lineWidth: isSelected || colorSchemeContrast == .increased ? 1.5 : 1)
-            }
-        }
-        .buttonStyle(.plain)
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(String(format: String(localized: "%.0f%% tip comparison"), comparison.percentage))
-        .accessibilityValue(String(localized: "Total \(comparison.totalAmountWithTip.formatted(.currency(code: localCurrency))), per person \(comparison.totalPerPerson.formatted(.currency(code: localCurrency)))"))
-        .accessibilityHint(String(localized: "Applies this tip percentage"))
-        .modifier(SelectedAccessibilityTraitModifier(isSelected: isSelected))
-    }
-
-    private func tipComparisonPercent(_ comparison: TipComparison, isSelected: Bool) -> some View {
-        Label {
-            Text("\(comparison.percentage, specifier: "%.0f")%")
-                .font(.subheadline.weight(.semibold).monospacedDigit())
-        } icon: {
-            Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                .foregroundStyle(isSelected ? settings.selectedTheme.accentColor : Color.secondary)
-        }
-        .foregroundStyle(.primary)
-    }
-
-    private func tipComparisonAmounts(_ comparison: TipComparison) -> some View {
-        VStack(alignment: .trailing, spacing: 2) {
-            Text(comparison.totalAmountWithTip, format: .currency(code: localCurrency))
-                .font(.subheadline.weight(.semibold))
-                .monospacedDigit()
-            Text(String(localized: "Per Person") + " " + comparison.totalPerPerson.formatted(.currency(code: localCurrency)))
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .monospacedDigit()
-        }
-    }
-
-    private var tipPercentageText: some View {
-        Text("\(viewModel.tipPercentage, specifier: "%.0f")%")
-            .font(.headline.monospacedDigit())
-            .lineLimit(1)
-            .animatedTextChange(value: viewModel.tipPercentage)
-    }
-
-    @ViewBuilder
-    private func tipPresetButton(for preset: Double) -> some View {
-        let isSelected = viewModel.tipPercentage == preset
-
-        Button {
-            performAnimated(.spring(response: 0.28, dampingFraction: 0.78)) {
-                viewModel.tipPercentage = preset
-                viewModel.persistSmartDefaults()
-            }
-            HapticFeedbackPerformer.selection(isEnabled: settings.hapticsEnabled)
-        } label: {
-            Text("\(preset, specifier: "%.0f")%")
-                .frame(maxWidth: .infinity)
-        }
-        .buttonStyle(TipPresetButtonStyle(isSelected: isSelected, accentColor: settings.selectedTheme.accentColor))
-        .accessibilityLabel("\(preset, specifier: "%.0f")%")
-        .accessibilityValue(isSelected ? String(localized: "Selected") : "")
-        .modifier(SelectedAccessibilityTraitModifier(isSelected: isSelected))
-    }
-
-    private var tipSlider: some View {
-        Slider(value: $viewModel.tipPercentage, in: 0...30, step: 1)
-            .tint(settings.selectedTheme.accentColor)
-            .onChange(of: viewModel.tipPercentage, perform: { _ in
-                HapticFeedbackPerformer.selection(isEnabled: settings.hapticsEnabled)
-                viewModel.persistSmartDefaults()
-            })
-            .animation(reduceMotion ? nil : .easeInOut(duration: 0.2), value: viewModel.tipPercentage)
-            .accessibilityLabel(String(localized: "Tip Percentage Selection"))
-            .accessibilityValue("\(viewModel.tipPercentage, specifier: "%.0f")%")
-            .accessibilityHint(String(localized: "Selects the Tip Percentage"))
-    }
-
-    private var totalsSummaryPanel: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text(String(localized: "Bill Totals"))
-                .font(.headline)
-                .foregroundStyle(.secondary)
-
-            ViewThatFits(in: .horizontal) {
-                HStack(alignment: .top, spacing: 12) {
-                    MetricCard(title: String(localized: "Total Per Person"), value: viewModel.totalPerPerson.formatted(.currency(code: localCurrency)), prominence: .primary, accentColor: settings.selectedTheme.accentColor)
-                    MetricCard(title: String(localized: "Total With Tip"), value: viewModel.totalAmountWithTip.formatted(.currency(code: localCurrency)))
-                }
-
-                VStack(spacing: 12) {
-                    MetricCard(title: String(localized: "Total Per Person"), value: viewModel.totalPerPerson.formatted(.currency(code: localCurrency)), prominence: .primary, accentColor: settings.selectedTheme.accentColor)
-                    MetricCard(title: String(localized: "Total With Tip"), value: viewModel.totalAmountWithTip.formatted(.currency(code: localCurrency)))
-                }
             }
 
             Divider()
 
-            InfoRow(title: String(localized: "Subtotal"), value: (viewModel.billAmount ?? 0).formatted(.currency(code: localCurrency)))
-            if viewModel.hasTax {
-                InfoRow(title: String(localized: "Tax"), value: viewModel.sanitizedTaxAmount.formatted(.currency(code: localCurrency)))
-                InfoRow(title: String(localized: "Tip Basis"), value: viewModel.tipTaxBasis.title)
-            }
-            InfoRow(title: String(localized: "Tip"), value: viewModel.tipAmount.formatted(.currency(code: localCurrency)))
-
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: 6) {
                 Text(String(localized: "Rounding"))
                     .font(.subheadline.weight(.medium))
                     .foregroundStyle(.secondary)
@@ -609,87 +467,228 @@ struct CalculationView: View {
                     viewModel.persistSmartDefaults()
                 }
                 .accessibilityIdentifier("Rounding Mode")
-
-                if let roundingExplanation {
-                    Label(roundingExplanation, systemImage: "info.circle")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .accessibilityIdentifier("Rounding Explanation")
-                }
-            }
-
-            ViewThatFits(in: .horizontal) {
-                HStack(alignment: .top, spacing: 10) {
-                    copyButton(label: String(localized: "Copy Total"), value: viewModel.totalAmountWithTip.formatted(.currency(code: localCurrency)))
-                    copyButton(label: String(localized: "Copy Per Person"), value: viewModel.totalPerPerson.formatted(.currency(code: localCurrency)))
-                }
-
-                VStack(spacing: 10) {
-                    copyButton(label: String(localized: "Copy Total"), value: viewModel.totalAmountWithTip.formatted(.currency(code: localCurrency)))
-                    copyButton(label: String(localized: "Copy Per Person"), value: viewModel.totalPerPerson.formatted(.currency(code: localCurrency)))
-                }
-            }
-
-            if let copiedValueLabel {
-                Text(copiedValueLabel + " " + String(localized: "copied"))
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .transition(reduceMotion ? .identity : .opacity)
-                    .accessibilityIdentifier("Copied Confirmation")
             }
         }
         .padding(18)
-        .glassPanel(cornerRadius: 24, highContrast: colorSchemeContrast == .increased)
-        .contentTransition(reduceMotion ? .identity : .opacity)
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(String(localized: "Bill Totals"))
-        .accessibilityValue(viewModel.accessibilityTotalsSummary(currencyCode: localCurrency))
-        .accessibilityIdentifier("Bill Totals Summary")
+        .contentCard()
     }
 
-    private var actionButtons: some View {
-        ViewThatFits(in: .horizontal) {
-            HStack(spacing: 12) {
-                saveButton
-                resetButton
+    /// Where the tip is for. Picking a service swaps in that service's typical presets.
+    private var servicePicker: some View {
+        Picker(selection: $viewModel.serviceContext) {
+            ForEach(TipServiceContext.allCases) { context in
+                Label(context.label, systemImage: context.systemImage).tag(context)
             }
+        } label: {
+            Text(String(localized: "Service"))
+        }
+        .pickerStyle(.menu)
+        .labelsHidden()
+        .fixedSize()
+        .onChange(of: viewModel.serviceContext) { _ in
+            viewModel.persistSmartDefaults()
+            HapticFeedbackPerformer.selection(isEnabled: settings.hapticsEnabled)
+        }
+        .accessibilityLabel(String(localized: "Tip Service Context"))
+        .accessibilityValue(viewModel.serviceContext.label)
+        .accessibilityHint(viewModel.serviceContext.helperText)
+        .accessibilityIdentifier("Tip Service Context")
+    }
 
-            VStack(spacing: 12) {
-                saveButton
-                resetButton
+    /// One row per preset, each showing the same figures so they can be compared at a glance.
+    /// The row count never changes while the slider moves, so the slider stays under the finger.
+    private var tipComparisonSection: some View {
+        let presets = viewModel.serviceContext.suggestedPresets
+        let comparisons = viewModel.tipComparisons(for: presets)
+
+        return VStack(alignment: .leading, spacing: 2) {
+            ForEach(presets, id: \.self) { percentage in
+                tipComparisonRow(percentage: percentage,
+                                 comparison: comparisons.first { $0.percentage == percentage })
             }
         }
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("Tip Comparison")
     }
 
-    private var roundingExplanation: String? {
-        switch viewModel.roundingMode {
-        case .none:
-            return nil
-        case .roundTotalUp:
-            guard viewModel.hasValidCalculation else {
-                return String(localized: "The total will be rounded up to the nearest dollar.")
+    private func tipComparisonRow(percentage: Double, comparison: TipComparison?) -> some View {
+        let isSelected = viewModel.tipPercentage == percentage
+        let rowPercentText = String(format: "%.0f%%", percentage)
+
+        return Button {
+            performAnimated(.spring(response: 0.28, dampingFraction: 0.78)) {
+                viewModel.tipPercentage = percentage
+                viewModel.persistSmartDefaults()
             }
-            return String(localized: "Rounded total from \(viewModel.unroundedTotalForDisplay.formatted(.currency(code: localCurrency))) to \(viewModel.totalAmountWithTip.formatted(.currency(code: localCurrency))).")
-        case .roundPerPersonUp:
-            guard viewModel.hasValidCalculation else {
-                return String(localized: "Each person's share will be rounded up to the nearest dollar.")
+            HapticFeedbackPerformer.selection(isEnabled: settings.hapticsEnabled)
+        } label: {
+            HStack(alignment: .firstTextBaseline, spacing: 10) {
+                Image(systemName: "checkmark")
+                    .font(.subheadline.weight(.bold))
+                    .foregroundStyle(accentColor)
+                    .opacity(isSelected ? 1 : 0)
+                    .accessibilityHidden(true)
+
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(rowPercentText)
+                        .font(.body.weight(isSelected ? .bold : .regular).monospacedDigit())
+                    if let comparison {
+                        Text(String(localized: "Tip \(comparison.tipAmount.formatted(.currency(code: localCurrency)))"))
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .monospacedDigit()
+                    }
+                }
+
+                Spacer(minLength: 8)
+
+                if let comparison {
+                    VStack(alignment: .trailing, spacing: 1) {
+                        Text(comparison.totalAmountWithTip, format: .currency(code: localCurrency))
+                            .font(.body.weight(isSelected ? .bold : .regular))
+                            .monospacedDigit()
+                        if isSplit {
+                            Text(String(localized: "\(comparison.totalPerPerson.formatted(.currency(code: localCurrency))) each"))
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .monospacedDigit()
+                        }
+                    }
+                }
             }
-            return String(localized: "Rounded each person from \(viewModel.unroundedPerPersonForDisplay.formatted(.currency(code: localCurrency))) to \(viewModel.totalPerPerson.formatted(.currency(code: localCurrency))).")
+            .padding(.vertical, 8)
+            .padding(.horizontal, 10)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background {
+                RoundedRectangle(cornerRadius: GlassRadius.inner, style: .continuous)
+                    .fill(isSelected ? accentColor.opacity(colorSchemeContrast == .increased ? 0.24 : 0.12) : Color.clear)
+            }
+            .contentShape(Rectangle())
         }
+        .buttonStyle(.plain)
+        .accessibilityLabel(rowPercentText)
+        .accessibilityValue(tipRowAccessibilityValue(comparison: comparison))
+        .accessibilityHint(String(localized: "Applies this tip percentage"))
+        .modifier(SelectedAccessibilityTraitModifier(isSelected: isSelected))
     }
+
+    /// Selection is conveyed by the `.isSelected` trait, so the value carries only the amounts.
+    private func tipRowAccessibilityValue(comparison: TipComparison?) -> String {
+        guard let comparison else {
+            return ""
+        }
+        return String(localized: "Total \(comparison.totalAmountWithTip.formatted(.currency(code: localCurrency))), per person \(comparison.totalPerPerson.formatted(.currency(code: localCurrency)))")
+    }
+
+    /// When the slider sets a value no row offers, the caption carries the tip amount instead.
+    private var customTipText: some View {
+        let isCustom = !viewModel.serviceContext.suggestedPresets.contains(viewModel.tipPercentage)
+        let text = isCustom
+            ? percentText + " · " + viewModel.tipAmount.formatted(.currency(code: localCurrency))
+            : percentText
+        return Text(text)
+            .font(.headline.weight(isCustom ? .bold : .regular).monospacedDigit())
+            .foregroundStyle(isCustom ? accentColor : Color.secondary)
+            .lineLimit(1)
+            .animatedTextChange(value: text)
+    }
+
+    private var tipSlider: some View {
+        Slider(value: $viewModel.tipPercentage, in: 0...30, step: 1) { isEditing in
+            isDraggingTipSlider = isEditing
+        }
+            .tint(accentColor)
+            .onChange(of: viewModel.tipPercentage, perform: { _ in
+                // Rows fire their own haptic; only tick here while the slider is being dragged.
+                if isDraggingTipSlider {
+                    HapticFeedbackPerformer.selection(isEnabled: settings.hapticsEnabled)
+                }
+                viewModel.persistSmartDefaults()
+            })
+            .animation(reduceMotion ? nil : .easeInOut(duration: 0.2), value: viewModel.tipPercentage)
+            .accessibilityLabel(String(localized: "Tip Percentage Selection"))
+            .accessibilityValue("\(viewModel.tipPercentage, specifier: "%.0f")%")
+            .accessibilityHint(String(localized: "Selects the Tip Percentage"))
+    }
+
+    // MARK: - Actions
 
     private var saveButton: some View {
         Button {
             showingSaveSheet = true
         } label: {
             Label(String(localized: "Save"), systemImage: "tray.and.arrow.down")
+                .font(.headline)
                 .frame(maxWidth: .infinity)
         }
-        .buttonStyle(.borderedProminent)
+        .glassProminentButtonStyle()
         .controlSize(.large)
+        .tint(accentColor)
         .disabled(!viewModel.hasValidCalculation)
         .accessibilityLabel(String(localized: "Save Tip Calculation"))
         .accessibilityHint(viewModel.hasValidCalculation ? String(localized: "Saves the Tip Calculation") : String(localized: "Enter a bill amount greater than zero before saving"))
+    }
+
+    /// Clearing is undoable, so it is an ordinary toolbar action rather than a red button.
+    private var clearButton: some View {
+        Button {
+            let previous = viewModel.snapshot()
+            let hadInput = viewModel.hasUserInput
+            performAnimated(.spring(response: 0.32, dampingFraction: 0.82)) {
+                viewModel.resetValues()
+                viewModel.applySettingsDefaults(defaultTipPercentage: settings.defaultTipPercentage,
+                                                defaultNumberOfPeople: settings.defaultNumberOfPeople)
+            }
+            if hadInput {
+                viewModel.undoOffer = .init(message: String(localized: "Calculation cleared"), snapshot: previous)
+            }
+            HapticFeedbackPerformer.warning(isEnabled: settings.hapticsEnabled)
+        } label: {
+            Label(String(localized: "Clear"), systemImage: "arrow.counterclockwise")
+        }
+        .disabled(!viewModel.hasUserInput)
+        .accessibilityLabel(String(localized: "Clear Calculation"))
+        .accessibilityIdentifier("Reset")
+    }
+
+    private var copyMenu: some View {
+        Menu {
+            copyMenuItems
+        } label: {
+            Label(String(localized: "Copy"), systemImage: "doc.on.doc")
+        }
+        .disabled(!viewModel.hasValidCalculation)
+        .accessibilityLabel(String(localized: "Copy Amount"))
+        .accessibilityIdentifier("Copy Menu")
+    }
+
+    @ViewBuilder
+    private var copyMenuItems: some View {
+        if isSplit {
+            Button {
+                copy(viewModel.totalPerPerson, confirmation: String(localized: "Per person amount copied"))
+            } label: {
+                Label(String(localized: "Copy Per Person"), systemImage: "person")
+            }
+        }
+        Button {
+            copy(viewModel.totalAmountWithTip, confirmation: String(localized: "Total copied"))
+        } label: {
+            Label(String(localized: "Copy Total"), systemImage: "sum")
+        }
+    }
+
+    private func copy(_ amount: Double, confirmation: String) {
+        UIPasteboard.general.string = amount.formatted(.currency(code: localCurrency))
+        HapticFeedbackPerformer.lightImpact(isEnabled: settings.hapticsEnabled)
+        successMessage = confirmation
+    }
+
+    private func cardHeader(_ title: String) -> some View {
+        Text(title)
+            .font(.subheadline.weight(.semibold))
+            .foregroundStyle(.secondary)
+            .accessibilityAddTraits(.isHeader)
     }
 
     private var saveTipSheet: some View {
@@ -711,7 +710,9 @@ struct CalculationView: View {
 
                 Section {
                     InfoRow(title: String(localized: "Total With Tip"), value: viewModel.totalAmountWithTip.formatted(.currency(code: localCurrency)))
-                    InfoRow(title: String(localized: "Per Person"), value: viewModel.totalPerPerson.formatted(.currency(code: localCurrency)))
+                    if isSplit {
+                        InfoRow(title: String(localized: "Per Person"), value: viewModel.totalPerPerson.formatted(.currency(code: localCurrency)))
+                    }
                 }
             }
             .navigationTitle(String(localized: "Save Tip"))
@@ -740,47 +741,12 @@ struct CalculationView: View {
         }
     }
 
-    private var resetButton: some View {
-        Button(role: .destructive) {
-            performAnimated(.spring(response: 0.32, dampingFraction: 0.82)) {
-                viewModel.resetValues()
-                viewModel.applySettingsDefaults(defaultTipPercentage: settings.defaultTipPercentage,
-                                                defaultNumberOfPeople: settings.defaultNumberOfPeople)
-            }
-            HapticFeedbackPerformer.warning(isEnabled: settings.hapticsEnabled)
-        } label: {
-            Label(String(localized: "Reset"), systemImage: "arrow.counterclockwise")
-                .frame(maxWidth: .infinity)
-        }
-        .buttonStyle(.bordered)
-        .controlSize(.large)
-        .accessibilityLabel(String(localized: "Reset"))
-    }
-
     private func performAnimated(_ animation: Animation, _ updates: () -> Void) {
         if reduceMotion {
             updates()
         } else {
             withAnimation(animation, updates)
         }
-    }
-
-    private func copyButton(label: String, value: String) -> some View {
-        Button {
-            UIPasteboard.general.string = value
-            copiedValueLabel = label
-            HapticFeedbackPerformer.lightImpact(isEnabled: settings.hapticsEnabled)
-            Task {
-                try? await Task.sleep(for: .seconds(2))
-                await MainActor.run { copiedValueLabel = nil }
-            }
-        } label: {
-            Label(label, systemImage: "doc.on.doc")
-                .frame(maxWidth: .infinity)
-        }
-        .buttonStyle(.bordered)
-        .disabled(!viewModel.hasValidCalculation)
-        .accessibilityLabel(label)
     }
 
     /// Saves the tip information to the data manager.
@@ -817,12 +783,20 @@ struct CalculationView: View {
                                                 defaultNumberOfPeople: settings.defaultNumberOfPeople)
             }
             successMessage = String(localized: "Tip calculation saved.")
-            Task {
-                try? await Task.sleep(for: .seconds(2.5))
-                await MainActor.run {
-                    withAnimation { successMessage = nil }
-                }
-            }
+        }
+    }
+}
+
+/// Reports when a view inside a scroll view is scrolled out of sight. The API is iOS 18+,
+/// so on earlier versions the view is always treated as visible.
+private struct ScrollVisibilityModifier: ViewModifier {
+    let onChange: (Bool) -> Void
+
+    func body(content: Content) -> some View {
+        if #available(iOS 18.0, *) {
+            content.onScrollVisibilityChange(threshold: 0.05, onChange)
+        } else {
+            content
         }
     }
 }

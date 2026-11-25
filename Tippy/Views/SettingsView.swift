@@ -12,7 +12,6 @@ import UIKit
 
 struct SettingsView: View {
     @EnvironmentObject var settings: TipSavvySettings
-    @Environment(\.colorSchemeContrast) private var colorSchemeContrast
 
     @State private var showingPrivacyPolicy = false
     @State private var showingResetConfirmation = false
@@ -23,21 +22,26 @@ struct SettingsView: View {
     private let privacyPolicyURL = URL(string: "https://docs.google.com/document/d/e/2PACX-1vT5uoP653Dd3_hKw-ozR0c0YxUhKPlGNglEByGnuWDC4M7rzMwI4gIdw-mFvU94Ma3gxW5JV-XNj_KW/pub")
     private let appReadinessInfo = AppReadinessInfo()
 
+    /// A standard inset-grouped Form: it matches people's model of Settings and picks up
+    /// the system's Liquid Glass treatment on its own.
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 18) {
-                    defaultsCard
-                    experienceCard
-                    privacyReliabilityCard
-                    appStoreCard
-                    aboutCard
-                    resetButton
+            Form {
+                defaultsSection
+                appearanceSection
+                privacySection
+                supportSection
+                aboutSection
+
+                Section {
+                    Button(role: .destructive) {
+                        showingResetConfirmation = true
+                    } label: {
+                        Text(String(localized: "Reset Preferences"))
+                    }
+                    .accessibilityIdentifier("Reset Preferences")
                 }
-                .padding(18)
-                .padding(.bottom, 18)
             }
-            .background(Color(.systemGroupedBackground))
             .navigationTitle(String(localized: "Settings"))
             .sheet(isPresented: $showingPrivacyPolicy) {
                 privacyPolicySheet
@@ -54,19 +58,15 @@ struct SettingsView: View {
         }
     }
 
-    private var defaultsCard: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Label(String(localized: "Calculation Defaults"), systemImage: "slider.horizontal.3")
-                .font(.headline)
-                .foregroundStyle(.secondary)
-
-            VStack(alignment: .leading, spacing: 8) {
+    private var defaultsSection: some View {
+        Section {
+            VStack(alignment: .leading, spacing: 4) {
                 HStack {
                     Text(String(localized: "Default Tip"))
-                        .font(.subheadline.weight(.medium))
                     Spacer()
                     Text("\(settings.defaultTipPercentage, specifier: "%.0f")%")
-                        .font(.headline.monospacedDigit())
+                        .monospacedDigit()
+                        .foregroundStyle(.secondary)
                         .animatedTextChange(value: settings.defaultTipPercentage)
                 }
 
@@ -80,24 +80,20 @@ struct SettingsView: View {
                     Text(String(localized: "Default Split"))
                     Spacer()
                     Text("\(settings.defaultNumberOfPeople)")
-                        .font(.headline.monospacedDigit())
+                        .monospacedDigit()
+                        .foregroundStyle(.secondary)
                         .animatedTextChange(value: settings.defaultNumberOfPeople)
                 }
             }
             .accessibilityLabel(String(localized: "Default Split"))
             .accessibilityValue("\(settings.defaultNumberOfPeople)")
+        } header: {
+            Text(String(localized: "Calculation Defaults"))
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(18)
-        .glassPanel(cornerRadius: 22, highContrast: colorSchemeContrast == .increased)
     }
 
-    private var experienceCard: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            Label(String(localized: "Experience"), systemImage: "iphone.gen3")
-                .font(.headline)
-                .foregroundStyle(.secondary)
-
+    private var appearanceSection: some View {
+        Section {
             Toggle(isOn: $settings.hapticsEnabled) {
                 Text(String(localized: "Haptic Feedback"))
             }
@@ -106,25 +102,16 @@ struct SettingsView: View {
             }
 
             themePicker
-
-            InfoRow(title: String(localized: "Currency"), value: localCurrency)
-            Text(String(localized: "TipSavvy formats totals with your device locale and currency settings."))
-                .font(.footnote)
-                .foregroundStyle(.secondary)
+        } header: {
+            Text(String(localized: "Experience"))
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(18)
-        .glassPanel(cornerRadius: 22)
     }
 
     private var themePicker: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text(String(localized: "Theme"))
-                .font(.subheadline.weight(.medium))
 
-            currentThemePreview
-
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 48), spacing: 12)], spacing: 12) {
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 56), spacing: 8)], spacing: 12) {
                 ForEach(AppTheme.allCases) { theme in
                     ThemeOptionButton(
                         theme: theme,
@@ -136,168 +123,67 @@ struct SettingsView: View {
                 }
             }
         }
+        .padding(.vertical, 4)
+        .accessibilityElement(children: .contain)
         .accessibilityIdentifier("Theme Picker")
     }
 
-    private var currentThemePreview: some View {
-        HStack(spacing: 12) {
-            Circle()
-                .fill(settings.selectedTheme.accentColor)
-                .frame(width: 34, height: 34)
-                .overlay {
-                    Image(systemName: "checkmark")
-                        .font(.caption.weight(.bold))
-                        .foregroundStyle(.white)
-                }
-                .accessibilityHidden(true)
-
-            VStack(alignment: .leading, spacing: 2) {
-                Text(String(localized: "Current Theme"))
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                Text(settings.selectedTheme.displayName)
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(.primary)
-            }
-
-            Spacer(minLength: 10)
-
-            Text(String(localized: "Accent"))
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(.white)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 6)
-                .background(settings.selectedTheme.accentColor, in: Capsule())
-            .accessibilityHidden(true)
-        }
-        .padding(12)
-        .background {
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .fill(settings.selectedTheme.accentColor.opacity(colorSchemeContrast == .increased ? 0.16 : 0.08))
-        }
-        .overlay {
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .strokeBorder(settings.selectedTheme.accentColor.opacity(colorSchemeContrast == .increased ? 0.8 : 0.35), lineWidth: colorSchemeContrast == .increased ? 1.5 : 1)
-        }
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(String(localized: "Current Theme"))
-        .accessibilityValue(settings.selectedTheme.displayName)
-        .accessibilityIdentifier("Current Theme Preview")
-    }
-
-    private var privacyReliabilityCard: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Label(String(localized: "Privacy & Reliability"), systemImage: "lock.shield")
-                .font(.headline)
-                .foregroundStyle(.secondary)
-
-            Label(String(localized: "Crash reports help improve reliability."), systemImage: "waveform.path.ecg")
-            Label(String(localized: "TipSavvy does not require an account."), systemImage: "person.crop.circle.badge.xmark")
-            Label(String(localized: "Saved calculations stay on this device."), systemImage: "iphone")
-        }
-        .font(.footnote)
-        .foregroundStyle(.secondary)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(18)
-        .glassPanel(cornerRadius: 22)
-    }
-
-    private var appStoreCard: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Label(String(localized: "Support TipSavvy"), systemImage: "heart")
-                .font(.headline)
-                .foregroundStyle(.secondary)
-
-            Text(String(localized: "Enjoying the app? Ratings are optional, private, and help other people find TipSavvy."))
-                .font(.footnote)
-                .foregroundStyle(.secondary)
-
+    private var privacySection: some View {
+        Section {
             Button {
-                requestNativeReview()
+                showingPrivacyPolicy = true
             } label: {
-                Label(String(localized: "Rate TipSavvy"), systemImage: "star")
-                    .frame(maxWidth: .infinity)
+                Text(String(localized: "Privacy Policy"))
             }
-            .buttonStyle(.borderedProminent)
-            .controlSize(.large)
-            .frame(maxWidth: .infinity)
-            .accessibilityIdentifier("Request App Review")
+            .accessibilityIdentifier("Privacy Policy")
+        } header: {
+            Text(String(localized: "Privacy"))
+        } footer: {
+            Text(String(localized: "No account, no analytics, no crash data. Saved calculations stay on this device."))
+        }
+    }
 
+    private var supportSection: some View {
+        Section {
+            // The App Store link always opens visibly, whereas the system review prompt is
+            // rate-limited and can silently do nothing.
             if let appStoreReviewURL {
                 Link(destination: appStoreReviewURL) {
-                    Label(String(localized: "Open App Store Review"), systemImage: "star.bubble")
-                        .frame(maxWidth: .infinity)
+                    Text(String(localized: "Rate TipSavvy"))
                 }
-                .buttonStyle(.bordered)
-                .controlSize(.large)
-                .frame(maxWidth: .infinity)
                 .accessibilityIdentifier("Rate on the App Store")
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(18)
-        .glassPanel(cornerRadius: 22)
-    }
-
-    private var aboutCard: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Label(String(localized: "About TipSavvy"), systemImage: "info.circle")
-                .font(.headline)
-                .foregroundStyle(.secondary)
-
-            InfoRow(title: String(localized: "Version"), value: appReadinessInfo.displayVersion)
-
-            ViewThatFits(in: .horizontal) {
-                HStack(spacing: 10) {
-                    privacyPolicyButton
-                    contactButton
+            } else {
+                Button {
+                    requestNativeReview()
+                } label: {
+                    Text(String(localized: "Rate TipSavvy"))
                 }
+                .accessibilityIdentifier("Request App Review")
+            }
 
-                VStack(spacing: 10) {
-                    privacyPolicyButton
-                    contactButton
+            if let contactURL {
+                Link(destination: contactURL) {
+                    Text(String(localized: "Contact Support"))
                 }
+                .accessibilityIdentifier("Contact Support")
             }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(18)
-        .glassPanel(cornerRadius: 22)
-        .accessibilityIdentifier("About TipSavvy")
-    }
-
-    private var privacyPolicyButton: some View {
-        Button {
-            showingPrivacyPolicy = true
-        } label: {
-            Label(String(localized: "Privacy Policy"), systemImage: "hand.raised")
-                .frame(maxWidth: .infinity)
-        }
-        .buttonStyle(.bordered)
-        .accessibilityIdentifier("Privacy Policy")
-    }
-
-    @ViewBuilder
-    private var contactButton: some View {
-        if let contactURL {
-            Link(destination: contactURL) {
-                Label(String(localized: "Contact"), systemImage: "envelope")
-                    .frame(maxWidth: .infinity)
-            }
-            .buttonStyle(.bordered)
-            .accessibilityIdentifier("Contact Support")
+        } header: {
+            Text(String(localized: "Support"))
+        } footer: {
+            Text(String(localized: "Ratings are optional and help other people find TipSavvy."))
         }
     }
 
-    private var resetButton: some View {
-        Button(role: .destructive) {
-            showingResetConfirmation = true
-        } label: {
-            Label(String(localized: "Reset Preferences"), systemImage: "arrow.counterclockwise")
-                .frame(maxWidth: .infinity)
+    private var aboutSection: some View {
+        Section {
+            LabeledContent(String(localized: "Version"), value: appReadinessInfo.displayVersion)
+                .accessibilityIdentifier("About TipSavvy")
+            LabeledContent(String(localized: "Currency"), value: localCurrency)
+        } header: {
+            Text(String(localized: "About"))
+        } footer: {
+            Text(String(localized: "Totals use your device's region and currency."))
         }
-        .buttonStyle(.bordered)
-        .controlSize(.large)
-        .accessibilityLabel(String(localized: "Reset Preferences"))
     }
 
     @ViewBuilder
@@ -316,7 +202,7 @@ struct SettingsView: View {
                 VStack(alignment: .leading, spacing: 18) {
                     Text(String(localized: "TipSavvy does not require an account and does not ask for your name, email address, phone number, payment information, contacts, or location."))
                     Text(String(localized: "Saved bill amounts, tip percentages, split counts, and app settings stay on your device unless you delete them or uninstall the app."))
-                    Text(String(localized: "TipSavvy uses Firebase Crashlytics for crash reporting and diagnostics. Crash reports help improve reliability and are not used to personally identify users."))
+                    Text(String(localized: "TipSavvy does not include third-party analytics or crash reporting. If you choose to share analytics with app developers in iOS Settings, Apple may provide anonymous crash reports."))
                     Text(String(localized: "TipSavvy is suitable for a general audience and does not knowingly collect personal information from children."))
                 }
                 .font(.body)
@@ -366,22 +252,32 @@ private struct ThemeOptionButton: View {
 
     var body: some View {
         Button(action: action) {
-            ZStack {
-                Circle()
-                    .fill(theme.accentColor)
-                    .frame(width: 34, height: 34)
-                    .overlay {
-                        Circle()
-                            .strokeBorder(.primary.opacity(colorSchemeContrast == .increased ? 0.6 : 0.2), lineWidth: colorSchemeContrast == .increased ? 1.5 : 1)
-                    }
+            VStack(spacing: 4) {
+                ZStack {
+                    Circle()
+                        .fill(theme.accentColor)
+                        .frame(width: 34, height: 34)
+                        .overlay {
+                            Circle()
+                                .strokeBorder(.primary.opacity(colorSchemeContrast == .increased ? 0.6 : 0.2), lineWidth: colorSchemeContrast == .increased ? 1.5 : 1)
+                        }
 
-                if isSelected {
-                    Image(systemName: "checkmark")
-                        .font(.callout.weight(.bold))
-                        .foregroundStyle(.white)
+                    if isSelected {
+                        Image(systemName: "checkmark")
+                            .font(.callout.weight(.bold))
+                            .foregroundStyle(.white)
+                    }
                 }
+                .frame(width: 44, height: 44)
+
+                Text(theme.displayName)
+                    .font(.caption2.weight(isSelected ? .semibold : .regular))
+                    .foregroundStyle(isSelected ? .primary : .secondary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
             }
-            .frame(width: 48, height: 48)
+            .frame(minWidth: 56)
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         .accessibilityLabel(theme.displayName)
