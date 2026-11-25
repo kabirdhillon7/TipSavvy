@@ -67,8 +67,10 @@ final class TipSavvyUITests: XCTestCase {
         field.tap()
         XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 3))
         field.typeText("24")
+        field.typeText(XCUIKeyboardKey.delete.rawValue)
+        field.typeText("5.5")
 
-        XCTAssertTrue((field.value as? String)?.contains("24") == true, "\(field.value ?? "nil")")
+        XCTAssertEqual(field.value as? String, "25.5")
     }
     
     func test_slider_shouldTapAndSwipeRight() {

@@ -276,13 +276,12 @@ struct CalculationView: View {
             cardHeader(String(localized: "Bill"))
 
             HStack(alignment: .center, spacing: 12) {
-                TextField(String(localized: "Enter Bill Amount"),
-                          value: $viewModel.billAmount,
-                          format: .currency(code: localCurrency))
+                CurrencyAmountField(prompt: String(localized: "Enter Bill Amount"),
+                                    amount: $viewModel.billAmount,
+                                    currencyCode: localCurrency,
+                                    focus: $keyboardFocusField,
+                                    field: .billAmount)
                     .font(.largeTitle.weight(.bold).monospacedDigit())
-                    .keyboardType(.decimalPad)
-                    .focused($keyboardFocusField, equals: .billAmount)
-                    .textFieldStyle(.plain)
                     .accessibilityLabel(String(localized: "Enter Bill Amount"))
             }
 
@@ -335,13 +334,12 @@ struct CalculationView: View {
 
             if showingTaxDetails {
                 VStack(alignment: .leading, spacing: 10) {
-                    TextField(String(localized: "Optional Tax Amount"),
-                              value: $viewModel.taxAmount,
-                              format: .currency(code: localCurrency))
+                    CurrencyAmountField(prompt: String(localized: "Optional Tax Amount"),
+                                        amount: $viewModel.taxAmount,
+                                        currencyCode: localCurrency,
+                                        focus: $keyboardFocusField,
+                                        field: .taxAmount)
                         .font(.title3.weight(.semibold).monospacedDigit())
-                        .keyboardType(.decimalPad)
-                        .focused($keyboardFocusField, equals: .taxAmount)
-                        .textFieldStyle(.plain)
                         .accessibilityLabel(String(localized: "Optional Tax Amount"))
                         .accessibilityIdentifier("Optional Tax Amount")
 
