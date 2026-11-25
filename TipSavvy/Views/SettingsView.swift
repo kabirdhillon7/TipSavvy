@@ -64,7 +64,7 @@ struct SettingsView: View {
                 HStack {
                     Text(String(localized: "Default Tip"))
                     Spacer()
-                    Text("\(settings.defaultTipPercentage, specifier: "%.0f")%")
+                    Text(settings.defaultTipPercentage.percentText)
                         .monospacedDigit()
                         .foregroundStyle(.secondary)
                         .animatedTextChange(value: settings.defaultTipPercentage)
@@ -72,7 +72,7 @@ struct SettingsView: View {
 
                 Slider(value: $settings.defaultTipPercentage, in: 0...30, step: 1)
                     .accessibilityLabel(String(localized: "Default Tip"))
-                    .accessibilityValue("\(settings.defaultTipPercentage, specifier: "%.0f")%")
+                    .accessibilityValue(settings.defaultTipPercentage.percentText)
             }
 
             Stepper(value: $settings.defaultNumberOfPeople, in: 1...99) {

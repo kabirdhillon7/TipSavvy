@@ -76,15 +76,16 @@ struct CurrencyAmountField<Field: Hashable>: View {
     private var isFocused: Bool { focus.wrappedValue == field }
 
     var body: some View {
-        HStack(alignment: .firstTextBaseline, spacing: 2) {
-            if !text.isEmpty, CurrencyInput.symbolLeads(currencyCode: currencyCode) {
+        let symbolLeads = CurrencyInput.symbolLeads(currencyCode: currencyCode)
+        return HStack(alignment: .firstTextBaseline, spacing: 2) {
+            if !text.isEmpty, symbolLeads {
                 symbol
             }
             TextField(prompt, text: $text)
                 .keyboardType(.decimalPad)
                 .focused(focus, equals: field)
                 .textFieldStyle(.plain)
-            if !text.isEmpty, !CurrencyInput.symbolLeads(currencyCode: currencyCode) {
+            if !text.isEmpty, !symbolLeads {
                 symbol
             }
         }

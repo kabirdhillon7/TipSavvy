@@ -111,7 +111,7 @@ struct SavedDetailView: View {
 
     /// The calculation as a receipt: each line adds up to the next, ending at what each person owes.
     private var receiptCard: some View {
-        let percent = "\(Int(tip.tipPercentage))%"
+        let percent = tip.tipPercentage.percentText
         let tipTitle = tip.hasTaxBreakdown && tip.savedTipsOnTax
             ? String(localized: "Tip \(percent) of Subtotal + Tax")
             : String(localized: "Tip \(percent)")
@@ -166,9 +166,7 @@ struct SavedDetailView: View {
     private var noteCard: some View {
         if let note = tip.note, !note.isEmpty {
             VStack(alignment: .leading, spacing: 6) {
-                Text(String(localized: "Note"))
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(.secondary)
+                SectionHeader(String(localized: "Note"))
                 Text(note)
                     .font(.body)
                     .foregroundStyle(.primary)

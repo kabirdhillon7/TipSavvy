@@ -81,7 +81,7 @@ struct SavedView: View {
         NavigationStack {
             Group {
                 if dataManager.savedTips.isEmpty {
-                    emptyState(title: String(localized: "No Saved Tips"), systemImage: "percent")
+                    emptySavedState
                 } else {
                     savedList
                 }
@@ -180,7 +180,7 @@ struct SavedView: View {
     }
 
     /// This month's figure with a six-month sparkline beside it, so the number has context.
-    private var savedInsightsButton: some View {
+    private func savedInsightsButton(_ insights: SavedTipInsights) -> some View {
         Button {
             showingSavedInsightsDetails = true
         } label: {
@@ -189,12 +189,12 @@ struct SavedView: View {
                     Text(String(localized: "Spent This Month"))
                         .font(.subheadline.weight(.medium))
                         .foregroundStyle(Color.secondary)
-                    Text(savedInsights.currentMonthTotalWithTip, format: .currency(code: localCurrency))
+                    Text(insights.currentMonthTotalWithTip, format: .currency(code: localCurrency))
                         .font(.title.weight(.bold).monospacedDigit())
                         .foregroundStyle(settings.selectedTheme.accentColor)
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)
-                    Text(String(localized: "\(savedInsights.currentMonthTipTotal.formatted(.currency(code: localCurrency))) in tips"))
+                    Text(String(localized: "\(insights.currentMonthTipTotal.formatted(.currency(code: localCurrency))) in tips"))
                         .font(.caption)
                         .foregroundStyle(Color.secondary)
                         .monospacedDigit()
@@ -202,7 +202,7 @@ struct SavedView: View {
 
                 Spacer(minLength: 8)
 
-                SpendingSparkline(entries: savedInsights.monthlySpending, accentColor: settings.selectedTheme.accentColor)
+                SpendingSparkline(entries: insights.monthlySpending, accentColor: settings.selectedTheme.accentColor)
                     .frame(width: 84, height: 40)
 
                 Image(systemName: "chevron.right")
@@ -214,37 +214,37 @@ struct SavedView: View {
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(String(localized: "Spent This Month"))
-        .accessibilityValue(String(localized: "\(savedInsights.currentMonthTotalWithTip.formatted(.currency(code: localCurrency))), \(savedInsights.currentMonthTipTotal.formatted(.currency(code: localCurrency))) in tips"))
+        .accessibilityValue(String(localized: "\(insights.currentMonthTotalWithTip.formatted(.currency(code: localCurrency))), \(insights.currentMonthTipTotal.formatted(.currency(code: localCurrency))) in tips"))
         .accessibilityHint(String(localized: "Shows detailed saved insights."))
         .accessibilityAddTraits(.isButton)
         .accessibilityIdentifier("Saved Insights")
     }
 
     private var savedList: some View {
-        List {
+        let tips = filteredTips
+        return List {
             Section {
-                savedInsightsButton
+                savedInsightsButton(savedInsights)
             }
 
             Section {
-                if filteredTips.isEmpty {
+                if tips.isEmpty {
                     noMatchesRow
                         .listRowBackground(Color.clear)
                 } else {
-                    ForEach(filteredTips) { tip in
+                    ForEach(tips) { tip in
                         savedTipRow(for: tip)
                     }
                 }
             } footer: {
-                if hasActiveFiltering && !filteredTips.isEmpty {
-                    Text(filteredTips.count == 1 ? String(localized: "1 matching tip") : String(localized: "\(filteredTips.count) matching tips"))
+                if hasActiveFiltering && !tips.isEmpty {
+                    Text(tips.count == 1 ? String(localized: "1 matching tip") : String(localized: "\(tips.count) matching tips"))
                         .accessibilityIdentifier("Visible Saved Tips")
                 }
             }
         }
         .listStyle(.insetGrouped)
-        .animation(reduceMotion ? nil : .easeInOut(duration: 0.22), value: filteredTips.map(\.objectID))
-        .animation(reduceMotion ? nil : .easeInOut(duration: 0.18), value: searchText)
+        .animation(reduceMotion ? nil : .easeInOut(duration: 0.22), value: tips.map(\.objectID))
     }
 
     private func savedTipRow(for tip: SavedTip) -> some View {
@@ -340,41 +340,33 @@ struct SavedView: View {
             let sameYear = Calendar.current.isDate(date, equalTo: Date(), toGranularity: .year)
             parts.append(date.formatted(sameYear ? .dateTime.month(.abbreviated).day() : .dateTime.month(.abbreviated).day().year()))
         }
-        parts.append("\(Int(tip.tipPercentage))%")
+        parts.append(tip.tipPercentage.percentText)
         parts.append(tip.numberOfPeople == 1 ? String(localized: "1 person") : String(localized: "\(Int(tip.numberOfPeople)) people"))
         return parts.joined(separator: " · ")
     }
 
-    private func emptyState(title: String, systemImage: String) -> some View {
-        Group {
+    /// Shown when nothing has been saved yet.
+    private var emptySavedState: some View {
+        let title = String(localized: "No Saved Tips")
+        return Group {
             if #available(iOS 17.0, *) {
                 ContentUnavailableView {
-                    Label(title, systemImage: systemImage)
+                    Label(title, systemImage: "percent")
                 } description: {
-                    Text(dataManager.savedTips.isEmpty ? emptySavedDescription : emptyMatchingDescription)
+                    Text(String(localized: "Saved calculations will appear here after you name and save them."))
                 } actions: {
-                    if hasActiveFiltering {
-                        clearFiltersButton
-                    } else if dataManager.savedTips.isEmpty {
-                        startCalculationButton
-                    }
+                    startCalculationButton
                 }
             } else {
                 VStack(spacing: 12) {
-                    Image(systemName: systemImage)
+                    Image(systemName: "percent")
                         .fontWeight(.medium)
                         .font(.largeTitle)
                         .foregroundStyle(.secondary)
-
                     Text(title)
                         .fontWeight(.medium)
                         .foregroundStyle(.secondary)
-
-                    if hasActiveFiltering {
-                        clearFiltersButton
-                    } else if dataManager.savedTips.isEmpty {
-                        startCalculationButton
-                    }
+                    startCalculationButton
                 }
             }
         }
@@ -394,14 +386,12 @@ struct SavedView: View {
                 .accessibilityHidden(true)
             Text(String(localized: "No Matching Tips"))
                 .font(.title3.weight(.semibold))
-            Text(emptyMatchingDescription)
+            Text(String(localized: "Try a different search or filter."))
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
-            if hasActiveFiltering {
-                clearFiltersButton
-                    .padding(.top, 6)
-            }
+            clearFiltersButton
+                .padding(.top, 6)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 40)
@@ -410,14 +400,6 @@ struct SavedView: View {
 
     private var hasActiveFiltering: Bool {
         filterMode != .all || !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-    }
-
-    private var emptySavedDescription: String {
-        String(localized: "Saved calculations will appear here after you name and save them.")
-    }
-
-    private var emptyMatchingDescription: String {
-        hasActiveFiltering ? String(localized: "Try a different search or filter.") : String(localized: "No saved tips match the current view.")
     }
 
     private var clearFiltersButton: some View {
@@ -448,7 +430,7 @@ struct SavedView: View {
     }
 
     private func renameTip(_ tip: SavedTip, _ name: String) {
-        performAnimated(.easeInOut(duration: 0.22)) {
+        performAnimated(.easeInOut(duration: 0.22), reduceMotion: reduceMotion) {
             _ = dataManager.renameTip(tip, to: name)
         }
     }
@@ -457,7 +439,7 @@ struct SavedView: View {
     private func deleteTip(_ tip: SavedTip) {
         let record = SavedTipRecord(tip)
         var result: Result<Void, DataManagerError> = .success(())
-        performAnimated(.easeInOut(duration: 0.22)) {
+        performAnimated(.easeInOut(duration: 0.22), reduceMotion: reduceMotion) {
             result = dataManager.deleteTip(tip)
         }
         if case .success = result {
@@ -467,7 +449,7 @@ struct SavedView: View {
     }
 
     private func undoDelete(_ record: SavedTipRecord) {
-        performAnimated(.easeInOut(duration: 0.22)) {
+        performAnimated(.easeInOut(duration: 0.22), reduceMotion: reduceMotion) {
             _ = dataManager.restoreTip(record)
         }
         recentlyDeleted = nil
@@ -487,14 +469,6 @@ struct SavedView: View {
         renameTip(tipBeingRenamed, renameText)
         self.tipBeingRenamed = nil
         renameText = ""
-    }
-
-    private func performAnimated(_ animation: Animation, _ updates: () -> Void) {
-        if reduceMotion {
-            updates()
-        } else {
-            withAnimation(animation, updates)
-        }
     }
 }
 
@@ -537,7 +511,7 @@ struct SavedInsightsDetailView: View {
     /// is labelled on its own rule rather than in a legend.
     private var spendingChartSection: some View {
         VStack(alignment: .leading, spacing: 14) {
-            sectionHeader(String(localized: "Spending by Month"))
+            SectionHeader(String(localized: "Spending by Month"))
 
             if insights.monthlySpending.allSatisfy({ $0.totalSpent == 0 }) {
                 Text(String(localized: "Save tips to see your spending history."))
@@ -617,7 +591,7 @@ struct SavedInsightsDetailView: View {
     /// Totals and averages side by side, so the pairs (spent vs. tips, bill vs. tip) compare directly.
     private var allTimeSection: some View {
         VStack(alignment: .leading, spacing: 14) {
-            sectionHeader(String(localized: "All Time"))
+            SectionHeader(String(localized: "All Time"))
 
             Grid(alignment: .leading, horizontalSpacing: 16, verticalSpacing: 14) {
                 GridRow {
@@ -626,7 +600,7 @@ struct SavedInsightsDetailView: View {
                 }
                 GridRow {
                     statCell(String(localized: "Average Bill"), insights.averageBillAmount.formatted(.currency(code: currencyCode)))
-                    statCell(String(localized: "Average Tip"), percentageText(insights.averageTipPercentage))
+                    statCell(String(localized: "Average Tip"), insights.averageTipPercentage.percentText)
                 }
                 GridRow {
                     statCell(String(localized: "Saved Tips"), "\(insights.allTimeSavedTipCount)")
@@ -663,10 +637,10 @@ struct SavedInsightsDetailView: View {
     /// Extremes and habits in one list. Whitespace separates rows; names ride under their figure.
     private var highlightsSection: some View {
         VStack(alignment: .leading, spacing: 14) {
-            sectionHeader(String(localized: "Highlights"))
+            SectionHeader(String(localized: "Highlights"))
             highlightRow(String(localized: "Largest Bill"), insights.largestSavedBill.formatted(.currency(code: currencyCode)), detail: insights.largestSavedBillName)
-            highlightRow(String(localized: "Highest Tip"), percentageText(insights.highestTipPercentage), detail: insights.highestTipName)
-            highlightRow(String(localized: "Common Tip"), percentageText(insights.mostCommonTipPercentage))
+            highlightRow(String(localized: "Highest Tip"), insights.highestTipPercentage.percentText, detail: insights.highestTipName)
+            highlightRow(String(localized: "Common Tip"), insights.mostCommonTipPercentage.percentText)
             highlightRow(String(localized: "Common Split"), insights.mostCommonSplitCount == 1 ? String(localized: "1 person") : String(localized: "\(insights.mostCommonSplitCount) people"))
             if insights.savedTipsWithTaxCount > 0 {
                 highlightRow(String(localized: "Saved With Tax"), "\(insights.savedTipsWithTaxCount)")
@@ -690,17 +664,6 @@ struct SavedInsightsDetailView: View {
                     .accessibilityHidden(true)
             }
         }
-    }
-
-    private func sectionHeader(_ title: String) -> some View {
-        Text(title)
-            .font(.subheadline.weight(.semibold))
-            .foregroundStyle(.secondary)
-            .accessibilityAddTraits(.isHeader)
-    }
-
-    private func percentageText(_ percentage: Double) -> String {
-        String(format: "%.0f%%", percentage)
     }
 }
 
@@ -796,11 +759,10 @@ struct SavedTipInsights: Equatable {
     let largestSavedBillName: String?
     let highestTipPercentage: Double
     let highestTipName: String?
-    let mostRecentSavedTipName: String?
-    let mostRecentSavedTipDate: Date?
     let recentActivitySummary: String
-    let hasCurrentMonthTips: Bool
     let monthlySpending: [MonthlySpending]
+
+    var hasCurrentMonthTips: Bool { currentMonthSavedTipCount > 0 }
 
     /// Mean across the months shown in the chart, including months with no spending.
     var averageMonthlySpending: Double {
@@ -837,27 +799,14 @@ struct SavedTipInsights: Equatable {
         let largestSavedTip = tips.max { lhs, rhs in
             lhs.totalAmountWithTip < rhs.totalAmountWithTip
         }
-        largestSavedBill = tips.map(\.totalAmountWithTip).max() ?? 0
+        largestSavedBill = largestSavedTip?.totalAmountWithTip ?? 0
         largestSavedBillName = largestSavedTip?.name
         let highestTip = tips.max { lhs, rhs in
             lhs.tipPercentage < rhs.tipPercentage
         }
         highestTipPercentage = highestTip?.tipPercentage ?? 0
         highestTipName = highestTip?.name
-        let mostRecentTip = tips.compactMap { tip -> (SavedTip, Date)? in
-            guard let date = tip.date else {
-                return nil
-            }
-
-            return (tip, date)
-        }
-        .max { lhs, rhs in
-            lhs.1 < rhs.1
-        }
-        mostRecentSavedTipName = mostRecentTip?.0.name
-        mostRecentSavedTipDate = mostRecentTip?.1
         recentActivitySummary = Self.recentActivitySummary(for: tips, now: now, calendar: calendar)
-        hasCurrentMonthTips = !currentMonthTips.isEmpty
         monthlySpending = (0..<6).reversed().compactMap { offset -> MonthlySpending? in
             guard let monthStart = calendar.date(byAdding: .month, value: -offset, to: now),
                   let interval = calendar.dateInterval(of: .month, for: monthStart) else { return nil }

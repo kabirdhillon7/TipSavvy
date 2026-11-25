@@ -9,38 +9,11 @@ import XCTest
 
 final class TipSavvyUITests: XCTestCase {
     
-    override func setUp() {
-        super.setUp()
-        
-        let app = XCUIApplication()
-        app.launchArguments += ["-ui-testing"]
-        app.launchArguments += ["-AppleLanguages", "(en-US)"]
-        app.launchArguments += ["-AppleLocale", "\"en-US\""]
-        
-        app.launch()
-    }
-    
     override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
-        
-        // In UI tests it is usually best to stop immediately when a failure occurs.
+        // Each test launches its own isolated app via launchIsolatedUITestApp().
         continueAfterFailure = false
-        
-        // In UI tests it’s important to set the initial state - such as interface orientation - required for your tests before they run. The setUp method is a good place to do this.
     }
-    
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
-    }
-    
-    //    func testExample() throws {
-    //        // UI tests must launch the application that they test.
-    //        let app = XCUIApplication()
-    //        app.launch()
-    //
-    //        // Use XCTAssert and related functions to verify your tests produce the correct results.
-    //    }
-    
+
     func testLaunchPerformance() throws {
         if #available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 7.0, *) {
             // This measures how long it takes to launch your application.
@@ -53,7 +26,7 @@ final class TipSavvyUITests: XCTestCase {
     // naming test_[UI Comp]_[expected result]
     
     func test_contentView_shouldCancelSaving() {
-        let app = XCUIApplication()
+        let app = launchIsolatedUITestApp()
         enterBillAmount("25", in: app)
         app.buttons["Save Tip Calculation"].tap()
         XCTAssertTrue(app.navigationBars["Save Tip"].waitForExistence(timeout: 2))
@@ -267,7 +240,7 @@ final class TipSavvyUITests: XCTestCase {
         app.buttons["Save"].tap()
         _ = app.staticTexts.matching(NSPredicate(format: "label CONTAINS 'saved'")).firstMatch.waitForExistence(timeout: 3)
 
-        selectSavedTab(in: app)
+        selectTab("Saved", in: app)
         let savedTip = app.descendants(matching: .any)
             .matching(NSPredicate(format: "label CONTAINS %@", "Tax Lunch"))
             .firstMatch
@@ -432,9 +405,7 @@ final class TipSavvyUITests: XCTestCase {
     }
 
     func test_calculateRoundCopySaveAndOpenDetail_shouldCompletePrimaryFlow() {
-        let app = XCUIApplication()
-        app.launchArguments += ["-ui-testing"]
-        app.launch()
+        let app = launchIsolatedUITestApp()
 
         enterBillAmount("25", in: app)
         tapScrolledIntoView(app.buttons["20%"], in: app)
@@ -461,16 +432,16 @@ final class TipSavvyUITests: XCTestCase {
     }
     
     func test_keyboardDoneButton_shouldDimissKeyboard() {
-        let app = XCUIApplication()
+        let app = launchIsolatedUITestApp()
         app.textFields["Enter Bill Amount"].tap()
-        app.toolbars["Toolbar"]/*@START_MENU_TOKEN@*/.buttons["Done"]/*[[".otherElements[\"Done\"].buttons[\"Done\"]",".buttons[\"Done\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
+        app.toolbars["Toolbar"].buttons["Done"].tap()
     }
 
     private func enterBillAmount(_ amount: String, in app: XCUIApplication) {
         let enterBillAmountTextField = app.textFields["Enter Bill Amount"]
         enterBillAmountTextField.tap()
         enterBillAmountTextField.typeText(amount)
-        app.toolbars["Toolbar"]/*@START_MENU_TOKEN@*/.buttons["Done"]/*[[".otherElements[\"Done\"].buttons[\"Done\"]",".buttons[\"Done\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
+        app.toolbars["Toolbar"].buttons["Done"].tap()
     }
 
     private func saveTip(named name: String, in app: XCUIApplication) {
@@ -499,10 +470,6 @@ final class TipSavvyUITests: XCTestCase {
         taxField.tap()
         taxField.typeText(amount)
         app.toolbars["Toolbar"].buttons["Done"].tap()
-    }
-
-    private func selectSavedTab(in app: XCUIApplication) {
-        selectTab("Saved", in: app)
     }
 
     /// The tab bar minimizes on scroll and then shows only the current tab,

@@ -102,18 +102,50 @@ struct SheetCloseButton: View {
     let action: () -> Void
 
     var body: some View {
+        Group {
 #if compiler(>=6.2)
-        if #available(iOS 26.0, *) {
-            Button(role: .close, action: action)
-                .accessibilityIdentifier("Done")
-        } else {
-            Button(String(localized: "Done"), action: action)
-                .accessibilityIdentifier("Done")
-        }
+            if #available(iOS 26.0, *) {
+                Button(role: .close, action: action)
+            } else {
+                Button(String(localized: "Done"), action: action)
+            }
 #else
-        Button(String(localized: "Done"), action: action)
-            .accessibilityIdentifier("Done")
+            Button(String(localized: "Done"), action: action)
 #endif
+        }
+        .accessibilityIdentifier("Done")
+    }
+}
+
+/// The small secondary title above a card's content.
+struct SectionHeader: View {
+    let title: String
+
+    init(_ title: String) {
+        self.title = title
+    }
+
+    var body: some View {
+        Text(title)
+            .font(.subheadline.weight(.semibold))
+            .foregroundStyle(.secondary)
+            .accessibilityAddTraits(.isHeader)
+    }
+}
+
+/// Runs `updates` inside `animation`, or immediately when Reduce Motion is on.
+func performAnimated(_ animation: Animation, reduceMotion: Bool, _ updates: () -> Void) {
+    if reduceMotion {
+        updates()
+    } else {
+        withAnimation(animation, updates)
+    }
+}
+
+extension Double {
+    /// A whole-number percentage ("18%"), rounded and locale-aware, used for every tip rate.
+    var percentText: String {
+        (self / 100).formatted(.percent.precision(.fractionLength(0)))
     }
 }
 

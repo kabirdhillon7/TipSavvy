@@ -45,7 +45,7 @@ struct CalculationView: View {
                     totalsReadout
                         .modifier(ScrollVisibilityModifier { isVisible in
                             if isVisible == totalsPanelIsOffscreen {
-                                performAnimated(.easeInOut(duration: 0.2)) {
+                                performAnimated(.easeInOut(duration: 0.2), reduceMotion: reduceMotion) {
                                     totalsPanelIsOffscreen = !isVisible
                                 }
                             }
@@ -76,7 +76,7 @@ struct CalculationView: View {
                     }
                 } else if let undoOffer = viewModel.undoOffer {
                     TipSavvyUndoBanner(message: undoOffer.message) {
-                        performAnimated(.spring(response: 0.32, dampingFraction: 0.82)) {
+                        performAnimated(.spring(response: 0.32, dampingFraction: 0.82), reduceMotion: reduceMotion) {
                             viewModel.undo()
                         }
                         HapticFeedbackPerformer.selection(isEnabled: settings.hapticsEnabled)
@@ -115,8 +115,6 @@ struct CalculationView: View {
                 dataErrorMessage = error?.localizedDescription
             }
             .animation(reduceMotion ? nil : .easeInOut(duration: 0.2), value: viewModel.numberOfPeople)
-            .animation(reduceMotion ? nil : .easeInOut(duration: 0.2), value: viewModel.totalAmountWithTip)
-            .animation(reduceMotion ? nil : .easeInOut(duration: 0.2), value: viewModel.totalPerPerson)
             .animation(reduceMotion ? nil : .easeInOut(duration: 0.2), value: showingTaxDetails)
             .animation(reduceMotion ? nil : .easeInOut(duration: 0.25), value: successMessage)
             .toolbar {
@@ -153,15 +151,8 @@ struct CalculationView: View {
             Group {
                 if isSplit {
                     ViewThatFits(in: .horizontal) {
-                        HStack(alignment: .top, spacing: 12) {
-                            perPersonMetric
-                            totalMetric(prominence: .regular)
-                        }
-
-                        VStack(alignment: .leading, spacing: 12) {
-                            perPersonMetric
-                            totalMetric(prominence: .regular)
-                        }
+                        HStack(alignment: .top, spacing: 12) { splitMetrics }
+                        VStack(alignment: .leading, spacing: 12) { splitMetrics }
                     }
                 } else {
                     // With one person, per-person equals the total; show it once.
@@ -197,11 +188,13 @@ struct CalculationView: View {
         .accessibilityIdentifier("Bill Totals Summary")
     }
 
-    private var perPersonMetric: some View {
+    @ViewBuilder
+    private var splitMetrics: some View {
         MetricCard(title: String(localized: "Per Person"),
                    value: viewModel.totalPerPerson.formatted(.currency(code: localCurrency)),
                    prominence: .primary,
                    accentColor: accentColor)
+        totalMetric(prominence: .regular)
     }
 
     private func totalMetric(prominence: MetricCard.Prominence) -> some View {
@@ -212,7 +205,7 @@ struct CalculationView: View {
     }
 
     private var percentText: String {
-        String(format: "%.0f%%", viewModel.tipPercentage)
+        viewModel.tipPercentage.percentText
     }
 
     private var tipBreakdownTitle: String {
@@ -238,24 +231,29 @@ struct CalculationView: View {
 
     /// A compact readout that floats over the inputs once the results card scrolls away.
     private var pinnedTotalsBar: some View {
-        HStack(alignment: .firstTextBaseline) {
+        // Split: per person leads, total trails. Alone: total leads, tip trails.
+        let (leadTitle, lead, trailTitle, trail) = isSplit
+            ? (String(localized: "Per Person"), viewModel.totalPerPerson, String(localized: "Total"), viewModel.totalAmountWithTip)
+            : (String(localized: "Total"), viewModel.totalAmountWithTip, String(localized: "Tip"), viewModel.tipAmount)
+
+        return HStack(alignment: .firstTextBaseline) {
             VStack(alignment: .leading, spacing: 0) {
-                Text(isSplit ? String(localized: "Per Person") : String(localized: "Total"))
+                Text(leadTitle)
                     .font(.caption)
                     .foregroundStyle(.secondary)
-                Text(isSplit ? viewModel.totalPerPerson : viewModel.totalAmountWithTip, format: .currency(code: localCurrency))
+                Text(lead, format: .currency(code: localCurrency))
                     .font(.title3.weight(.bold).monospacedDigit())
                     .foregroundStyle(accentColor)
-                    .animatedTextChange(value: isSplit ? viewModel.totalPerPerson : viewModel.totalAmountWithTip)
+                    .animatedTextChange(value: lead)
             }
             Spacer(minLength: 12)
             VStack(alignment: .trailing, spacing: 0) {
-                Text(isSplit ? String(localized: "Total") + " · " + percentText : String(localized: "Tip") + " · " + percentText)
+                Text(trailTitle + " · " + percentText)
                     .font(.caption)
                     .foregroundStyle(.secondary)
-                Text(isSplit ? viewModel.totalAmountWithTip : viewModel.tipAmount, format: .currency(code: localCurrency))
+                Text(trail, format: .currency(code: localCurrency))
                     .font(.title3.weight(.semibold).monospacedDigit())
-                    .animatedTextChange(value: isSplit ? viewModel.totalAmountWithTip : viewModel.tipAmount)
+                    .animatedTextChange(value: trail)
             }
         }
         .padding(.horizontal, 22)
@@ -273,7 +271,7 @@ struct CalculationView: View {
 
     private var billAmountCard: some View {
         VStack(alignment: .leading, spacing: 10) {
-            cardHeader(String(localized: "Bill"))
+            SectionHeader(String(localized: "Bill"))
 
             HStack(alignment: .center, spacing: 12) {
                 CurrencyAmountField(prompt: String(localized: "Enter Bill Amount"),
@@ -410,7 +408,7 @@ struct CalculationView: View {
 
     private func peopleButton(systemImage: String, label: String, isDisabled: Bool, action: @escaping () -> Void) -> some View {
         Button {
-            performAnimated(.spring(response: 0.26, dampingFraction: 0.82)) {
+            performAnimated(.spring(response: 0.26, dampingFraction: 0.82), reduceMotion: reduceMotion) {
                 action()
             }
             HapticFeedbackPerformer.selection(isEnabled: settings.hapticsEnabled)
@@ -429,7 +427,7 @@ struct CalculationView: View {
     private var tipCard: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack(alignment: .firstTextBaseline) {
-                cardHeader(String(localized: "Tip"))
+                SectionHeader(String(localized: "Tip"))
                 Spacer(minLength: 12)
                 servicePicker
             }
@@ -511,12 +509,11 @@ struct CalculationView: View {
 
     private func tipComparisonRow(percentage: Double, comparison: TipComparison?) -> some View {
         let isSelected = viewModel.tipPercentage == percentage
-        let rowPercentText = String(format: "%.0f%%", percentage)
+        let rowPercentText = percentage.percentText
 
         return Button {
-            performAnimated(.spring(response: 0.28, dampingFraction: 0.78)) {
+            performAnimated(.spring(response: 0.28, dampingFraction: 0.78), reduceMotion: reduceMotion) {
                 viewModel.tipPercentage = percentage
-                viewModel.persistSmartDefaults()
             }
             HapticFeedbackPerformer.selection(isEnabled: settings.hapticsEnabled)
         } label: {
@@ -603,9 +600,8 @@ struct CalculationView: View {
                 }
                 viewModel.persistSmartDefaults()
             })
-            .animation(reduceMotion ? nil : .easeInOut(duration: 0.2), value: viewModel.tipPercentage)
             .accessibilityLabel(String(localized: "Tip Percentage Selection"))
-            .accessibilityValue("\(viewModel.tipPercentage, specifier: "%.0f")%")
+            .accessibilityValue(percentText)
             .accessibilityHint(String(localized: "Selects the Tip Percentage"))
     }
 
@@ -632,10 +628,8 @@ struct CalculationView: View {
         Button {
             let previous = viewModel.snapshot()
             let hadInput = viewModel.hasUserInput
-            performAnimated(.spring(response: 0.32, dampingFraction: 0.82)) {
+            performAnimated(.spring(response: 0.32, dampingFraction: 0.82), reduceMotion: reduceMotion) {
                 viewModel.resetValues()
-                viewModel.applySettingsDefaults(defaultTipPercentage: settings.defaultTipPercentage,
-                                                defaultNumberOfPeople: settings.defaultNumberOfPeople)
             }
             if hadInput {
                 viewModel.undoOffer = .init(message: String(localized: "Calculation cleared"), snapshot: previous)
@@ -680,13 +674,6 @@ struct CalculationView: View {
         UIPasteboard.general.string = amount.formatted(.currency(code: localCurrency))
         HapticFeedbackPerformer.lightImpact(isEnabled: settings.hapticsEnabled)
         successMessage = confirmation
-    }
-
-    private func cardHeader(_ title: String) -> some View {
-        Text(title)
-            .font(.subheadline.weight(.semibold))
-            .foregroundStyle(.secondary)
-            .accessibilityAddTraits(.isHeader)
     }
 
     private var saveTipSheet: some View {
@@ -739,14 +726,6 @@ struct CalculationView: View {
         }
     }
 
-    private func performAnimated(_ animation: Animation, _ updates: () -> Void) {
-        if reduceMotion {
-            updates()
-        } else {
-            withAnimation(animation, updates)
-        }
-    }
-
     /// Saves the tip information to the data manager.
     func saveTipInfo() {
         guard let billAmount = viewModel.billAmount, viewModel.canSaveTip else {
@@ -775,10 +754,8 @@ struct CalculationView: View {
         showingSaveSheet = false
 
         DispatchQueue.main.async {
-            performAnimated(.spring(response: 0.32, dampingFraction: 0.82)) {
+            performAnimated(.spring(response: 0.32, dampingFraction: 0.82), reduceMotion: reduceMotion) {
                 viewModel.resetValues()
-                viewModel.applySettingsDefaults(defaultTipPercentage: settings.defaultTipPercentage,
-                                                defaultNumberOfPeople: settings.defaultNumberOfPeople)
             }
             successMessage = String(localized: "Tip calculation saved.")
         }

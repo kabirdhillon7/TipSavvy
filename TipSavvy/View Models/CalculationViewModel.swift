@@ -72,21 +72,19 @@ enum AppTheme: String, CaseIterable, Identifiable {
     }
 
     /// Light values pass WCAG AA (4.5:1) on white; dark values are lightened to pass on
-    /// dark grouped cards, the same way system colors shift in dark mode.
+    /// dark grouped cards, the same way system colors shift in dark mode. Built once, so the
+    /// same `Color` compares equal across renders and SwiftUI can skip unchanged views.
     var accentColor: Color {
-        switch self {
-        case .green:
-            return Self.adaptive(light: (0.000, 0.537, 0.263), dark: (0.130, 0.597, 0.359))
-        case .blue:
-            return Self.adaptive(light: (0.000, 0.431, 0.820), dark: (0.190, 0.539, 0.854))
-        case .pink:
-            return Self.adaptive(light: (0.745, 0.118, 0.384), dark: (0.819, 0.374, 0.563))
-        case .orange:
-            return Self.adaptive(light: (0.741, 0.294, 0.000), dark: (0.790, 0.428, 0.190))
-        case .purple:
-            return Self.adaptive(light: (0.455, 0.220, 0.753), dark: (0.613, 0.446, 0.825))
-        }
+        Self.accentColors[self] ?? .accentColor
     }
+
+    private static let accentColors: [AppTheme: Color] = [
+        .green: adaptive(light: (0.000, 0.537, 0.263), dark: (0.130, 0.597, 0.359)),
+        .blue: adaptive(light: (0.000, 0.431, 0.820), dark: (0.190, 0.539, 0.854)),
+        .pink: adaptive(light: (0.745, 0.118, 0.384), dark: (0.819, 0.374, 0.563)),
+        .orange: adaptive(light: (0.741, 0.294, 0.000), dark: (0.790, 0.428, 0.190)),
+        .purple: adaptive(light: (0.455, 0.220, 0.753), dark: (0.613, 0.446, 0.825))
+    ]
 
     private static func adaptive(light: (CGFloat, CGFloat, CGFloat), dark: (CGFloat, CGFloat, CGFloat)) -> Color {
         Color(UIColor { traits in

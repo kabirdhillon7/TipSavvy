@@ -88,8 +88,6 @@ final class SavedTipFilterTests: XCTestCase {
         XCTAssertEqual(insights.largestSavedBillName, "May Dinner")
         XCTAssertEqual(insights.highestTipPercentage, 20)
         XCTAssertEqual(insights.highestTipName, "May Dinner")
-        XCTAssertEqual(insights.mostRecentSavedTipName, "May Dinner")
-        XCTAssertEqual(insights.mostRecentSavedTipDate, currentMonthDate)
         XCTAssertEqual(insights.recentActivitySummary, "No saves in the last 7 days")
         XCTAssertTrue(insights.hasCurrentMonthTips)
     }
@@ -123,17 +121,6 @@ final class SavedTipFilterTests: XCTestCase {
         XCTAssertEqual(insights.mostCommonTipPercentage, 15)
     }
 
-    func test_savedTipInsights_shouldIgnoreNilDatesWhenFindingMostRecentTip() throws {
-        let recentDate = Date(timeIntervalSince1970: 1_800)
-        _ = try makeTip(name: "Missing Date", date: nil)
-        _ = try makeTip(name: "Recent Date", date: recentDate)
-
-        let insights = SavedTipInsights(tips: dataManager.savedTips)
-
-        XCTAssertEqual(insights.mostRecentSavedTipName, "Recent Date")
-        XCTAssertEqual(insights.mostRecentSavedTipDate, recentDate)
-    }
-
     func test_savedTipInsights_shouldReturnDefaultsForEmptyInput() {
         let insights = SavedTipInsights(tips: [])
 
@@ -154,8 +141,6 @@ final class SavedTipFilterTests: XCTestCase {
         XCTAssertNil(insights.largestSavedBillName)
         XCTAssertEqual(insights.highestTipPercentage, 0)
         XCTAssertNil(insights.highestTipName)
-        XCTAssertNil(insights.mostRecentSavedTipName)
-        XCTAssertNil(insights.mostRecentSavedTipDate)
         XCTAssertEqual(insights.recentActivitySummary, "No saves in the last 7 days")
         XCTAssertFalse(insights.hasCurrentMonthTips)
     }
