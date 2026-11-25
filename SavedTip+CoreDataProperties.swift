@@ -1,6 +1,6 @@
 //
 //  SavedTip+CoreDataProperties.swift
-//  Tippy
+//  TipSavvy
 //
 //  Created by Kabir Dhillon on 6/11/23.
 //

@@ -51,14 +51,14 @@ jobs:
 
       - name: Resolve Packages
         if: matrix.language == 'swift'
-        run: xcodebuild -resolvePackageDependencies -project Tippy.xcodeproj -scheme Tippy
+        run: xcodebuild -resolvePackageDependencies -project TipSavvy.xcodeproj -scheme TipSavvy
 
       - name: Build Swift Sources
         if: matrix.language == 'swift'
         run: |
           xcodebuild build \
-            -project Tippy.xcodeproj \
-            -scheme Tippy \
+            -project TipSavvy.xcodeproj \
+            -scheme TipSavvy \
             -destination 'platform=iOS Simulator,name=iPhone 17,OS=latest' \
             CODE_SIGNING_ALLOWED=NO
 

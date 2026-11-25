@@ -46,10 +46,10 @@ if [[ "${DEVICE}" == "duo-inner" ]]; then
 fi
 
 xcodebuild test \
-  -project Tippy.xcodeproj \
-  -scheme Tippy \
+  -project TipSavvy.xcodeproj \
+  -scheme TipSavvy \
   -destination "platform=iOS Simulator,name=${SIMULATOR},OS=latest" \
-  -only-testing:TippyUITests/AppStoreScreenshotTests \
+  -only-testing:TipSavvyUITests/AppStoreScreenshotTests \
   -parallel-testing-enabled NO \
   -resultBundlePath "${RESULT_BUNDLE}" \
   CODE_SIGNING_ALLOWED=NO

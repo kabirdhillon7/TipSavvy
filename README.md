@@ -58,9 +58,9 @@ TipSavvy has no third-party dependencies, so a fresh clone builds with no extra 
 
 ```bash
 xcodebuild test \
-  -project Tippy.xcodeproj \
-  -scheme Tippy \
-  -testPlan Tippy \
+  -project TipSavvy.xcodeproj \
+  -scheme TipSavvy \
+  -testPlan TipSavvy \
   -destination 'platform=iOS Simulator,name=iPhone 17,OS=latest' \
   CODE_SIGNING_ALLOWED=NO
 ```
@@ -69,9 +69,9 @@ Build-for-testing without running UI tests:
 
 ```bash
 xcodebuild build-for-testing \
-  -project Tippy.xcodeproj \
-  -scheme Tippy \
-  -testPlan Tippy \
+  -project TipSavvy.xcodeproj \
+  -scheme TipSavvy \
+  -testPlan TipSavvy \
   -destination 'platform=iOS Simulator,name=iPhone 17,OS=latest' \
   CODE_SIGNING_ALLOWED=NO
 ```

@@ -3,8 +3,8 @@
 set -u
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-ICON_DIR="$ROOT_DIR/Tippy/Assets.xcassets/AppIcon.appiconset"
-INFO_PLIST="$ROOT_DIR/Tippy/Info.plist"
+ICON_DIR="$ROOT_DIR/TipSavvy/Assets.xcassets/AppIcon.appiconset"
+INFO_PLIST="$ROOT_DIR/TipSavvy/Info.plist"
 README="$ROOT_DIR/README.md"
 COMPROMISED_GOOGLE_API_KEY="AIzaSyCcHuamnEEhy3jd6f7-zA7xlPc8SWfv""VGo"
 
