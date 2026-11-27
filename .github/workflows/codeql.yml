@@ -13,8 +13,8 @@ on:
 jobs:
   analyze:
     name: Analyze (${{ matrix.language }})
-    runs-on: ${{ (matrix.language == 'swift' && 'macos-15') || 'ubuntu-latest' }}
-    timeout-minutes: 30
+    runs-on: ${{ (matrix.language == 'swift' && 'macos-26') || 'ubuntu-latest' }}
+    timeout-minutes: 60
 
     permissions:
       security-events: write
@@ -37,7 +37,7 @@ jobs:
 
       - name: Select Xcode
         if: matrix.language == 'swift'
-        run: sudo xcode-select -s /Applications/Xcode_16.4.app
+        run: sudo xcode-select -s /Applications/Xcode_26.6.app
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v4
