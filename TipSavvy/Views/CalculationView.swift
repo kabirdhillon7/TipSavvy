@@ -119,7 +119,7 @@ struct CalculationView: View {
             .animation(reduceMotion ? nil : .easeInOut(duration: 0.25), value: successMessage)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    clearButton
+                    resetButton
                 }
 
                 ToolbarItem(placement: .topBarTrailing) {
@@ -623,23 +623,22 @@ struct CalculationView: View {
         .accessibilityHint(viewModel.hasValidCalculation ? String(localized: "Saves the Tip Calculation") : String(localized: "Enter a bill amount greater than zero before saving"))
     }
 
-    /// Clearing is undoable, so it is an ordinary toolbar action rather than a red button.
-    private var clearButton: some View {
-        Button {
+    /// Reset is undoable, so it is an ordinary toolbar action rather than a red button.
+    /// It is labeled with a word, not an icon: a lone ↺ reads as decoration on a calculator.
+    private var resetButton: some View {
+        Button(String(localized: "Reset")) {
             let previous = viewModel.snapshot()
             let hadInput = viewModel.hasUserInput
             performAnimated(.spring(response: 0.32, dampingFraction: 0.82), reduceMotion: reduceMotion) {
                 viewModel.resetValues()
             }
             if hadInput {
-                viewModel.undoOffer = .init(message: String(localized: "Calculation cleared"), snapshot: previous)
+                viewModel.undoOffer = .init(message: String(localized: "Calculation reset"), snapshot: previous)
             }
             HapticFeedbackPerformer.warning(isEnabled: settings.hapticsEnabled)
-        } label: {
-            Label(String(localized: "Clear"), systemImage: "arrow.counterclockwise")
         }
         .disabled(!viewModel.hasUserInput)
-        .accessibilityLabel(String(localized: "Clear Calculation"))
+        .accessibilityHint(String(localized: "Clears the bill and restores your default tip and split"))
         .accessibilityIdentifier("Reset")
     }
 

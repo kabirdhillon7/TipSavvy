@@ -77,7 +77,7 @@ struct CurrencyAmountField<Field: Hashable>: View {
 
     var body: some View {
         let symbolLeads = CurrencyInput.symbolLeads(currencyCode: currencyCode)
-        return HStack(alignment: .firstTextBaseline, spacing: 2) {
+        return HStack(alignment: .firstTextBaseline, spacing: 0) {
             if !text.isEmpty, symbolLeads {
                 symbol
             }

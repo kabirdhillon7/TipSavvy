@@ -187,7 +187,7 @@ final class TipSavvyUITests: XCTestCase {
         selectTab("Saved", in: app)
     }
     
-    func test_clearButton_shouldClearAndOfferUndo() {
+    func test_resetButton_shouldResetAndOfferUndo() {
         let app = launchIsolatedUITestApp()
 
         XCTAssertFalse(app.buttons["Reset"].isEnabled)

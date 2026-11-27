@@ -30,9 +30,6 @@ jobs:
       - name: Resolve Packages
         run: xcodebuild -resolvePackageDependencies -project TipSavvy.xcodeproj -scheme TipSavvy
 
-      - name: Prepare Firebase Config
-        run: cp GoogleService-Info.plist.example GoogleService-Info.plist
-
       - name: Build and Unit Test
         run: |
           xcodebuild test \
