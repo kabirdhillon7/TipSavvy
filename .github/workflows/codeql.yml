@@ -13,8 +13,8 @@ on:
 jobs:
   analyze:
     name: Analyze (${{ matrix.language }})
-    runs-on: ${{ (matrix.language == 'swift' && 'macos-15') || 'ubuntu-latest' }}
-    timeout-minutes: 30
+    runs-on: ${{ (matrix.language == 'swift' && 'macos-26') || 'ubuntu-latest' }}
+    timeout-minutes: 60
 
     permissions:
       security-events: write
@@ -37,11 +37,7 @@ jobs:
 
       - name: Select Xcode
         if: matrix.language == 'swift'
-        run: sudo xcode-select -s /Applications/Xcode_16.4.app
-
-      - name: Prepare Firebase Config
-        if: matrix.language == 'swift'
-        run: cp GoogleService-Info.plist.example GoogleService-Info.plist
+        run: sudo xcode-select -s /Applications/Xcode_26.4.1.app
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v4
@@ -51,15 +47,15 @@ jobs:
 
       - name: Resolve Packages
         if: matrix.language == 'swift'
-        run: xcodebuild -resolvePackageDependencies -project Tippy.xcodeproj -scheme Tippy
+        run: xcodebuild -resolvePackageDependencies -project TipSavvy.xcodeproj -scheme TipSavvy
 
       - name: Build Swift Sources
         if: matrix.language == 'swift'
         run: |
           xcodebuild build \
-            -project Tippy.xcodeproj \
-            -scheme Tippy \
-            -destination 'platform=iOS Simulator,name=iPhone 17,OS=latest' \
+            -project TipSavvy.xcodeproj \
+            -scheme TipSavvy \
+            -destination 'platform=iOS Simulator,name=iPhone 17' \
             CODE_SIGNING_ALLOWED=NO
 
       - name: Perform CodeQL Analysis

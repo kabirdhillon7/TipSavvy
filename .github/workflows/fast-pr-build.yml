@@ -17,7 +17,7 @@ permissions:
 
 jobs:
   build-and-unit-test:
-    runs-on: macos-15
+    runs-on: macos-26
     timeout-minutes: 15
 
     steps:
@@ -25,20 +25,17 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Select Xcode
-        run: sudo xcode-select -s /Applications/Xcode_16.4.app
+        run: sudo xcode-select -s /Applications/Xcode_26.4.1.app
 
       - name: Resolve Packages
-        run: xcodebuild -resolvePackageDependencies -project Tippy.xcodeproj -scheme Tippy
-
-      - name: Prepare Firebase Config
-        run: cp GoogleService-Info.plist.example GoogleService-Info.plist
+        run: xcodebuild -resolvePackageDependencies -project TipSavvy.xcodeproj -scheme TipSavvy
 
       - name: Build and Unit Test
         run: |
           xcodebuild test \
-            -project Tippy.xcodeproj \
-            -scheme Tippy \
-            -testPlan Tippy \
-            -destination 'platform=iOS Simulator,name=iPhone 17,OS=latest' \
-            -only-testing:TippyTests \
+            -project TipSavvy.xcodeproj \
+            -scheme TipSavvy \
+            -testPlan TipSavvy \
+            -destination 'platform=iOS Simulator,name=iPhone 17' \
+            -only-testing:TipSavvyTests \
             CODE_SIGNING_ALLOWED=NO
