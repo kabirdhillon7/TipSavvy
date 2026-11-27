@@ -1,0 +1,425 @@
+<title>TipSavvy Screenshot Studio</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;800&family=Inter:wght@400;500;600&family=DM+Mono:wght@500&display=swap">
+<style>
+/* Layout: a studio bar (device tabs + export notes) over a gallery of the four panels exactly as the App Store shows them; copy editing sits below. */
+:root {
+  --bg: #F3F6F2;
+  --surface: #FFFFFF;
+  --fg: #17241B;
+  --muted: #56665B;
+  --line: #D5DED6;
+  --accent: #1B6B3A;
+  --accent-ink: #FFFFFF;
+  --warn: #8A5A00;
+  --warn-bg: #FFF1D6;
+  --ok-bg: #E1F1E5;
+  --font-display: "Montserrat", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "Inter", -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "DM Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #111813; --surface: #1A231D; --fg: #E6EEE7; --muted: #9EB0A3; --line: #2D3A31;
+  --accent: #6FCB8F; --accent-ink: #0E1A12; --warn: #F3C46B; --warn-bg: #3A2C10; --ok-bg: #1E3626; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #111813; --surface: #1A231D; --fg: #E6EEE7; --muted: #9EB0A3; --line: #2D3A31;
+  --accent: #6FCB8F; --accent-ink: #0E1A12; --warn: #F3C46B; --warn-bg: #3A2C10; --ok-bg: #1E3626; color-scheme: dark }
+
+body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 15px; line-height: 1.5; }
+.wrap { max-width: 1240px; margin: 0 auto; padding-block: 28px 56px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 28px; }
+header { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 12px 24px; }
+h1 { font-family: var(--font-display); font-weight: 800; font-size: 30px; line-height: 1.1; margin: 0; letter-spacing: -0.01em; text-wrap: balance; }
+.sub { margin: 6px 0 0; color: var(--muted); max-width: 62ch; }
+h2 { font-family: var(--font-display); font-weight: 800; font-size: 18px; margin: 0; }
+.tabs { display: flex; flex-wrap: wrap; gap: 8px; }
+.tab { font: 500 14px/1.2 var(--font-body); color: var(--fg); background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; cursor: pointer; display: grid; gap: 2px; text-align: left; min-height: 44px; }
+.tab small { font-family: var(--font-mono); font-size: 11.5px; color: var(--muted); }
+.tab[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.tab[aria-pressed="true"] small { color: var(--accent-ink); opacity: 0.85; }
+.tab:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.status { display: inline-block; font-size: 12px; font-weight: 600; border-radius: 999px; padding: 2px 9px; }
+.status.ok { background: var(--ok-bg); color: var(--accent); }
+.status.missing { background: var(--warn-bg); color: var(--warn); }
+.gallery-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; margin-bottom: 12px; }
+.gallery { overflow-x: auto; padding-bottom: 6px; }
+.panels { display: flex; gap: 10px; width: max-content; }
+.panel-box { position: relative; overflow: hidden; border-radius: 6px; flex: none; box-shadow: 0 1px 0 var(--line); }
+.panel-box figcaption { font: 500 12px var(--font-mono); color: var(--muted); margin-top: 6px; }
+figure { margin: 0; }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 20px; display: grid; gap: 14px; align-content: start; min-width: 0; }
+.field-row { display: grid; grid-template-columns: 28px 1fr 1fr; gap: 8px; align-items: center; }
+.field-row .n { font: 500 13px var(--font-mono); color: var(--muted); }
+label.hint { font-size: 12px; color: var(--muted); }
+input[type="text"], select { font: 15px var(--font-body); color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 9px 10px; min-width: 0; width: 100%; box-sizing: border-box; min-height: 44px; }
+.cols { display: grid; grid-template-columns: 28px 1fr 1fr; gap: 8px; font-size: 12px; color: var(--muted); }
+.swatches { display: flex; flex-wrap: wrap; gap: 8px; }
+.swatch { width: 44px; height: 44px; border-radius: 10px; border: 2px solid var(--line); cursor: pointer; }
+.swatch[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 2px var(--surface) inset; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.btn { font: 600 14px var(--font-body); border-radius: 9px; padding: 10px 14px; cursor: pointer; min-height: 44px; border: 1px solid var(--accent); background: var(--accent); color: var(--accent-ink); }
+.btn.ghost { background: transparent; color: var(--accent); }
+pre { font: 13px/1.55 var(--font-mono); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; margin: 0; overflow-x: auto; white-space: pre; }
+ol.steps { margin: 0; padding-left: 20px; display: grid; gap: 12px; }
+ol.steps p { margin: 0 0 6px; }
+textarea { width: 100%; box-sizing: border-box; min-height: 140px; font: 12.5px/1.5 var(--font-mono); color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px; }
+.toast { font-size: 13px; color: var(--accent); font-weight: 600; }
+
+/* Screenshot artwork. Sizes are in device pixels; colors come from the config, not the page theme. */
+.strip { position: absolute; left: 0; top: 0; overflow: hidden; }
+.tape { position: absolute; left: 0; filter: drop-shadow(0 6px 10px rgba(20, 48, 30, 0.12)); }
+.cap { position: absolute; display: flex; flex-direction: column; align-items: center; justify-content: center; box-sizing: border-box; text-align: center; }
+.cap .line { display: flex; align-items: baseline; font-family: "DM Mono", ui-monospace, Menlo, monospace; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; }
+.cap .line .dots { flex: 1; border-bottom: 0.12em dotted currentColor; margin: 0 0.5em; transform: translateY(-0.28em); opacity: 0.55; }
+.cap .text { font-family: "Montserrat", "Helvetica Neue", Arial, sans-serif; font-weight: 800; line-height: 1.04; letter-spacing: -0.015em; }
+.frame { position: absolute; box-sizing: border-box; background: #0E0F0E; }
+.screen { position: absolute; overflow: hidden; background: #F2F2F7; }
+.screen img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top; }
+.screen .need { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; text-align: center; font-family: "DM Mono", ui-monospace, Menlo, monospace; color: #6B776F; padding: 12%; box-sizing: border-box; line-height: 1.4; }
+.island { position: absolute; background: #0E0F0E; border-radius: 999px; }
+
+body.render { margin: 0; overflow: hidden; }
+body.render .wrap { display: none; }
+</style>
+
+<script type="application/json" id="shot-config">
+{
+  "ground": "#EAF4EC",
+  "ink": "#1B6B3A",
+  "paper": "#FFFFFF",
+  "groundOptions": ["#EAF4EC", "#F7F8F1", "#DDEBDF"],
+  "shots": [
+    {"file": "01-enter-the-bill", "caption": "Enter the bill,", "label": "Bill", "value": "$86.40"},
+    {"file": "02-pick-the-tip", "caption": "pick the tip,", "label": "Tip 20%", "value": "$17.28"},
+    {"file": "03-split-it-fairly", "caption": "split it fairly,", "label": "Split", "value": "3 ways"},
+    {"file": "04-save-it", "caption": "and save it.", "label": "Saved", "value": "Dinner"}
+  ],
+  "devices": {
+    "iphone":      {"label": "iPhone 6.9\"",  "w": 1320, "h": 2868, "raw": "iphone",    "screen": [1320, 2868], "kind": "phone", "island": true},
+    "iphone-6.3":  {"label": "iPhone 6.3\"",  "w": 1206, "h": 2622, "raw": "iphone",    "screen": [1320, 2868], "kind": "phone", "island": true},
+    "ipad":        {"label": "iPad 13\"",     "w": 2064, "h": 2752, "raw": "ipad",      "screen": [2064, 2752], "kind": "tablet"},
+    "duo-outer":   {"label": "Duo outer",     "w": 1398, "h": 2034, "raw": "duo-outer", "screen": [1398, 2034], "kind": "phone",
+                    "bezel": {"src": "bezels/duo-outer.png", "size": [1435, 2000], "opening": [80, 73, 1275, 1854], "radii": [10, 150, 150, 10]}},
+    "duo-inner":   {"label": "Duo inner",     "w": 2007, "h": 2853, "raw": "duo-inner", "screen": [2007, 2853], "kind": "tablet",
+                    "bezel": {"src": "bezels/duo-inner.png", "size": [1453, 2000], "opening": [78, 78, 1297, 1844]}}
+  }
+}
+</script>
+
+<div class="wrap" id="studio">
+  <header>
+    <div>
+      <h1>TipSavvy Screenshot Studio</h1>
+      <p class="sub">The four App Store shots read as one sentence on a receipt tape that runs across them. What you see here is what the render script exports, pixel for pixel.</p>
+    </div>
+  </header>
+
+  <section aria-labelledby="dev-h">
+    <h2 id="dev-h" style="margin-bottom:10px">Device</h2>
+    <div class="tabs" id="tabs" role="group" aria-label="Device size"></div>
+  </section>
+
+  <section aria-labelledby="gal-h">
+    <div class="gallery-head">
+      <h2 id="gal-h">Preview</h2>
+      <span id="dev-status"></span>
+    </div>
+    <div class="gallery"><div class="panels" id="panels"></div></div>
+  </section>
+
+  <div class="grid2">
+    <section class="card" aria-labelledby="copy-h">
+      <h2 id="copy-h">Words and color</h2>
+      <div class="cols"><span></span><span>Headline</span><span>Receipt line</span></div>
+      <div id="fields" style="display:grid;gap:8px"></div>
+      <div>
+        <label class="hint" id="ground-label">Background</label>
+        <div class="swatches" id="swatches" role="group" aria-labelledby="ground-label"></div>
+      </div>
+      <div class="actions">
+        <button class="btn" id="copy">Copy settings</button>
+        <button class="btn ghost" id="reset">Reset to file</button>
+        <span class="toast" id="toast" aria-live="polite"></span>
+      </div>
+      <label class="hint" for="out">Changes here only live in this browser. To ship them, paste these settings into the <code>shot-config</code> block of AppStoreScreenshots/screenshots.html, or send them to Claude.</label>
+      <textarea id="out" readonly></textarea>
+    </section>
+
+    <section class="card" aria-labelledby="exp-h">
+      <h2 id="exp-h">Get the PNGs</h2>
+      <ol class="steps">
+        <li><p>Capture the app on each simulator. iPhone covers both iPhone sizes.</p>
+<pre>Scripts/capture-app-store-screenshots.sh iphone
+Scripts/capture-app-store-screenshots.sh ipad</pre></li>
+        <li><p>For Duo, fold or unfold the simulator in Xcode's Device Hub first, then:</p>
+<pre>Scripts/capture-app-store-screenshots.sh duo-outer "TipSavvy Shots Duo"
+Scripts/capture-app-store-screenshots.sh duo-inner "TipSavvy Shots Duo"</pre></li>
+        <li><p>Render every size that has captures:</p>
+<pre>Scripts/render-app-store-screenshots.py</pre></li>
+        <li><p>Upload from <code>AppStoreScreenshots/final/&lt;device&gt;/</code>. Files are flattened RGB PNGs at Apple's exact sizes.</p></li>
+      </ol>
+    </section>
+  </div>
+</div>
+
+<script>
+(function () {
+  const base = JSON.parse(document.getElementById('shot-config').textContent);
+  const params = new URLSearchParams(location.search);
+  const renderDevice = params.get('render');
+
+  function geom(d) {
+    const W = d.w, H = d.h, a = d.screen[0] / d.screen[1];
+    const tablet = d.kind === 'tablet';
+    let fw = 0.78 * W;
+    const b = (tablet ? 0.022 : 0.03) * fw;
+    let innerW = fw - 2 * b, innerH = innerW / a, fh = innerH + 2 * b;
+    const maxH = 0.86 * H;
+    if (fh > maxH) { fh = maxH; innerH = fh - 2 * b; innerW = innerH * a; fw = innerW + 2 * b; }
+    let bezel = null;
+    if (d.bezel) {
+      // Apple bezel art: size the frame from the PNG and put the screen in its transparent opening.
+      const [bw, bh] = d.bezel.size, [ox, oy, ow, oh] = d.bezel.opening;
+      fh = maxH; fw = fh * bw / bh;
+      if (fw > 0.78 * W) { fw = 0.78 * W; fh = fw * bh / bw; }
+      const k = fw / bw, pad = 2;
+      const radii = d.bezel.radii || [0.08 * ow, 0.08 * ow, 0.08 * ow, 0.08 * ow];
+      bezel = { src: d.bezel.src, x: ox * k - pad, y: oy * k - pad, w: ow * k + 2 * pad, h: oh * k + 2 * pad, r: radii.map(v => (v * k) + 'px').join(' ') };
+    }
+    const bleed = 0.06 * H;
+    const top = H + bleed - fh;
+    const cs = Math.min(0.088 * W, 0.05 * H);
+    const ls = cs * 0.3;
+    const tapeH = cs * 1.15 + ls * 1.4 + cs * 1.1;
+    const tapeTop = Math.max(cs * 0.4, (top - tapeH) / 2);
+    const radius = (tablet ? 0.06 : 0.15) * fw;
+    return { W, H, fw, fh, b, innerW, innerH, top, cs, ls, tapeH, tapeTop, radius, tablet, bezel };
+  }
+
+  function tapePath(width, h, tooth) {
+    const depth = tooth * 0.5, n = Math.ceil(width / tooth);
+    let p = 'M0 ' + depth;
+    for (let k = 1; k <= n; k++) p += ' L' + (k * tooth) + ' ' + (k % 2 ? 0 : depth);
+    for (let k = n; k >= 0; k--) p += ' L' + (k * tooth) + ' ' + (k % 2 ? h : h - depth);
+    return p + ' Z';
+  }
+
+  function el(tag, cls, style) {
+    const e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (style) Object.assign(e.style, style);
+    return e;
+  }
+
+  function buildStrip(cfg, key, missing) {
+    const d = cfg.devices[key], g = geom(d), n = cfg.shots.length, px = v => v + 'px';
+    const strip = el('div', 'strip', { width: px(g.W * n), height: px(g.H), background: cfg.ground });
+
+    const svgNS = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(svgNS, 'svg');
+    svg.setAttribute('class', 'tape');
+    svg.setAttribute('aria-hidden', 'true');
+    svg.setAttribute('width', g.W * n);
+    svg.setAttribute('height', g.tapeH);
+    svg.style.top = px(g.tapeTop);
+    const path = document.createElementNS(svgNS, 'path');
+    path.setAttribute('d', tapePath(g.W * n, g.tapeH, Math.round(g.W * 0.02)));
+    path.setAttribute('fill', cfg.paper);
+    svg.appendChild(path);
+    strip.appendChild(svg);
+
+    cfg.shots.forEach((s, i) => {
+      const x = i * g.W;
+      const cap = el('div', 'cap', { left: px(x), width: px(g.W), top: px(g.tapeTop), height: px(g.tapeH), color: cfg.ink, gap: px(g.ls * 0.9) });
+      const line = el('div', 'line', { fontSize: px(g.ls), width: px(g.W * 0.62) });
+      const l1 = el('span'); l1.textContent = s.label;
+      const l2 = el('span'); l2.textContent = s.value;
+      line.append(l1, el('span', 'dots'), l2);
+      const text = el('div', 'text', { fontSize: px(g.cs), maxWidth: px(g.W * 0.88) });
+      text.textContent = s.caption;
+      cap.append(line, text);
+      strip.appendChild(cap);
+
+      const shadow = '0 ' + px(g.H * 0.012) + ' ' + px(g.H * 0.03) + ' rgba(20,48,30,0.25)';
+      const frame = g.bezel
+        ? el('div', 'frame', { left: px(x + (g.W - g.fw) / 2), top: px(g.top), width: px(g.fw), height: px(g.fh), background: 'transparent', filter: 'drop-shadow(' + shadow + ')' })
+        : el('div', 'frame', { left: px(x + (g.W - g.fw) / 2), top: px(g.top), width: px(g.fw), height: px(g.fh), borderRadius: px(g.radius), boxShadow: shadow });
+      const screen = g.bezel
+        ? el('div', 'screen', { left: px(g.bezel.x), top: px(g.bezel.y), width: px(g.bezel.w), height: px(g.bezel.h), borderRadius: g.bezel.r })
+        : el('div', 'screen', { left: px(g.b), top: px(g.b), width: px(g.innerW), height: px(g.innerH), borderRadius: px(Math.max(0, g.radius - g.b)) });
+      if (missing) {
+        const need = el('div', 'need', { fontSize: px(g.cs * 0.32) });
+        need.textContent = 'No capture yet. Run Scripts/capture-app-store-screenshots.sh ' + d.raw;
+        screen.appendChild(need);
+      } else {
+        const img = el('img');
+        img.alt = s.caption.replace(/[,.]$/, '') + ' screen';
+        img.src = 'raw/' + d.raw + '/' + s.file + '.png';
+        screen.appendChild(img);
+      }
+      frame.appendChild(screen);
+      if (g.bezel) {
+        const art = el('img', null, { position: 'absolute', left: '0', top: '0', width: px(g.fw), height: px(g.fh) });
+        art.alt = '';
+        art.src = g.bezel.src;
+        frame.appendChild(art);
+      }
+      if (d.island) {
+        const iw = g.innerW * 0.29, ih = g.innerW * 0.085;
+        frame.appendChild(el('div', 'island', { width: px(iw), height: px(ih), left: px(g.b + (g.innerW - iw) / 2), top: px(g.b + g.innerW * 0.026) }));
+      }
+      strip.appendChild(frame);
+    });
+    return { strip, g };
+  }
+
+  // Render mode (used by Scripts/render-app-store-screenshots.py): one panel at exact device size.
+  if (renderDevice) {
+    document.body.classList.add('render');
+    const shot = Number(params.get('shot') || 0);
+    const { strip, g } = buildStrip(base, renderDevice, false);
+    const view = el('div', null, { position: 'relative', width: g.W + 'px', height: g.H + 'px', overflow: 'hidden' });
+    strip.style.left = (-shot * g.W) + 'px';
+    view.appendChild(strip);
+    document.body.appendChild(view);
+    return;
+  }
+
+  // Studio mode.
+  const STORE = 'tipsavvy-shot-edits';
+  function load() {
+    try { const s = JSON.parse(localStorage.getItem(STORE) || 'null'); if (s) return s; } catch (e) {}
+    return null;
+  }
+  function save(v) { try { localStorage.setItem(STORE, JSON.stringify(v)); } catch (e) {} }
+  function clone(o) { return JSON.parse(JSON.stringify(o)); }
+
+  let cfg = clone(base);
+  const saved = load();
+  if (saved) { cfg.ground = saved.ground || cfg.ground; if (Array.isArray(saved.shots)) saved.shots.forEach((s, i) => { if (cfg.shots[i]) Object.assign(cfg.shots[i], s); }); }
+
+  let current = 'iphone';
+  try { current = localStorage.getItem(STORE + '-device') || 'iphone'; } catch (e) {}
+  if (!cfg.devices[current]) current = 'iphone';
+
+  const availability = {};
+  function probe(key) {
+    const d = cfg.devices[key];
+    if (availability[d.raw] !== undefined) return Promise.resolve(availability[d.raw]);
+    return new Promise(res => {
+      const img = new Image();
+      img.onload = () => { availability[d.raw] = true; res(true); };
+      img.onerror = () => { availability[d.raw] = false; res(false); };
+      img.src = 'raw/' + d.raw + '/' + cfg.shots[0].file + '.png';
+    });
+  }
+
+  const tabs = document.getElementById('tabs');
+  Object.keys(cfg.devices).forEach(key => {
+    const d = cfg.devices[key];
+    const b = el('button', 'tab');
+    b.type = 'button';
+    b.dataset.key = key;
+    b.innerHTML = '<span></span><small></small>';
+    b.firstChild.textContent = d.label;
+    b.lastChild.textContent = d.w + ' × ' + d.h;
+    b.addEventListener('click', () => { current = key; try { localStorage.setItem(STORE + '-device', key); } catch (e) {} draw(); });
+    tabs.appendChild(b);
+  });
+
+  const panels = document.getElementById('panels');
+  const status = document.getElementById('dev-status');
+  async function draw() {
+    tabs.querySelectorAll('.tab').forEach(t => t.setAttribute('aria-pressed', String(t.dataset.key === current)));
+    const d = cfg.devices[current];
+    const have = await probe(current);
+    status.innerHTML = '';
+    const chip = el('span', 'status ' + (have ? 'ok' : 'missing'));
+    chip.textContent = have ? 'Captured · raw/' + d.raw : 'Not captured yet · raw/' + d.raw;
+    status.appendChild(chip);
+
+    const n = cfg.shots.length;
+    const avail = Math.max(280, Math.min(document.querySelector('.wrap').clientWidth, 1240));
+    const boxH = Math.min(520, (avail - 10 * (n - 1)) / n * d.h / d.w);
+    const s = boxH / d.h, boxW = d.w * s;
+    panels.innerHTML = '';
+    cfg.shots.forEach((shot, i) => {
+      const fig = el('figure');
+      const box = el('div', 'panel-box', { width: boxW + 'px', height: boxH + 'px' });
+      const { strip } = buildStrip(cfg, current, !have);
+      strip.style.transformOrigin = '0 0';
+      strip.style.transform = 'scale(' + s + ') translateX(' + (-i * d.w) + 'px)';
+      box.appendChild(strip);
+      const cap = el('figcaption');
+      cap.textContent = shot.file + '.png';
+      fig.append(box, cap);
+      panels.appendChild(fig);
+    });
+    writeOut();
+  }
+
+  const fields = document.getElementById('fields');
+  cfg.shots.forEach((shot, i) => {
+    const row = el('div', 'field-row');
+    const num = el('span', 'n'); num.textContent = String(i + 1);
+    const cap = el('input'); cap.type = 'text'; cap.id = 'cap-' + i; cap.value = shot.caption; cap.setAttribute('aria-label', 'Headline for shot ' + (i + 1));
+    const pair = el('div', null, { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' });
+    const lab = el('input'); lab.type = 'text'; lab.id = 'lab-' + i; lab.value = shot.label; lab.setAttribute('aria-label', 'Receipt label for shot ' + (i + 1));
+    const val = el('input'); val.type = 'text'; val.id = 'val-' + i; val.value = shot.value; val.setAttribute('aria-label', 'Receipt value for shot ' + (i + 1));
+    pair.append(lab, val);
+    row.append(num, cap, pair);
+    fields.appendChild(row);
+    let t;
+    [cap, lab, val].forEach(inp => inp.addEventListener('input', () => {
+      shot.caption = cap.value; shot.label = lab.value; shot.value = val.value;
+      persist(); clearTimeout(t); t = setTimeout(draw, 150);
+    }));
+  });
+
+  const swatches = document.getElementById('swatches');
+  function drawSwatches() {
+    swatches.innerHTML = '';
+    cfg.groundOptions.forEach(c => {
+      const b = el('button', 'swatch', { background: c });
+      b.type = 'button';
+      b.setAttribute('aria-label', 'Background ' + c);
+      b.setAttribute('aria-pressed', String(c.toLowerCase() === cfg.ground.toLowerCase()));
+      b.addEventListener('click', () => { cfg.ground = c; persist(); drawSwatches(); draw(); });
+      swatches.appendChild(b);
+    });
+  }
+
+  function persist() { save({ ground: cfg.ground, shots: cfg.shots.map(s => ({ caption: s.caption, label: s.label, value: s.value })) }); }
+  const out = document.getElementById('out');
+  function writeOut() {
+    const keep = clone(base);
+    keep.ground = cfg.ground;
+    keep.shots = cfg.shots.map(s => ({ file: s.file, caption: s.caption, label: s.label, value: s.value }));
+    out.value = JSON.stringify({ ground: keep.ground, shots: keep.shots }, null, 2);
+  }
+  const toast = document.getElementById('toast');
+  document.getElementById('copy').addEventListener('click', () => {
+    const done = () => { toast.textContent = 'Copied'; setTimeout(() => (toast.textContent = ''), 1800); };
+    try {
+      navigator.clipboard.writeText(out.value).then(done, () => { out.focus(); out.select(); toast.textContent = 'Selected. Press Cmd+C to copy.'; });
+    } catch (e) { out.focus(); out.select(); toast.textContent = 'Selected. Press Cmd+C to copy.'; }
+  });
+  document.getElementById('reset').addEventListener('click', () => {
+    try { localStorage.removeItem(STORE); } catch (e) {}
+    cfg = clone(base);
+    cfg.shots.forEach((s, i) => {
+      document.getElementById('cap-' + i).value = s.caption;
+      document.getElementById('lab-' + i).value = s.label;
+      document.getElementById('val-' + i).value = s.value;
+    });
+    // Rebind shot objects used by the inputs.
+    location.reload();
+  });
+
+  let rt;
+  window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(draw, 150); });
+  drawSwatches();
+  draw();
+})();
+</script>
